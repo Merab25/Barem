@@ -1,0 +1,103 @@
+## Terminal sessions that survive a dropped connection
+
+# Start a session
+screen
+
+# Start a named session
+screen -S deploy
+
+# Start a session detached, running a command
+screen -dmS import ./import.sh
+
+# List sessions
+screen -ls
+
+# Reattach to the only detached session
+screen -r
+
+# Reattach to a named session
+screen -r deploy
+
+# Reattach by PID when names collide
+screen -r 4821.deploy
+
+# Detach an existing session elsewhere and attach here
+screen -dr deploy
+
+# Attach to a session that is already attached, sharing it
+screen -x deploy
+
+# Force a new session even if one exists
+screen -S deploy2
+
+# Detach from inside a session: Ctrl-a then d
+screen -S deploy
+
+# Create a new window inside a session: Ctrl-a then c
+screen -S work
+
+# Next window: Ctrl-a then n, previous: Ctrl-a then p
+screen -S work
+
+# Jump to window 0: Ctrl-a then 0
+screen -S work
+
+# List windows: Ctrl-a then "
+screen -S work
+
+# Rename the current window: Ctrl-a then A
+screen -S work
+
+# Split horizontally: Ctrl-a then S, then Ctrl-a Tab to move
+screen -S work
+
+# Split vertically: Ctrl-a then |
+screen -S work
+
+# Kill the current window: Ctrl-a then k
+screen -S work
+
+# Scroll back: Ctrl-a then Escape, then arrow keys
+screen -S work
+
+# Run a command in a new window of an existing session
+screen -S deploy -X screen ./tail-logs.sh
+
+# Send a command into a running session
+screen -S deploy -X stuff "date\n"
+
+# Log a session's output to a file
+screen -L -S deploy
+
+# Log to a named file
+screen -L -Logfile /var/log/screen-deploy.log -S deploy
+
+# Quit a session from outside
+screen -S deploy -X quit
+
+# Kill every detached session
+screen -ls | awk '/Detached/ {print $1}' | xargs -r -n1 screen -S -X quit
+
+# Clean up dead sessions
+screen -wipe
+
+# Increase the scrollback buffer
+screen -h 10000
+
+# Use a specific config file
+screen -c ~/.screenrc.work
+
+# Run a long job that survives logout
+screen -dmS backup bash -c './backup.sh > backup.log 2>&1'
+
+# Check whether it finished
+screen -ls | grep backup || echo "session gone, job done"
+
+# Share a session with a colleague (both need access to the same user)
+screen -S pair -x
+
+# tmux is the more modern equivalent
+tmux new -s deploy
+
+# tmux: list, attach, detach
+tmux ls

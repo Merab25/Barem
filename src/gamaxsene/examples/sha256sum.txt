@@ -1,0 +1,94 @@
+## Compute and verify checksums
+
+# Checksum of a file
+sha256sum ubuntu.iso
+
+# Checksums of several files
+sha256sum *.iso
+
+# Checksum of a string, with no trailing newline
+printf 'hello' | sha256sum
+
+# Checksum of standard input
+cat report.pdf | sha256sum
+
+# Just the hash, without the file name
+sha256sum ubuntu.iso | awk '{print $1}'
+
+# Same, using cut
+sha256sum ubuntu.iso | cut -d' ' -f1
+
+# Save checksums to a file
+sha256sum *.tar.gz > SHA256SUMS
+
+# Verify against a saved list
+sha256sum -c SHA256SUMS
+
+# Verify quietly: print only the failures
+sha256sum -c --quiet SHA256SUMS
+
+# Verify and ignore files that are missing
+sha256sum -c --ignore-missing SHA256SUMS
+
+# Warn about badly formatted lines in the list
+sha256sum -c -w SHA256SUMS
+
+# Fail loudly if any line cannot be read
+sha256sum -c --strict SHA256SUMS
+
+# Check one file against an expected hash
+echo "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  file.txt" | sha256sum -c
+
+# Compare a download against a published hash, in a script
+[ "$(sha256sum -b ubuntu.iso | cut -d' ' -f1)" = "$EXPECTED" ] && echo OK || echo MISMATCH
+
+# Read in binary mode (matters on some platforms)
+sha256sum -b ubuntu.iso
+
+# Checksums for a whole tree
+find . -type f -exec sha256sum {} + > SHA256SUMS
+
+# Checksums for a tree, sorted for a stable file
+find . -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
+
+# Verify a tree later
+sha256sum -c SHA256SUMS | grep -v ': OK$'
+
+# Find duplicate files by checksum
+find . -type f -exec sha256sum {} + | sort | uniq -w64 -d
+
+# Compare two directories by content
+diff <(cd a && find . -type f -exec sha256sum {} + | sort -k2) <(cd b && find . -type f -exec sha256sum {} + | sort -k2)
+
+# Checksum a directory as a whole, order-independent
+find . -type f -exec sha256sum {} + | sort -k2 | sha256sum
+
+# Checksum a tarball's contents rather than the tarball
+tar -xOf archive.tar | sha256sum
+
+# Checksum while downloading, without a second pass
+curl -sL https://example.com/file.iso | tee file.iso | sha256sum
+
+# Confirm a file survived a transfer
+ssh merab@server 'sha256sum /srv/file.iso'; sha256sum file.iso
+
+# The older, weaker algorithms, still seen in the wild
+md5sum ubuntu.iso
+
+# SHA-1
+sha1sum ubuntu.iso
+
+# SHA-512
+sha512sum ubuntu.iso
+
+# Pick the algorithm with one tool
+openssl dgst -sha256 ubuntu.iso
+
+# BLAKE2, faster than SHA-2
+b2sum ubuntu.iso
+
+# A quick non-cryptographic check, for corruption only
+cksum ubuntu.iso
+
+# Verify a signed checksum file, which is the stronger check
+gpg --verify SHA256SUMS.gpg SHA256SUMS

@@ -1,0 +1,94 @@
+## Measure how long a command takes
+
+# Time a command with the shell keyword
+time ./build.sh
+
+# Time a whole pipeline
+time (curl -s https://example.com | wc -c)
+
+# Time a loop
+time for i in $(seq 1 100); do true; done
+
+# The external command, which has more formatting options
+/usr/bin/time ./build.sh
+
+# Verbose output: memory, page faults, context switches
+/usr/bin/time -v ./build.sh
+
+# Just the elapsed wall-clock time
+/usr/bin/time -f '%e seconds' ./build.sh
+
+# Elapsed time and peak memory in kilobytes
+/usr/bin/time -f '%e s, %M KB' ./build.sh
+
+# User and system CPU time separately
+/usr/bin/time -f 'user=%U sys=%S real=%e' ./build.sh
+
+# CPU percentage used
+/usr/bin/time -f '%P cpu' ./build.sh
+
+# Write the timing to a file instead of stderr
+/usr/bin/time -o timing.txt -f '%e' ./build.sh
+
+# Append to a timing log
+/usr/bin/time -a -o timings.log -f '%e %C' ./build.sh
+
+# Time each of several commands and record them
+for c in "./a.sh" "./b.sh"; do /usr/bin/time -a -o times.log -f "%e $c" bash -c "$c"; done
+
+# Capture only the timing, discarding the command's output
+/usr/bin/time -f '%e' ./build.sh > /dev/null
+
+# Capture the timing into a variable
+t=$( { /usr/bin/time -f '%e' ./build.sh > /dev/null; } 2>&1 )
+
+# Time a command but keep its exit status
+time ./build.sh; echo "exit=$?"
+
+# Time something that reads standard input
+time wc -l < big.log
+
+# Compare two implementations
+time ./old.sh; time ./new.sh
+
+# Run something several times to average out noise
+time (for i in $(seq 1 10); do ./query.sh > /dev/null; done)
+
+# Proper benchmarking with warmups and statistics
+hyperfine './old.sh' './new.sh'
+
+# Benchmark with a fixed number of runs
+hyperfine -r 20 './query.sh'
+
+# Time an HTTP request's phases with curl instead
+curl -s -o /dev/null -w 'dns=%{time_namelookup} connect=%{time_connect} total=%{time_total}\n' https://example.com
+
+# Time a database query
+time psql -d mydb -c 'SELECT count(*) FROM users'
+
+# Time an SSH round trip
+time ssh merab@server true
+
+# How long has a process been running?
+ps -o pid,etime,cmd -p 4821
+
+# Elapsed seconds, easier to compare
+ps -o pid,etimes,cmd -p 4821
+
+# Time a section of a script using SECONDS
+start=$SECONDS; ./step.sh; echo "took $((SECONDS - start))s"
+
+# Higher resolution timing inside a script
+start=$(date +%s%N); ./step.sh; echo "took $(( ($(date +%s%N) - start) / 1000000 ))ms"
+
+# Put a time limit on a command instead of measuring it
+timeout 30 ./build.sh
+
+# Total CPU time a user has consumed
+ps -u merab -o time= | paste -sd+ | bc
+
+# Where did the boot time go?
+systemd-analyze blame | head
+
+# Time a make build with parallel jobs
+time make -j"$(nproc)"

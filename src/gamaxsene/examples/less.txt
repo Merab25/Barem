@@ -1,0 +1,97 @@
+## Page through files and command output without loading it all
+
+# Page through a file
+less /var/log/syslog
+
+# Page through command output
+dmesg | less
+
+# Show line numbers
+less -N /etc/nginx/nginx.conf
+
+# Do not wrap long lines; scroll sideways instead
+less -S access.log
+
+# Keep colour codes from a colourising command
+less -R
+
+# Colour output from grep or git
+grep --color=always -i error app.log | less -R
+
+# Quit if the file fits on one screen
+less -F short.txt
+
+# Do not clear the screen on exit, so the text stays
+less -X notes.txt
+
+# Both of the above, the most useful everyday pair
+less -FX notes.txt
+
+# Start at a specific line
+less +100 /var/log/syslog
+
+# Start at the end of the file
+less +G /var/log/syslog
+
+# Start at the first match of a pattern
+less +/ERROR app.log
+
+# Follow the file as it grows, like tail -f but scrollable
+less +F /var/log/nginx/access.log
+
+# Case-insensitive searching
+less -i app.log
+
+# Case-insensitive even when the pattern has capitals
+less -I app.log
+
+# Open several files and switch between them with :n and :p
+less app.log error.log
+
+# Squeeze multiple blank lines
+less -s spaced.txt
+
+# Show a prompt with the percentage through the file
+less -m /var/log/syslog
+
+# Verbose prompt with line and byte position
+less -M /var/log/syslog
+
+# Set the tab width
+less -x4 Makefile
+
+# Read a compressed file directly
+zless access.log.gz
+
+# Or via lesspipe, which handles many formats
+less access.log.gz
+
+# Page a man page with your own options
+MANPAGER='less -S' man ip
+
+# Make these defaults for every less invocation
+export LESS='-FXR'
+
+# Page through a directory listing
+ls -la /etc | less
+
+# Page a very long JSON document, formatted
+jq . big.json | less -R
+
+# Page git log without git's own pager
+git --no-pager log --oneline | less
+
+# Search while inside less: type /pattern then n for next
+less app.log
+
+# Jump to a line while inside less: type a number then g
+less -N app.log
+
+# Follow mode inside less: press Shift-F, and Ctrl-C to stop
+less /var/log/syslog
+
+# Save the currently displayed input to a file: type s while paging a pipe
+dmesg | less
+
+# The simpler pager, when less is unavailable
+more /var/log/syslog

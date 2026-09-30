@@ -1,0 +1,109 @@
+## Install and manage Python packages
+
+# Install a package
+pip install requests
+
+# Always safer: use the interpreter you mean
+python3 -m pip install requests
+
+# Install a specific version
+python3 -m pip install 'requests==2.32.3'
+
+# Install a minimum version
+python3 -m pip install 'requests>=2.30'
+
+# Install with extras
+python3 -m pip install 'uvicorn[standard]'
+
+# Install from a requirements file
+python3 -m pip install -r requirements.txt
+
+# Install the current project in editable mode
+python3 -m pip install -e .
+
+# Editable with the dev extras
+python3 -m pip install -e '.[dev]'
+
+# Install from git
+python3 -m pip install 'git+https://github.com/Merab25/Gamaxsene.git'
+
+# Install from git at a tag
+python3 -m pip install 'git+https://github.com/Merab25/Gamaxsene.git@v0.3.0'
+
+# Install a local wheel
+python3 -m pip install ./dist/gamaxsene-0.3.0-py3-none-any.whl
+
+# Upgrade a package
+python3 -m pip install -U requests
+
+# Upgrade pip itself
+python3 -m pip install -U pip
+
+# Install without using any cached wheel
+python3 -m pip install --no-cache-dir requests
+
+# Install for the current user only, outside a venv
+python3 -m pip install --user httpie
+
+# Uninstall
+python3 -m pip uninstall -y requests
+
+# List installed packages
+python3 -m pip list
+
+# List packages that are out of date
+python3 -m pip list --outdated
+
+# List only what you installed, not dependencies
+python3 -m pip list --not-required
+
+# Show details of a package
+python3 -m pip show requests
+
+# Show what depends on it and what it needs
+python3 -m pip show -f requests
+
+# Freeze the environment into a requirements file
+python3 -m pip freeze > requirements.txt
+
+# Freeze without editable installs
+python3 -m pip freeze --exclude-editable > requirements.txt
+
+# Check for broken dependency requirements
+python3 -m pip check
+
+# Download a package without installing it
+python3 -m pip download requests -d ./wheels
+
+# Install from a local directory of wheels, with no network
+python3 -m pip install --no-index --find-links ./wheels -r requirements.txt
+
+# Build a wheel for the current project
+python3 -m pip wheel . -w dist/
+
+# Dry run: see what would be installed
+python3 -m pip install --dry-run -r requirements.txt
+
+# Install from an alternative index
+python3 -m pip install -i https://pypi.example.com/simple mypackage
+
+# Verbose, for debugging a resolution problem
+python3 -m pip install -v somepackage
+
+# Where does pip put things?
+python3 -m pip show -f requests | head -n 3
+
+# The cache location and size
+python3 -m pip cache dir && python3 -m pip cache info
+
+# Clear the cache
+python3 -m pip cache purge
+
+# Install a CLI tool in its own isolated environment instead
+pipx install httpie
+
+# Upgrade every pipx tool
+pipx upgrade-all
+
+# On modern Debian and Ubuntu, pip refuses outside a venv by design
+python3 -m venv .venv && .venv/bin/python -m pip install requests

@@ -1,0 +1,100 @@
+## Print text, and the pitfalls worth knowing
+
+# Print a line
+echo "hello world"
+
+# Print without a trailing newline
+echo -n "no newline"
+
+# Interpret backslash escapes, such as tab and newline
+echo -e "col1\tcol2\nrow1\trow2"
+
+# Print a variable
+echo "$HOME"
+
+# Print a variable inside a sentence
+echo "Running as $USER on $(hostname)"
+
+# Single quotes print literally, with no expansion
+echo '$HOME is not expanded'
+
+# Print the value of the last exit status
+echo "$?"
+
+# Print the PID of the current shell
+echo "$$"
+
+# Print all arguments of a script
+echo "$@"
+
+# Print the number of arguments
+echo "$#"
+
+# Write to a file
+echo "port: 8080" > config.yaml
+
+# Append to a file
+echo "debug: false" >> config.yaml
+
+# Append to a root-owned file, using tee for the privileged write
+echo "127.0.0.1 myapp.local" | sudo tee -a /etc/hosts
+
+# Write to standard error instead of standard output
+echo "something failed" >&2
+
+# Print a blank line
+echo
+
+# Print a literal backslash
+echo 'C:\path\to\file'
+
+# Pipe into another command
+echo "hello" | tr 'a-z' 'A-Z'
+
+# Feed a password-free value into a command
+echo "SELECT 1;" | psql -d mydb
+
+# Turn a PATH into one entry per line
+echo "$PATH" | tr ':' '\n'
+
+# Print a brace-expanded sequence
+echo {1..10}
+
+# Print a sequence with a step
+echo {0..100..10}
+
+# Print letters
+echo {a..e}
+
+# Expand a glob to see what it matches, without acting on it
+echo *.log
+
+# Dry-run a command by echoing it first
+for f in *.bak; do echo rm "$f"; done
+
+# prefer printf when the format matters: echo -e is not portable
+printf 'col1\tcol2\n'
+
+# printf with a format and values
+printf '%-10s %5d\n' cpu 42
+
+# printf repeats the format for extra arguments
+printf '%s\n' one two three
+
+# Print a number with two decimal places
+printf '%.2f\n' 3.14159
+
+# Print a separator line
+printf '%.0s-' {1..40}; echo
+
+# Build a JSON line safely
+printf '{"host":"%s","ok":true}\n' "$(hostname)"
+
+# Echo colour, when the terminal supports it
+echo -e "\033[1;32mOK\033[0m"
+
+# Print the shell's own idea of a command
+type echo
+
+# The external echo, when the builtin gets in the way
+/bin/echo -n "hello"

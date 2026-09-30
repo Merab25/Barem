@@ -1,0 +1,106 @@
+## Query and edit YAML, JSON and TOML on the command line
+
+# Pretty-print a YAML file
+yq . config.yaml
+
+# Read one value
+yq '.image.tag' values.yaml
+
+# A nested value
+yq '.spec.template.spec.containers[0].image' deployment.yaml
+
+# Raw output, without quotes
+yq -r '.image.tag' values.yaml
+
+# A value with a default when the key is missing
+yq '.replicas // 1' values.yaml
+
+# Every key at the top level
+yq 'keys' config.yaml
+
+# Length of a list
+yq '.containers | length' pod.yaml
+
+# All items of a list
+yq '.spec.containers[].name' pod.yaml
+
+# Filter a list
+yq '.services[] | select(.port == 8080)' docker-compose.yaml
+
+# Select by name and print one field
+yq '.spec.containers[] | select(.name == "web") | .image' pod.yaml
+
+# Build a small table of two fields
+yq -r '.services | to_entries[] | [.key, .value.image] | @tsv' docker-compose.yaml
+
+# Set a value and print the result
+yq '.image.tag = "1.4.2"' values.yaml
+
+# Set a value in place
+yq -i '.image.tag = "1.4.2"' values.yaml
+
+# Set a number rather than a string
+yq -i '.replicas = 3' values.yaml
+
+# Set a nested value in place
+yq -i '.spec.replicas = 5' deployment.yaml
+
+# Set a value from a shell variable
+yq -i ".image.tag = \"$VERSION\"" values.yaml
+
+# Safer: pass the variable as a typed argument
+yq -i '.image.tag = strenv(VERSION)' values.yaml
+
+# Delete a key
+yq -i 'del(.debug)' config.yaml
+
+# Delete an item from a list
+yq -i 'del(.services[0])' compose.yaml
+
+# Add an item to a list
+yq -i '.args += ["--verbose"]' config.yaml
+
+# Merge two files, the second winning
+yq eval-all '. as $item ireduce ({}; . * $item)' base.yaml override.yaml
+
+# Simple merge of two documents
+yq '. *= load("override.yaml")' base.yaml
+
+# Convert YAML to JSON
+yq -o=json config.yaml
+
+# Compact JSON, for piping
+yq -o=json -I0 config.yaml
+
+# Convert JSON to YAML
+yq -P -o=yaml data.json
+
+# Convert TOML to YAML
+yq -p=toml -o=yaml pyproject.toml
+
+# Read a value out of a TOML file
+yq -p=toml '.project.version' pyproject.toml
+
+# Split a multi-document YAML file and handle each document
+yq eval-all 'select(.kind == "Service")' k8s.yaml
+
+# Work with every document in a stream
+yq '.metadata.name' k8s.yaml
+
+# Read from standard input
+kubectl get deploy web -o yaml | yq '.spec.replicas'
+
+# Validate that a file parses at all
+yq . config.yaml > /dev/null && echo "valid YAML"
+
+# Keep comments when editing in place, which yq v4 does
+yq -i '.replicas = 3' deployment.yaml
+
+# Sort keys for a stable diff
+yq -P 'sort_keys(..)' config.yaml
+
+# Compare two YAML files ignoring key order
+diff <(yq -P 'sort_keys(..)' a.yaml) <(yq -P 'sort_keys(..)' b.yaml)
+
+# The JSON equivalent tool, for JSON-only work
+jq '.image.tag' values.json

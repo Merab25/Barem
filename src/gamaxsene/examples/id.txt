@@ -1,0 +1,100 @@
+## Show who you are, your groups, and who else is logged in
+
+# Your user, group and all supplementary groups
+id
+
+# Another user's identity
+id merab
+
+# Just the numeric user id
+id -u
+
+# Just the user name
+id -un
+
+# Numeric primary group id
+id -g
+
+# Primary group name
+id -gn
+
+# All group ids
+id -G
+
+# All group names
+id -Gn
+
+# Group names of another user
+id -Gn merab
+
+# Are we root?
+[ "$(id -u)" -eq 0 ] || echo "please run as root"
+
+# Guard a script against being run as root
+[ "$(id -u)" -ne 0 ] || { echo "do not run as root"; exit 1; }
+
+# Use the current user and group in a chown
+sudo chown -R "$(id -un):$(id -gn)" /srv/app
+
+# Just the user name, the short way
+whoami
+
+# The user who logged in, before any su or sudo
+logname
+
+# Who invoked sudo
+echo "$SUDO_USER"
+
+# Groups of the current user
+groups
+
+# Groups of another user
+groups merab
+
+# Is the user in a specific group?
+id -nG merab | tr ' ' '\n' | grep -qx docker && echo "in docker group"
+
+# Look the user up through nsswitch: files, LDAP, SSSD
+getent passwd merab
+
+# The user's home directory and shell
+getent passwd merab | cut -d: -f6,7
+
+# Members of a group
+getent group docker
+
+# Every human account on the system
+awk -F: '$3 >= 1000 && $3 < 65534 {print $1}' /etc/passwd
+
+# Who is logged in now
+who
+
+# Who is logged in, with what they are running
+w
+
+# Just the count of logged-in users
+who | wc -l
+
+# Your own login session
+who am i
+
+# Recent logins
+last | head
+
+# Recent logins for one user
+last merab | head
+
+# Failed login attempts
+sudo lastb | head
+
+# When did each user last log in?
+lastlog
+
+# SELinux or AppArmor context, when relevant
+id -Z
+
+# Group changes only take effect on a new login session
+newgrp docker
+
+# Refresh group membership without logging out
+exec su -l "$USER"

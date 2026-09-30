@@ -1,0 +1,94 @@
+## Merge lines from files side by side, or fold a list into one line
+
+# Two files side by side, separated by a tab
+paste names.txt emails.txt
+
+# Use a different separator
+paste -d, names.txt emails.txt
+
+# Separate with a colon
+paste -d: names.txt emails.txt
+
+# Three files, with different separators in turn
+paste -d',;' a.txt b.txt c.txt
+
+# Turn a list into one comma-separated line
+paste -sd, names.txt
+
+# One space-separated line
+paste -sd' ' names.txt
+
+# Join a list with a pipe character
+paste -sd'|' names.txt
+
+# Rebuild a PATH from one directory per line
+paste -sd: dirs.txt
+
+# Turn a file into one long line
+paste -s names.txt
+
+# Pair up every two lines of a single file
+paste - - < pairs.txt
+
+# Group every three lines into one row
+paste - - - < triples.txt
+
+# Combine command output side by side
+paste <(seq 1 5) <(seq 101 105)
+
+# Number a list without nl
+paste <(seq 1 "$(wc -l < names.txt)") names.txt
+
+# Build a CSV from separate columns
+paste -d, ids.txt names.txt emails.txt > users.csv
+
+# Add a header to a generated CSV
+{ echo "id,name,email"; paste -d, ids.txt names.txt emails.txt; } > users.csv
+
+# Zip two lists into shell assignments
+paste -d= keys.txt values.txt
+
+# Build an env file from keys and values
+paste -d= keys.txt values.txt > app.env
+
+# Merge a list of hosts with their IPs
+paste -d'\t' hosts.txt ips.txt
+
+# Turn the output of a loop into one line
+for h in web1 web2 web3; do echo "$h"; done | paste -sd,
+
+# Comma-separate a list for an SQL IN clause
+paste -sd, ids.txt
+
+# Quote each item first, then join
+sed 's/.*/"&"/' names.txt | paste -sd,
+
+# Join with ", " using sed afterwards
+paste -sd, names.txt | sed 's/,/, /g'
+
+# Transpose a single column into a row
+paste -s numbers.txt
+
+# Split a comma list into lines, the inverse of paste -sd,
+tr ',' '\n' < list.csv
+
+# Compare two files line by line, side by side
+paste a.txt b.txt | column -t
+
+# Sum two columns from different files
+paste a.txt b.txt | awk '{print $1 + $2}'
+
+# Combine a column with a constant
+paste names.txt <(yes "active" | head -n "$(wc -l < names.txt)")
+
+# Interleave two files, one line each
+paste -d'\n' a.txt b.txt
+
+# Merge with join when the files share a key column instead
+join -t, -1 1 -2 1 sorted-a.csv sorted-b.csv
+
+# Build a one-line list of running containers
+docker ps --format '{{.Names}}' | paste -sd,
+
+# Build a one-line list of failed services
+systemctl list-units --state=failed --no-legend | awk '{print $1}' | paste -sd,

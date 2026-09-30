@@ -1,0 +1,94 @@
+## Change file ownership and group
+
+# Change the owner
+sudo chown merab report.pdf
+
+# Change owner and group together
+sudo chown merab:developers report.pdf
+
+# Change the group only
+sudo chown :developers report.pdf
+
+# Change the group with chgrp instead
+sudo chgrp developers report.pdf
+
+# Set the group to the owner's login group
+sudo chown merab: report.pdf
+
+# Recursively change a whole tree
+sudo chown -R www-data:www-data /var/www/html
+
+# Show what changed
+sudo chown -Rv www-data:www-data /var/www/html
+
+# Report only the files actually changed
+sudo chown -Rc www-data:www-data /var/www/html
+
+# Quiet: suppress error messages
+sudo chown -Rf merab /srv/data
+
+# Use numeric UID and GID
+sudo chown 1000:1000 report.pdf
+
+# Copy ownership from a reference file
+sudo chown --reference=template.txt newfile.txt
+
+# Only change files that currently have a specific owner
+sudo chown --from=olduser:oldgroup newuser:newgroup /srv/data -R
+
+# Only change files owned by a departing user
+sudo chown -R --from=alice bob /srv/shared
+
+# Do not follow symlinks; change the link itself
+sudo chown -h merab /usr/local/bin/myapp
+
+# Never cross into another filesystem
+sudo chown -R --one-file-system merab /mnt/data
+
+# Follow symlinks encountered in a tree
+sudo chown -RL www-data /var/www
+
+# Hand a web root to the web server, but keep it readable
+sudo chown -R www-data:www-data /var/www/html && sudo chmod -R 755 /var/www/html
+
+# Give a service its own data directory
+sudo chown -R myapp:myapp /var/lib/myapp
+
+# Fix ownership after extracting an archive as root
+sudo chown -R "$USER:$USER" ~/downloads/extracted
+
+# Fix ownership after a careless sudo in your home directory
+sudo chown -R "$(id -un):$(id -gn)" "$HOME"
+
+# Correct an SSH directory a root copy broke
+sudo chown -R merab:merab /home/merab/.ssh && chmod 700 /home/merab/.ssh
+
+# Set ownership only on directories
+sudo find /var/www -type d -exec chown www-data:www-data {} +
+
+# Set ownership only on files
+sudo find /var/www -type f -exec chown www-data:www-data {} +
+
+# Change ownership of files belonging to a deleted UID
+sudo find / -xdev -nouser -exec chown root {} + 2>/dev/null
+
+# Find files with no valid group
+sudo find / -xdev -nogroup 2>/dev/null
+
+# See current ownership
+ls -l report.pdf
+
+# Ownership of a whole directory, including the directory itself
+ls -ld /var/www/html
+
+# Owner and group as plain text, for a script
+stat -c '%U:%G' /var/www/html
+
+# Find everything owned by one user
+find /srv -user merab
+
+# Find everything owned by one group
+find /srv -group developers
+
+# Preview a recursive change before running it
+sudo chown -Rv --no-preserve-root www-data /var/www/html

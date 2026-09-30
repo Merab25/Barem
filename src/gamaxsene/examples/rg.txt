@@ -1,0 +1,115 @@
+## ripgrep: fast recursive search that respects .gitignore
+
+# Search the current directory tree
+rg "TODO"
+
+# Case-insensitive
+rg -i "error"
+
+# Smart case: insensitive unless the pattern has capitals
+rg -S "Error"
+
+# Whole words only
+rg -w "id"
+
+# Fixed string, no regex
+rg -F "a.b.c"
+
+# Search one directory
+rg "timeout" src/
+
+# Search a single file
+rg "listen" /etc/nginx/nginx.conf
+
+# Only files of one type
+rg -t py "import requests"
+
+# Several types
+rg -t js -t ts "fetch("
+
+# Exclude a type
+rg -T test "createUser"
+
+# List the type names ripgrep knows
+rg --type-list
+
+# Filter by glob instead of type
+rg -g '*.yaml' "image:"
+
+# Exclude a glob
+rg "password" -g '!*.lock'
+
+# Exclude a directory
+rg "TODO" -g '!node_modules/**'
+
+# Include files that .gitignore excludes
+rg -u "secret"
+
+# Also search hidden files
+rg -uu "secret"
+
+# Search everything, binaries included
+rg -uuu "magic"
+
+# Just the file names that match
+rg -l "TODO"
+
+# File names that do not match
+rg --files-without-match "license"
+
+# Count matches per file
+rg -c "ERROR" /var/log/
+
+# Total number of matches
+rg -c "ERROR" --no-filename /var/log/ | paste -sd+ | bc
+
+# Show 3 lines of context
+rg -C3 "panic"
+
+# Lines after the match only
+rg -A5 "BEGIN CERTIFICATE"
+
+# Lines before the match only
+rg -B2 "Traceback"
+
+# Print only the matching part
+rg -o '[0-9]{1,3}(\.[0-9]{1,3}){3}' access.log
+
+# Extract a capture group
+rg -o -r '$1' 'user=(\w+)' app.log
+
+# Multiline search
+rg -U "func main\(\)\s*\{"
+
+# Search and replace, previewing the result
+rg "old_name" -r "new_name"
+
+# Actually rewrite the files with sed once the preview looks right
+rg -l "old_name" | xargs sed -i 's/old_name/new_name/g'
+
+# List every file ripgrep would search
+rg --files
+
+# List files then filter them
+rg --files | rg "test_"
+
+# Follow symlinks
+rg -L "config"
+
+# Limit the search depth
+rg --max-depth 2 "TODO"
+
+# Sort the results by path, for stable output
+rg --sort path "TODO"
+
+# JSON output, for tooling
+rg --json "TODO" | head
+
+# Search a compressed file
+rg -z "ERROR" app.log.gz
+
+# Pipe through a pager, keeping colour
+rg -p "TODO" | less -R
+
+# The portable equivalent when ripgrep is unavailable
+grep -rn --include='*.py' "TODO" .

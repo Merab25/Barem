@@ -1,0 +1,100 @@
+## Get and renew Let's Encrypt TLS certificates
+
+# Get a certificate and configure nginx automatically
+sudo certbot --nginx -d example.com -d www.example.com
+
+# Get a certificate and configure Apache
+sudo certbot --apache -d example.com
+
+# Get a certificate without touching the web server config
+sudo certbot certonly --nginx -d example.com
+
+# Use the webroot method, for a server certbot cannot configure
+sudo certbot certonly --webroot -w /var/www/html -d example.com
+
+# Use a temporary standalone server, when nothing is listening on 80
+sudo certbot certonly --standalone -d example.com
+
+# Non-interactive, for automation
+sudo certbot certonly --nginx -d example.com --non-interactive --agree-tos -m admin@example.com
+
+# A wildcard certificate, which requires a DNS challenge
+sudo certbot certonly --manual --preferred-challenges dns -d '*.example.com' -d example.com
+
+# DNS challenge with a supported provider plugin
+sudo certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.cloudflare.ini -d '*.example.com'
+
+# Test everything against the staging server first, avoiding rate limits
+sudo certbot certonly --nginx -d example.com --dry-run
+
+# Test with the staging ACME directory explicitly
+sudo certbot certonly --nginx -d example.com --staging
+
+# List the certificates on this machine
+sudo certbot certificates
+
+# Renew everything that is due
+sudo certbot renew
+
+# Dry-run the renewal, which is the check worth automating
+sudo certbot renew --dry-run
+
+# Force renewal even if it is not due yet
+sudo certbot renew --force-renewal
+
+# Renew one certificate only
+sudo certbot renew --cert-name example.com
+
+# Reload the web server after a successful renewal
+sudo certbot renew --deploy-hook 'systemctl reload nginx'
+
+# Stop and start a service around renewal, for standalone mode
+sudo certbot renew --pre-hook 'systemctl stop nginx' --post-hook 'systemctl start nginx'
+
+# Add a domain to an existing certificate
+sudo certbot --nginx -d example.com -d www.example.com -d api.example.com --expand
+
+# Change the key type to ECDSA
+sudo certbot certonly --nginx -d example.com --key-type ecdsa --force-renewal
+
+# Revoke a certificate
+sudo certbot revoke --cert-path /etc/letsencrypt/live/example.com/cert.pem
+
+# Revoke and delete it
+sudo certbot revoke --cert-name example.com --delete-after-revoke
+
+# Delete a certificate certbot manages
+sudo certbot delete --cert-name example.com
+
+# Where the files live
+sudo ls -l /etc/letsencrypt/live/example.com/
+
+# The renewal configuration for one certificate
+sudo cat /etc/letsencrypt/renewal/example.com.conf
+
+# Is the renewal timer active?
+systemctl list-timers 'certbot*'
+
+# Status of the renewal service
+systemctl status certbot.timer
+
+# The renewal log
+sudo tail -n 50 /var/log/letsencrypt/letsencrypt.log
+
+# Check the expiry date of the installed certificate
+openssl x509 -enddate -noout -in /etc/letsencrypt/live/example.com/cert.pem
+
+# Check what the server is actually serving
+openssl s_client -connect example.com:443 -servername example.com < /dev/null 2>/dev/null | openssl x509 -noout -dates
+
+# Which names does the served certificate cover?
+openssl s_client -connect example.com:443 -servername example.com < /dev/null 2>/dev/null | openssl x509 -noout -text | grep -A1 'Subject Alternative Name'
+
+# Days until expiry, for a monitoring check
+sudo openssl x509 -checkend 604800 -noout -in /etc/letsencrypt/live/example.com/cert.pem && echo "more than 7 days left"
+
+# Register or update the account email
+sudo certbot update_account -m newadmin@example.com
+
+# Run certbot in a container instead of installing it
+docker run --rm -v /etc/letsencrypt:/etc/letsencrypt certbot/certbot renew

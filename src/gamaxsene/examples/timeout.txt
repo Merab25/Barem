@@ -1,0 +1,97 @@
+## Put a time limit on a command
+
+# Stop the command after 30 seconds
+timeout 30 ./long-task.sh
+
+# Seconds are the default; units can be explicit
+timeout 30s ./long-task.sh
+
+# Minutes
+timeout 5m ./backup.sh
+
+# Hours
+timeout 2h ./import.sh
+
+# Fractional seconds
+timeout 0.5 ping -c 100 example.com
+
+# Send a specific signal instead of TERM
+timeout -s KILL 30 ./stuck.sh
+
+# Send INT, as if you pressed Ctrl-C
+timeout -s INT 10 tail -f app.log
+
+# TERM first, then KILL 5 seconds later if it is still alive
+timeout -k 5 30 ./long-task.sh
+
+# Report the command's own exit status, not 124, on timeout
+timeout --preserve-status 30 ./long-task.sh
+
+# Run in the foreground so signals reach the child normally
+timeout --foreground 30 ./interactive.sh
+
+# Exit status 124 means the command timed out
+timeout 5 sleep 10; echo "exit=$?"
+
+# Distinguish a timeout from a real failure
+timeout 5 ./task.sh; [ $? -eq 124 ] && echo "timed out"
+
+# Bound a health check in a script
+timeout 3 curl -sf http://localhost:8080/health || echo "unhealthy"
+
+# Bound a DNS lookup that might hang
+timeout 2 dig +short example.com
+
+# Bound an SSH connection attempt
+timeout 10 ssh -o BatchMode=yes merab@server true
+
+# Bound a port test
+timeout 2 bash -c 'cat < /dev/null > /dev/tcp/example.com/443' && echo open
+
+# Stop following a log after a while
+timeout 60 tail -f /var/log/app.log
+
+# Capture a packet trace for a fixed period
+sudo timeout 30 tcpdump -i eth0 -w capture.pcap
+
+# Sample top for ten seconds
+timeout 10 top -b > top-sample.txt
+
+# Limit a database query
+timeout 60 psql -d mydb -f heavy-report.sql
+
+# Limit a backup, so cron does not overlap runs
+timeout 55m /usr/local/bin/backup.sh
+
+# In a cron line, so a stuck job never piles up
+timeout 10m /usr/local/bin/sync.sh
+
+# Retry with a timeout on each attempt
+for i in 1 2 3; do timeout 10 ./flaky.sh && break; sleep 5; done
+
+# Wait for a service to come up, but give up eventually
+timeout 60 bash -c 'until nc -z localhost 5432; do sleep 1; done'
+
+# Wait for a file to appear, with a limit
+timeout 30 bash -c 'until [ -f /tmp/ready ]; do sleep 1; done'
+
+# Wait for a container to be healthy
+timeout 90 bash -c 'until [ "$(docker inspect -f "{{.State.Health.Status}}" web)" = healthy ]; do sleep 2; done'
+
+# Time-box a test suite in CI
+timeout 15m pytest -q
+
+# Kill a whole process group on timeout, not just the leader
+timeout -k 5 30 setsid ./spawner.sh
+
+# Timeout applies to the command, so wrap pipelines in a shell
+timeout 10 bash -c 'curl -s https://example.com | wc -c'
+
+# The sibling command: run under a different niceness with a limit
+timeout 30 nice -n 19 ./heavy.sh
+
+# Limit resources rather than time
+ulimit -t 30; ./cpu-bound.sh
+
+# Stop a command at a specific time instead
+at 23:30 -f ./job.sh

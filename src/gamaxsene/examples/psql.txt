@@ -1,0 +1,133 @@
+## Query and administer PostgreSQL from the terminal
+
+# Connect to a database
+psql -d mydb
+
+# Connect as a specific user on a remote host
+psql -h db.example.com -U merab -d mydb
+
+# Connect on a non-default port
+psql -h db.example.com -p 5433 -U merab -d mydb
+
+# Connect with a URL
+psql 'postgresql://merab@db.example.com:5432/mydb'
+
+# Connect as the postgres superuser locally
+sudo -u postgres psql
+
+# Run one query and exit
+psql -d mydb -c 'SELECT count(*) FROM users'
+
+# Run a query as postgres
+sudo -u postgres psql -c 'SELECT version()'
+
+# Run a script file
+psql -d mydb -f schema.sql
+
+# Stop on the first error, and wrap it in a transaction
+psql -d mydb -v ON_ERROR_STOP=1 -1 -f migration.sql
+
+# Quiet, for scripts
+psql -q -d mydb -f seed.sql
+
+# Tuples only, no headers or footers
+psql -t -d mydb -c 'SELECT id FROM users'
+
+# Unaligned output with a chosen separator, for piping
+psql -At -F',' -d mydb -c 'SELECT id, email FROM users'
+
+# Write query output straight to a file
+psql -d mydb -o users.txt -c 'SELECT * FROM users'
+
+# Export a query as CSV
+psql -d mydb -c "\copy (SELECT * FROM users) TO 'users.csv' CSV HEADER"
+
+# Import a CSV into a table
+psql -d mydb -c "\copy users FROM 'users.csv' CSV HEADER"
+
+# Pass a variable into a script
+psql -d mydb -v tenant=42 -f report.sql
+
+# List databases
+psql -l
+
+# Inside psql: list databases
+psql -d mydb -c '\l'
+
+# List tables
+psql -d mydb -c '\dt'
+
+# List tables with sizes
+psql -d mydb -c '\dt+'
+
+# Describe a table
+psql -d mydb -c '\d users'
+
+# Describe with indexes and constraints
+psql -d mydb -c '\d+ users'
+
+# List indexes
+psql -d mydb -c '\di'
+
+# List roles
+psql -d mydb -c '\du'
+
+# List schemas
+psql -d mydb -c '\dn'
+
+# Show the connection info
+psql -d mydb -c '\conninfo'
+
+# Database sizes, largest first
+psql -d postgres -c "SELECT datname, pg_size_pretty(pg_database_size(datname)) FROM pg_database ORDER BY pg_database_size(datname) DESC"
+
+# Table sizes in one database
+psql -d mydb -c "SELECT relname, pg_size_pretty(pg_total_relation_size(relid)) FROM pg_catalog.pg_statio_user_tables ORDER BY pg_total_relation_size(relid) DESC LIMIT 10"
+
+# Currently running queries
+psql -d mydb -c "SELECT pid, state, query_start, left(query, 60) FROM pg_stat_activity WHERE state <> 'idle'"
+
+# Long-running queries
+psql -d mydb -c "SELECT pid, now() - query_start AS age, left(query,60) FROM pg_stat_activity WHERE state = 'active' ORDER BY age DESC"
+
+# Cancel a query politely
+psql -d mydb -c 'SELECT pg_cancel_backend(4821)'
+
+# Terminate a connection
+psql -d mydb -c 'SELECT pg_terminate_backend(4821)'
+
+# Who is connected, and to what
+psql -d mydb -c "SELECT usename, datname, client_addr, count(*) FROM pg_stat_activity GROUP BY 1,2,3"
+
+# Explain a query plan
+psql -d mydb -c 'EXPLAIN ANALYZE SELECT * FROM users WHERE email = $$a@b.c$$'
+
+# Time every query in the session
+psql -d mydb -c '\timing' -c 'SELECT count(*) FROM users'
+
+# Create a database and a user
+sudo -u postgres createdb myapp
+
+# Create a role with a password
+sudo -u postgres psql -c "CREATE ROLE myapp LOGIN PASSWORD 'secret'"
+
+# Grant a role rights on a database
+sudo -u postgres psql -c 'GRANT ALL ON DATABASE myapp TO myapp'
+
+# Back up one database
+pg_dump -d mydb -Fc -f mydb.dump
+
+# Back up as plain SQL, compressed
+pg_dump -d mydb | gzip > mydb.sql.gz
+
+# Restore a custom-format dump
+pg_restore -d mydb --clean --if-exists mydb.dump
+
+# Back up every database and role
+pg_dumpall -f cluster.sql
+
+# Avoid a password prompt in a script
+PGPASSWORD="$DB_PASS" psql -h db -U merab -d mydb -c 'SELECT 1'
+
+# Better: use a password file
+echo 'db:5432:mydb:merab:secret' >> ~/.pgpass && chmod 600 ~/.pgpass

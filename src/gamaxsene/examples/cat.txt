@@ -1,0 +1,103 @@
+## Print files, join them together and create small files
+
+# Print a file
+cat /etc/hostname
+
+# Print several files one after another
+cat part1.txt part2.txt
+
+# Join files into a new one
+cat part1.txt part2.txt > whole.txt
+
+# Append one file to another
+cat extra.txt >> whole.txt
+
+# Number every line
+cat -n script.sh
+
+# Number only the non-blank lines
+cat -b script.sh
+
+# Show tabs as ^I and line ends as $, to find whitespace problems
+cat -A Makefile
+
+# Show line endings, to spot Windows CRLF
+cat -e windows.txt
+
+# Show tabs only
+cat -T Makefile
+
+# Collapse runs of blank lines into one
+cat -s spaced-out.txt
+
+# Create a small file, ending with Ctrl-D
+cat > notes.txt
+
+# Create a file from a heredoc, which is easier to script
+cat > /tmp/config.yaml <<'EOF'
+port: 8080
+debug: false
+EOF
+
+# Heredoc that expands variables
+cat > /tmp/info.txt <<EOF
+host=$(hostname)
+date=$(date +%F)
+EOF
+
+# Write to a root-owned file, using tee because the redirect runs as you
+cat config.yaml | sudo tee /etc/myapp/config.yaml > /dev/null
+
+# Read from standard input explicitly
+echo "hello" | cat -
+
+# Mix a file and standard input
+echo "footer" | cat body.txt -
+
+# Copy a file (cp is the right tool, but this works)
+cat source.txt > dest.txt
+
+# Concatenate split archive parts back together
+cat backup.tar.gz.part-* > backup.tar.gz
+
+# Read a pseudo-file from /proc
+cat /proc/cpuinfo
+
+# Kernel command line
+cat /proc/cmdline
+
+# Load average
+cat /proc/loadavg
+
+# Mounted filesystems
+cat /proc/mounts
+
+# Read a value from sysfs
+cat /sys/class/net/eth0/address
+
+# Empty a file without deleting it
+cat /dev/null > /var/log/app.log
+
+# Simpler way to empty a file
+: > /var/log/app.log
+
+# Add a public key to authorized_keys on a remote host
+cat ~/.ssh/id_ed25519.pub | ssh merab@server 'cat >> ~/.ssh/authorized_keys'
+
+# Feed a file into a command that only reads standard input
+cat data.csv | column -t -s,
+
+# Do not use cat just to feed grep: grep reads files itself
+grep -i error app.log
+
+# Page through a long file instead of flooding the terminal
+less /var/log/syslog
+
+# Print a file backwards, last line first
+tac access.log
+
+# Show a binary file safely, as hex
+xxd firmware.bin | head
+
+# Print a file with syntax highlighting, if bat is installed
+bat src/main.py

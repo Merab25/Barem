@@ -1,0 +1,112 @@
+## Edit files with nano, the editor that tells you its own shortcuts
+
+# Open a file
+nano notes.txt
+
+# Open a new file that does not exist yet
+nano /tmp/newfile.txt
+
+# Open at a specific line
+nano +120 /var/log/syslog
+
+# Open at a line and column
+nano +120,5 script.sh
+
+# Open at the last line
+nano +999999 app.log
+
+# Open at the first match of a pattern
+nano +/ERROR app.log
+
+# Open read-only
+nano -v /etc/nginx/nginx.conf
+
+# Show line numbers
+nano -l script.sh
+
+# Turn off line wrapping, so long lines stay long
+nano -w /etc/nginx/nginx.conf
+
+# Convert tabs to spaces as you type
+nano -E -T 4 script.py
+
+# Set the tab width
+nano -T 2 config.yaml
+
+# Enable auto-indent
+nano -i script.py
+
+# Do not create a backup file
+nano -B notes.txt
+
+# Keep a backup of the original
+nano -b /etc/hosts
+
+# Constant position display at the bottom
+nano -c app.log
+
+# Enable mouse support
+nano -m notes.txt
+
+# Disable syntax highlighting
+nano -Y none script.sh
+
+# Force a syntax highlighting mode
+nano -Y sh deploy
+
+# Start with no config file loaded
+nano --ignorercfiles notes.txt
+
+# Suspend with Ctrl-Z enabled
+nano -z notes.txt
+
+# Save: Ctrl-O then Enter — exit: Ctrl-X
+nano notes.txt
+
+# Search: Ctrl-W, then Alt-W to repeat
+nano app.log
+
+# Search and replace: Ctrl-\ (Ctrl-Backslash)
+nano config.yaml
+
+# Go to a line: Ctrl-_ then the number
+nano script.sh
+
+# Cut a line: Ctrl-K — paste: Ctrl-U
+nano notes.txt
+
+# Mark a block: Ctrl-6, move, then Ctrl-K to cut it
+nano notes.txt
+
+# Show the cursor position: Ctrl-C
+nano app.log
+
+# Justify a paragraph: Ctrl-J
+nano README.md
+
+# Edit a system file with the right privileges
+sudo nano /etc/hosts
+
+# Better for protected files: sudo's safe editor
+sudo -e /etc/nginx/nginx.conf
+
+# Make nano your default editor
+export EDITOR=nano
+
+# Use it for the crontab
+EDITOR=nano crontab -e
+
+# Use it for git commit messages
+git config --global core.editor nano
+
+# Your nano configuration
+cat ~/.nanorc
+
+# Turn on line numbers permanently
+echo 'set linenumbers' >> ~/.nanorc
+
+# Version and build options
+nano --version
+
+# The other editor, when nano is not installed
+vim notes.txt

@@ -1,0 +1,124 @@
+## Install and manage Node.js packages and run project scripts
+
+# Install everything from package.json
+npm install
+
+# Install exactly what the lockfile says, for CI
+npm ci
+
+# Install a package and save it as a dependency
+npm install express
+
+# Install as a dev dependency
+npm install -D vitest
+
+# Install a specific version
+npm install express@4.19.2
+
+# Install the latest of a major version
+npm install 'express@^4'
+
+# Install without saving to package.json
+npm install --no-save express
+
+# Install a package globally
+npm install -g typescript
+
+# Install from git
+npm install git+https://github.com/user/repo.git
+
+# Uninstall a package
+npm uninstall express
+
+# Uninstall a global package
+npm uninstall -g typescript
+
+# Run a script from package.json
+npm run build
+
+# Run the test script
+npm test
+
+# Start the app
+npm start
+
+# List the scripts a project defines
+npm run
+
+# Pass arguments through to the script
+npm run test -- --watch
+
+# Run a package binary without installing it
+npx prettier --write .
+
+# Run a specific version of a tool once
+npx typescript@5.4 tsc --noEmit
+
+# List installed packages, top level only
+npm ls --depth=0
+
+# List globally installed packages
+npm ls -g --depth=0
+
+# Why is this package installed?
+npm explain lodash
+
+# Check which packages are out of date
+npm outdated
+
+# Update within the ranges package.json allows
+npm update
+
+# Update one package
+npm update express
+
+# See the versions published for a package
+npm view express versions
+
+# The latest published version
+npm view express version
+
+# Audit for known vulnerabilities
+npm audit
+
+# Only production dependencies
+npm audit --omit=dev
+
+# Apply the fixes that do not break semver
+npm audit fix
+
+# Show a dependency tree for one package
+npm ls express
+
+# Remove node_modules and reinstall cleanly
+rm -rf node_modules package-lock.json && npm install
+
+# Clear the cache when installs misbehave
+npm cache clean --force
+
+# Verify the cache
+npm cache verify
+
+# Set a registry for this project
+npm config set registry https://registry.npmjs.org/
+
+# Show the effective configuration
+npm config list
+
+# Where does npm put global packages?
+npm root -g
+
+# Print a field from package.json
+npm pkg get version
+
+# Set a field in package.json
+npm pkg set version=1.4.2
+
+# Bump the version and create a git tag
+npm version patch
+
+# Pack the project into a tarball, to inspect what would publish
+npm pack --dry-run
+
+# Publish to the registry
+npm publish --access public

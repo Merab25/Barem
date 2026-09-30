@@ -1,0 +1,106 @@
+## Query and manage Debian packages directly
+
+# List every installed package
+dpkg -l
+
+# Find an installed package by pattern
+dpkg -l 'nginx*'
+
+# Only properly installed packages
+dpkg -l | grep '^ii'
+
+# Count installed packages
+dpkg -l | grep -c '^ii'
+
+# Is a specific package installed?
+dpkg -l nginx 2>/dev/null | grep -q '^ii' && echo installed
+
+# Detailed status of a package
+dpkg -s nginx
+
+# Just the version
+dpkg -s nginx | awk '/^Version:/ {print $2}'
+
+# Query a field with a format string
+dpkg-query -W -f='${Version}\n' nginx
+
+# Name and version of several packages
+dpkg-query -W -f='${Package} ${Version}\n' 'python3*'
+
+# Installed size of every package, largest first
+dpkg-query -W -f='${Installed-Size}\t${Package}\n' | sort -rn | head
+
+# List the files a package installed
+dpkg -L nginx
+
+# Only the config files
+dpkg -L nginx | grep '^/etc'
+
+# Which package owns this file?
+dpkg -S /usr/sbin/nginx
+
+# Which package owns the command on my PATH?
+dpkg -S "$(command -v python3)"
+
+# List the contents of a .deb without installing it
+dpkg -c ./myapp_1.0_amd64.deb
+
+# Show a .deb's control information
+dpkg -I ./myapp_1.0_amd64.deb
+
+# Install a local .deb
+sudo dpkg -i ./myapp_1.0_amd64.deb
+
+# Fix dependencies dpkg could not resolve
+sudo apt-get install -f
+
+# Install several .deb files
+sudo dpkg -i ./*.deb
+
+# Remove a package, keeping its config files
+sudo dpkg -r myapp
+
+# Purge a package and its config files
+sudo dpkg -P myapp
+
+# Reconfigure an installed package
+sudo dpkg-reconfigure tzdata
+
+# Reconfigure non-interactively
+sudo DEBIAN_FRONTEND=noninteractive dpkg-reconfigure -f noninteractive tzdata
+
+# Find packages in a broken half-configured state
+dpkg -l | grep -v '^ii'
+
+# Fix packages that were interrupted mid-install
+sudo dpkg --configure -a
+
+# Find config files you have modified
+sudo dpkg -V
+
+# Verify one package's files against their checksums
+sudo dpkg -V nginx
+
+# List packages that are removed but left config behind
+dpkg -l | grep '^rc'
+
+# Purge all of those at once
+dpkg -l | awk '/^rc/ {print $2}' | xargs -r sudo dpkg -P
+
+# The machine's architecture, as dpkg names it
+dpkg --print-architecture
+
+# Extra architectures enabled, for multiarch
+dpkg --print-foreign-architectures
+
+# Extract a .deb without installing it
+dpkg-deb -x ./myapp_1.0_amd64.deb /tmp/extracted
+
+# Save and restore the package selection list
+dpkg --get-selections > packages.list
+
+# Mark a package to be held at its current version
+sudo apt-mark hold nginx
+
+# The higher-level tool, which resolves dependencies
+sudo apt install nginx

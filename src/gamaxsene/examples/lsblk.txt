@@ -1,0 +1,100 @@
+## List block devices, partitions and what they hold
+
+# Devices and partitions as a tree
+lsblk
+
+# Include filesystem type, label and UUID
+lsblk -f
+
+# Pick the columns you want
+lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINT,UUID
+
+# Add the model and serial, for identifying physical disks
+lsblk -o NAME,SIZE,MODEL,SERIAL
+
+# Show which devices are rotational (1) or SSD (0)
+lsblk -o NAME,ROTA,SCHED,SIZE
+
+# List every available column name
+lsblk --help
+
+# Sizes in bytes rather than human units
+lsblk -b
+
+# Whole disks only, no partitions
+lsblk -d
+
+# Whole disks with their models
+lsblk -d -o NAME,SIZE,MODEL,TRAN
+
+# One device and its partitions
+lsblk /dev/sda
+
+# Skip empty devices, such as unused card readers
+lsblk -e7
+
+# Exclude loop devices, which snap creates many of
+lsblk -e7 -f
+
+# No tree characters, easier to parse
+lsblk -l
+
+# No header, for scripting
+lsblk -ln -o NAME,SIZE
+
+# Machine-readable pairs
+lsblk -P -o NAME,SIZE,FSTYPE
+
+# JSON output
+lsblk -J -o NAME,SIZE,FSTYPE,MOUNTPOINT
+
+# Include device permissions and owner
+lsblk -m
+
+# Topology: sector sizes and alignment
+lsblk -t
+
+# Which disk is the root filesystem on?
+lsblk -no PKNAME "$(findmnt -no SOURCE /)"
+
+# Find unmounted partitions
+lsblk -ln -o NAME,SIZE,MOUNTPOINT | awk 'NF==2'
+
+# Find partitions with no filesystem yet
+lsblk -f -ln -o NAME,FSTYPE | awk 'NF==1'
+
+# UUIDs, for writing an fstab entry
+lsblk -f -o NAME,UUID,FSTYPE,MOUNTPOINT
+
+# The other tool for UUIDs and labels
+sudo blkid
+
+# UUID of one partition
+sudo blkid -s UUID -o value /dev/sdb1
+
+# Detailed disk and partition layout
+sudo fdisk -l
+
+# One disk's partition table
+sudo fdisk -l /dev/sdb
+
+# The GPT-aware equivalent
+sudo parted -l
+
+# Free space on the mounted filesystems
+df -h
+
+# What is mounted where, with options
+findmnt
+
+# Rescan the SCSI bus after hot-plugging a disk
+echo '- - -' | sudo tee /sys/class/scsi_host/host0/scan
+
+# Rescan a resized disk so the kernel sees the new size
+echo 1 | sudo tee /sys/class/block/sdb/device/rescan
+
+# Watch devices appear as you plug them in
+sudo dmesg -Tw
+
+# Disk model and SMART health
+sudo smartctl -H /dev/sda

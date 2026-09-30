@@ -1,0 +1,106 @@
+## Run Python, manage virtual environments and use its handy modules
+
+# Version
+python3 --version
+
+# Run a script
+python3 script.py
+
+# Run a one-liner
+python3 -c "print(2 ** 10)"
+
+# Run a one-liner using a module
+python3 -c "import sys; print(sys.version)"
+
+# Unbuffered output, so logs appear immediately
+python3 -u worker.py
+
+# Run a module as a script
+python3 -m json.tool data.json
+
+# Pretty-print JSON from a pipe
+curl -s https://api.example.com/items | python3 -m json.tool
+
+# Sort JSON keys for a stable diff
+python3 -m json.tool --sort-keys data.json
+
+# Serve the current directory over HTTP
+python3 -m http.server 8000
+
+# Serve on a specific address and directory
+python3 -m http.server 8000 --bind 127.0.0.1 --directory /srv/public
+
+# Create a virtual environment
+python3 -m venv .venv
+
+# Activate it
+. .venv/bin/activate
+
+# Leave it
+deactivate
+
+# Create a venv that can see system packages
+python3 -m venv --system-site-packages .venv
+
+# Recreate a venv from scratch
+rm -rf .venv && python3 -m venv .venv
+
+# Run a module inside a venv without activating it
+.venv/bin/python -m pytest -q
+
+# Check which interpreter is in use
+python3 -c "import sys; print(sys.executable)"
+
+# Where does Python look for modules?
+python3 -c "import sys; print('\n'.join(sys.path))"
+
+# Where is an installed package?
+python3 -c "import requests; print(requests.__file__)"
+
+# Time a snippet
+python3 -m timeit "sum(range(1000))"
+
+# Time with a setup line
+python3 -m timeit -s "d={'a':1}" "d.get('a')"
+
+# Profile a script
+python3 -m cProfile -s cumtime script.py | head -n 20
+
+# Drop into the debugger on an exception
+python3 -m pdb script.py
+
+# Check a file compiles, without running it
+python3 -m py_compile script.py
+
+# Syntax-check every file in a tree
+python3 -m compileall -q src/
+
+# Start an interactive shell after running a script
+python3 -i script.py
+
+# Read a script from standard input
+echo "print('hi')" | python3 -
+
+# Base64 a file with Python, when base64 is missing
+python3 -c "import base64,sys; sys.stdout.write(base64.b64encode(open('f.bin','rb').read()).decode())"
+
+# URL-encode a string
+python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "a b&c"
+
+# Generate a password hash for /etc/shadow
+python3 -c "import crypt; print(crypt.crypt('secret', crypt.mksalt(crypt.METHOD_SHA512)))"
+
+# Pretty-print YAML as JSON
+python3 -c "import sys,yaml,json; print(json.dumps(yaml.safe_load(sys.stdin), indent=2))" < config.yaml
+
+# Warnings as errors, to catch deprecations
+python3 -W error script.py
+
+# Ignore a specific warning category
+python3 -W ignore::DeprecationWarning script.py
+
+# Show where site-packages lives
+python3 -m site
+
+# Install packages into the current environment
+python3 -m pip install -r requirements.txt

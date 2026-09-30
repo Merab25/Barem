@@ -1,0 +1,151 @@
+## Inspect and operate a Redis server from the terminal
+
+# Connect to a local Redis
+redis-cli
+
+# Connect to a remote host
+redis-cli -h cache.example.com -p 6379
+
+# Connect with a password
+redis-cli -h cache.example.com -a "$REDIS_PASS"
+
+# Password from an environment variable, keeping it out of ps
+REDISCLI_AUTH="$REDIS_PASS" redis-cli -h cache.example.com
+
+# Select a database number
+redis-cli -n 2
+
+# Connect with a URL
+redis-cli -u 'redis://user:pass@cache.example.com:6379/0'
+
+# Run one command and exit
+redis-cli PING
+
+# Get a key
+redis-cli GET session:abc123
+
+# Set a key
+redis-cli SET greeting hello
+
+# Set with an expiry in seconds
+redis-cli SET session:abc123 payload EX 3600
+
+# Time to live of a key
+redis-cli TTL session:abc123
+
+# Remove the expiry
+redis-cli PERSIST session:abc123
+
+# Delete a key
+redis-cli DEL session:abc123
+
+# Does a key exist?
+redis-cli EXISTS session:abc123
+
+# What type is a key?
+redis-cli TYPE session:abc123
+
+# Number of keys in the current database
+redis-cli DBSIZE
+
+# Scan keys by pattern without blocking the server
+redis-cli --scan --pattern 'session:*'
+
+# Count matching keys
+redis-cli --scan --pattern 'session:*' | wc -l
+
+# Never use KEYS on a production server; SCAN is the safe form
+redis-cli --scan --pattern 'cache:*' | head
+
+# Delete every key matching a pattern
+redis-cli --scan --pattern 'cache:*' | xargs -r -n 100 redis-cli DEL
+
+# Hash: get all fields
+redis-cli HGETALL user:42
+
+# Hash: one field
+redis-cli HGET user:42 email
+
+# List: range of elements
+redis-cli LRANGE queue:jobs 0 9
+
+# List length
+redis-cli LLEN queue:jobs
+
+# Set members
+redis-cli SMEMBERS tags:active
+
+# Sorted set, highest scores first
+redis-cli ZREVRANGE leaderboard 0 9 WITHSCORES
+
+# Server information
+redis-cli INFO
+
+# One section of it
+redis-cli INFO memory
+
+# Memory used, human readable
+redis-cli INFO memory | grep used_memory_human
+
+# Connected clients
+redis-cli INFO clients
+
+# Keyspace summary per database
+redis-cli INFO keyspace
+
+# Live statistics, refreshing
+redis-cli --stat
+
+# Latency to the server
+redis-cli --latency
+
+# Latency history
+redis-cli --latency-history
+
+# The biggest keys in the keyspace
+redis-cli --bigkeys
+
+# Sample memory use by key pattern
+redis-cli --memkeys
+
+# Memory used by one key
+redis-cli MEMORY USAGE user:42
+
+# Watch commands as they arrive (slows the server, use briefly)
+redis-cli MONITOR
+
+# Subscribe to a channel
+redis-cli SUBSCRIBE events
+
+# Publish a message
+redis-cli PUBLISH events 'deploy finished'
+
+# The slow query log
+redis-cli SLOWLOG GET 10
+
+# Reset the slow log
+redis-cli SLOWLOG RESET
+
+# Read a config value
+redis-cli CONFIG GET maxmemory
+
+# Set a config value at runtime
+redis-cli CONFIG SET maxmemory 512mb
+
+# Persist the current config to the file
+redis-cli CONFIG REWRITE
+
+# Force a snapshot in the background
+redis-cli BGSAVE
+
+# When the last save succeeded
+redis-cli LASTSAVE
+
+# Flush one database (destructive)
+redis-cli -n 2 FLUSHDB
+
+# Replication status
+redis-cli INFO replication
+
+# Run against a cluster, following redirects
+redis-cli -c -h cache.example.com

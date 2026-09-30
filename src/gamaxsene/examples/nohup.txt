@@ -1,0 +1,94 @@
+## Keep a command running after you log out
+
+# Run a command immune to hangups, output to nohup.out
+nohup ./long-task.sh
+
+# Run it in the background as well, which is what you usually want
+nohup ./long-task.sh &
+
+# Send output where you want it
+nohup ./long-task.sh > /var/log/task.log 2>&1 &
+
+# Discard the output entirely
+nohup ./long-task.sh > /dev/null 2>&1 &
+
+# Append instead of overwriting
+nohup ./long-task.sh >> /var/log/task.log 2>&1 &
+
+# Keep stdout and stderr in separate files
+nohup ./long-task.sh > out.log 2> err.log &
+
+# Record the PID so you can stop it later
+nohup ./long-task.sh > task.log 2>&1 & echo $! > task.pid
+
+# Stop it later using that PID
+kill "$(cat task.pid)"
+
+# Run a long rsync that survives a dropped SSH session
+nohup rsync -av /srv/data/ backup@host:/backup/ > rsync.log 2>&1 &
+
+# Run a database import overnight
+nohup psql -d mydb -f import.sql > import.log 2>&1 &
+
+# Start a development server detached
+nohup python3 -m http.server 8000 > server.log 2>&1 &
+
+# Run a command as another user, detached
+sudo -u deploy nohup ./deploy.sh > deploy.log 2>&1 &
+
+# Detach a command already running: suspend, background, disown
+kill -STOP %1
+
+# Background a stopped job
+bg
+
+# Detach a background job from the shell, so it survives logout
+disown -h %1
+
+# Detach every background job
+disown -a
+
+# List the shell's jobs
+jobs -l
+
+# Bring a job back to the foreground
+fg %1
+
+# Start fully detached, in its own session
+setsid ./long-task.sh > task.log 2>&1 &
+
+# setsid with no controlling terminal at all
+setsid --fork ./long-task.sh
+
+# Check it is still running after logout
+pgrep -af long-task.sh
+
+# Watch its output as it appears
+tail -f /var/log/task.log
+
+# nohup writes here when you do not redirect
+tail -f nohup.out
+
+# Combine with timeout, so it cannot run forever
+nohup timeout 4h ./import.sh > import.log 2>&1 &
+
+# Combine with nice, so it stays out of the way
+nohup nice -n 19 ./heavy.sh > heavy.log 2>&1 &
+
+# Run a remote command that survives the SSH session ending
+ssh merab@server 'nohup ./long-task.sh > task.log 2>&1 &'
+
+# Same, without ssh waiting for the stream to close
+ssh -n merab@server 'setsid nohup ./long-task.sh > task.log 2>&1 < /dev/null &'
+
+# A terminal multiplexer is usually the better answer
+tmux new -d -s import './import.sh'
+
+# Reattach to that session later
+tmux attach -t import
+
+# screen, if tmux is unavailable
+screen -dmS import ./import.sh
+
+# For anything permanent, write a systemd unit instead
+systemd-run --unit=import --description='one-off import' ./import.sh

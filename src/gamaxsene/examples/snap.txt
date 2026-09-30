@@ -1,0 +1,115 @@
+## Install and manage snap packages on Ubuntu
+
+# Install a snap
+sudo snap install htop
+
+# Install from a specific channel
+sudo snap install node --channel=20/stable
+
+# Install a classic-confinement snap, which needs the flag
+sudo snap install code --classic
+
+# Install a specific revision
+sudo snap install htop --revision=1234
+
+# Install from a local .snap file
+sudo snap install ./myapp.snap --dangerous
+
+# List installed snaps
+snap list
+
+# List with the channel each one tracks
+snap list --all
+
+# Search for a snap
+snap find nextcloud
+
+# Show details about a snap
+snap info htop
+
+# Which channels are available?
+snap info node | sed -n '/channels:/,$p'
+
+# Update every snap now
+sudo snap refresh
+
+# Update one snap
+sudo snap refresh htop
+
+# Switch a snap to another channel
+sudo snap refresh node --channel=22/stable
+
+# See what would be refreshed
+snap refresh --list
+
+# Roll back to the previous revision
+sudo snap revert htop
+
+# Remove a snap
+sudo snap remove htop
+
+# Remove and keep no snapshot of its data
+sudo snap remove --purge htop
+
+# Disable a snap without removing it
+sudo snap disable htop
+
+# Enable it again
+sudo snap enable htop
+
+# Which services does a snap run?
+snap services
+
+# Restart a snap's service
+sudo snap restart nextcloud
+
+# Stop a snap's service
+sudo snap stop nextcloud
+
+# Logs of a snap's service
+sudo snap logs nextcloud
+
+# Follow those logs
+sudo snap logs -f nextcloud
+
+# Interfaces a snap requests and what is connected
+snap connections htop
+
+# Connect an interface manually
+sudo snap connect myapp:removable-media
+
+# Disconnect an interface
+sudo snap disconnect myapp:removable-media
+
+# Recent snap operations
+snap changes
+
+# Details of one operation
+snap change 42
+
+# Take a snapshot of a snap's data
+sudo snap save nextcloud
+
+# List snapshots
+snap saved
+
+# Restore a snapshot
+sudo snap restore 1
+
+# Hold automatic refreshes for a snap
+sudo snap refresh --hold htop
+
+# Hold all refreshes for a period
+sudo snap refresh --hold=24h
+
+# Set the refresh timer
+sudo snap set system refresh.timer=sat,03:00
+
+# How much disk are old revisions using?
+du -sh /var/lib/snapd/snaps
+
+# Keep fewer old revisions
+sudo snap set system refresh.retain=2
+
+# Snap loop devices clutter lsblk; hide them
+lsblk -e7

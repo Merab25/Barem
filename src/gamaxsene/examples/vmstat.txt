@@ -1,0 +1,97 @@
+## Sample CPU, memory, swap and IO activity over time
+
+# One snapshot since boot (averages, rarely what you want)
+vmstat
+
+# Sample every 2 seconds, forever
+vmstat 2
+
+# Five samples, two seconds apart
+vmstat 2 5
+
+# Human-readable units
+vmstat -S M 2 5
+
+# Units in megabytes
+vmstat -S m 2 5
+
+# Wide output, so columns do not run together
+vmstat -w 2 5
+
+# Add a timestamp to each line
+vmstat -t 2 5
+
+# Memory summary instead of the activity table
+vmstat -s
+
+# Disk statistics per device
+vmstat -d
+
+# Summary of disk activity
+vmstat -D
+
+# Partition-level statistics
+vmstat -p /dev/sda1
+
+# Slab (kernel cache) information
+vmstat -m
+
+# Forks since boot
+vmstat -f
+
+# Skip the first line, which is an average since boot
+vmstat 2 5 | tail -n +3
+
+# Log samples with timestamps for later analysis
+vmstat -t 5 > vmstat-$(date +%F).log
+
+# Is the machine swapping? Watch si and so
+vmstat 2 10
+
+# Is it IO bound? Watch the wa column
+vmstat 2 10
+
+# Is it CPU bound? Watch us plus sy against id
+vmstat 2 10
+
+# Are there runnable processes waiting? Watch the r column
+vmstat 2 10
+
+# Are processes blocked on IO? Watch the b column
+vmstat 2 10
+
+# Just the CPU idle column
+vmstat 2 5 | awk 'NR>2 {print $15}'
+
+# Alert if idle drops below 10 percent
+vmstat 1 5 | awk 'NR>2 && $15 < 10 {print "cpu busy:", $15"% idle"}'
+
+# Average idle across the samples
+vmstat 1 10 | awk 'NR>2 {s+=$15; n++} END {print s/n "% idle average"}'
+
+# Per-core detail instead of the whole machine
+mpstat -P ALL 2 5
+
+# Disk throughput and latency
+iostat -xz 2 5
+
+# Which process is doing the IO
+sudo iotop -o -b -n 3
+
+# Per-process CPU over time
+pidstat 2 5
+
+# Per-process memory over time
+pidstat -r 2 5
+
+# Historical data, if sysstat collection is enabled
+sar -u 1 5
+
+# Yesterday's CPU history
+sar -u -f /var/log/sysstat/sa$(date -d yesterday +%d)
+
+# The quick look, when you just need load and memory
+uptime; free -h
+
+# Interactive view of the same numbers
+htop

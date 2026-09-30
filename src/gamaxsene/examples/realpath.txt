@@ -1,0 +1,97 @@
+## Resolve paths, and split them into directory and file name
+
+# Absolute path of a relative one
+realpath ./config.yaml
+
+# Resolve every symlink along the way
+realpath /usr/local/bin/myapp
+
+# Resolve a path whose last component does not exist yet
+realpath -m /srv/releases/v2/config.yaml
+
+# Do not require any component to exist
+realpath --canonicalize-missing ./new/file.txt
+
+# Require every component to exist, failing otherwise
+realpath -e /etc/nginx/nginx.conf
+
+# Do not resolve symlinks, just normalise the path
+realpath -s ../project/./src
+
+# Path relative to another directory
+realpath --relative-to=/srv /srv/app/config.yaml
+
+# Relative to a common base
+realpath --relative-base=/home/merab /home/merab/projects/app
+
+# Strip the trailing newline, for embedding in a string
+realpath -z . | tr -d '\0'
+
+# Resolve several paths at once
+realpath *.conf
+
+# The directory part of a path
+dirname /var/log/nginx/access.log
+
+# The file name part
+basename /var/log/nginx/access.log
+
+# File name without its extension
+basename /var/log/nginx/access.log .log
+
+# Strip a suffix with the -s form
+basename -s .log /var/log/nginx/access.log
+
+# Several at once
+basename -a /tmp/a.txt /tmp/b.txt
+
+# Directory of the script currently running, the portable idiom
+script_dir=$(cd "$(dirname "$0")" && pwd)
+
+# Same thing with realpath, which also resolves symlinks
+script_dir=$(dirname "$(realpath "$0")")
+
+# Project root from a script inside a bin/ directory
+root=$(dirname "$(dirname "$(realpath "$0")")")
+
+# Make a path absolute before changing directory
+target=$(realpath "$1") && cd /tmp && cat "$target"
+
+# Where does this command actually live?
+realpath "$(command -v python3)"
+
+# Follow a chain of symlinks, showing each step
+namei -l /usr/local/bin/myapp
+
+# Where does a symlink point, one level only
+readlink /srv/current
+
+# Fully resolved target
+readlink -f /srv/current
+
+# Resolve, allowing the last component to be missing
+readlink -m /srv/current/config.yaml
+
+# Check two paths refer to the same file
+[ "$(realpath a.txt)" = "$(realpath b.txt)" ] && echo same
+
+# Normalise a path with .. and . in it
+realpath -m /srv/app/../data/./cache
+
+# Turn a relative path in a config file into an absolute one
+sed -i "s|^root=.*|root=$(realpath ./public)|" app.conf
+
+# Current directory, without resolving symlinks
+pwd
+
+# Current directory, fully resolved
+pwd -P
+
+# The current directory as the shell sees it
+echo "$PWD"
+
+# Build a path safely in a script
+config=$(realpath -m "${BASE_DIR:-.}/etc/config.yaml")
+
+# List every file by absolute path
+find . -type f -exec realpath {} +

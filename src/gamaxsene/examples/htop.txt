@@ -1,0 +1,103 @@
+## Interactive process viewer with sorting, filtering and tree view
+
+# Start htop
+htop
+
+# Only one user's processes
+htop -u www-data
+
+# Show processes as a tree
+htop -t
+
+# Sort by a column at startup
+htop -s PERCENT_MEM
+
+# Sort by CPU
+htop -s PERCENT_CPU
+
+# List the sortable column names
+htop --sort-key=help
+
+# Only specific PIDs
+htop -p 4821,4822
+
+# Set the refresh delay in tenths of a second
+htop -d 20
+
+# Hide kernel threads
+htop -k
+
+# Non-interactive snapshot, useful in a script or a log
+htop -C -n 1
+
+# Monochrome, for a terminal without colour
+htop -C
+
+# Filter by command name at startup
+htop -F nginx
+
+# Show only processes in a cgroup or container
+htop -u root -t
+
+# Inside htop: F6 or > chooses the sort column
+htop
+
+# Inside htop: F4 filters by name, Esc clears it
+htop
+
+# Inside htop: F3 searches and jumps to a process
+htop
+
+# Inside htop: F5 toggles the tree view
+htop
+
+# Inside htop: H hides user threads, K hides kernel threads
+htop
+
+# Inside htop: F9 sends a signal to the selected process
+htop
+
+# Inside htop: F7 and F8 change niceness (F7 needs root)
+htop
+
+# Inside htop: F2 opens setup, to add columns and meters
+htop
+
+# Inside htop: u selects a user to filter by
+htop
+
+# Inside htop: l shows the files the process has open
+htop
+
+# Inside htop: s traces its system calls
+htop
+
+# Inside htop: Space tags a process, then act on all tagged ones
+htop
+
+# Save your layout so it persists
+htop
+
+# Where the config lives
+cat ~/.config/htop/htoprc
+
+# Run it over SSH with a working terminal
+ssh -t merab@server htop
+
+# htop for one container's processes, from the host
+htop -p "$(docker inspect -f '{{.State.Pid}}' web)"
+
+# The always-installed alternative
+top
+
+# A one-shot snapshot without htop
+ps aux --sort=-%cpu | head
+
+# By memory instead
+ps aux --sort=-%mem | head
+
+# IO-focused viewer
+sudo iotop -o
+
+# A modern alternative with more detail
+btop

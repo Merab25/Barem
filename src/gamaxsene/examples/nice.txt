@@ -1,0 +1,97 @@
+## Run work at lower or higher priority, for CPU and for disk
+
+# Run a command at the lowest CPU priority
+nice -n 19 ./heavy-job.sh
+
+# The default nice bump is 10
+nice ./heavy-job.sh
+
+# Slightly deprioritised
+nice -n 5 ./build.sh
+
+# Higher priority needs root (negative values)
+sudo nice -n -5 ./latency-sensitive.sh
+
+# Highest priority
+sudo nice -n -20 ./realtime-ish.sh
+
+# Show the niceness a command would inherit
+nice
+
+# Change the priority of a running process
+sudo renice -n 19 -p 4821
+
+# Renice several processes
+sudo renice -n 10 -p 4821 -p 4822
+
+# Renice every process of a user
+sudo renice -n 19 -u backup
+
+# Renice a whole process group
+sudo renice -n 19 -g 4821
+
+# Renice by name
+sudo renice -n 19 $(pgrep -d' ' -f rsync)
+
+# See current niceness in ps
+ps -eo pid,ni,comm --sort=-ni | head
+
+# Niceness of one process
+ps -o pid,ni,comm -p 4821
+
+# Only processes that have been deprioritised
+ps -eo pid,ni,comm | awk '$2 > 0'
+
+# Lower the disk priority instead of the CPU
+ionice -c 3 ./backup.sh
+
+# Idle IO class: only use the disk when nothing else wants it
+ionice -c 3 rsync -a /srv/data/ /mnt/backup/
+
+# Best-effort class with the lowest priority
+ionice -c 2 -n 7 ./backup.sh
+
+# Show the IO class of a running process
+ionice -p 4821
+
+# Change the IO class of a running process
+sudo ionice -c 3 -p 4821
+
+# Both together: a backup that stays out of the way
+nice -n 19 ionice -c 3 tar -czf /mnt/backup/srv.tar.gz /srv
+
+# A nightly backup in cron that will not hurt daytime latency
+nice -n 19 ionice -c 3 /usr/local/bin/backup.sh
+
+# Deprioritise a big compile
+nice -n 19 make -j"$(nproc)"
+
+# Deprioritise a database dump
+nice -n 10 ionice -c 2 -n 7 mysqldump --single-transaction mydb | gzip > dump.sql.gz
+
+# Deprioritise a find that scans the whole disk
+nice -n 19 ionice -c 3 find / -name '*.log' 2>/dev/null
+
+# Combine with timeout so it cannot run forever
+timeout 2h nice -n 19 ./import.sh
+
+# Run detached, deprioritised, and logged
+nohup nice -n 19 ./heavy.sh > heavy.log 2>&1 &
+
+# Set the priority of a systemd service
+sudo systemctl edit myapp
+
+# Systemd does the same with Nice= and IOSchedulingClass=
+systemctl show -p Nice myapp
+
+# CPU shares for a container
+docker run --cpu-shares 256 myimage
+
+# Limit a container to half a core
+docker run --cpus 0.5 myimage
+
+# cgroups give harder limits than nice ever will
+systemd-run --scope -p CPUQuota=50% ./heavy.sh
+
+# Check whether the load actually improved
+uptime

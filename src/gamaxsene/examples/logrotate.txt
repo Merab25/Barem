@@ -1,0 +1,112 @@
+## Rotate, compress and expire log files
+
+# Run logrotate as cron would, honouring the state file
+sudo logrotate /etc/logrotate.conf
+
+# Dry run: show what would happen, change nothing
+sudo logrotate -d /etc/logrotate.conf
+
+# Dry run for one config file
+sudo logrotate -d /etc/logrotate.d/nginx
+
+# Verbose, showing each decision
+sudo logrotate -v /etc/logrotate.conf
+
+# Verbose dry run, the combination you want while writing a config
+sudo logrotate -dv /etc/logrotate.d/myapp
+
+# Force rotation even if the conditions are not met yet
+sudo logrotate -f /etc/logrotate.d/nginx
+
+# Force and be verbose, to confirm it worked
+sudo logrotate -fv /etc/logrotate.d/myapp
+
+# Use a different state file, so a test does not disturb the real one
+sudo logrotate -s /tmp/logrotate.state -dv /etc/logrotate.d/myapp
+
+# Where the state normally lives
+sudo cat /var/lib/logrotate/status
+
+# When was a log last rotated, according to the state file
+sudo grep myapp /var/lib/logrotate/status
+
+# List the configs that are in effect
+ls /etc/logrotate.d/
+
+# Read one config
+cat /etc/logrotate.d/nginx
+
+# Write a config for your own application
+sudo tee /etc/logrotate.d/myapp > /dev/null <<'EOF'
+/var/log/myapp/*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 myapp adm
+    sharedscripts
+    postrotate
+        systemctl reload myapp > /dev/null 2>&1 || true
+    endscript
+}
+EOF
+
+# Test that new config without touching anything
+sudo logrotate -dv /etc/logrotate.d/myapp
+
+# A config that signals the process instead of reloading the unit
+sudo tee /etc/logrotate.d/legacy > /dev/null <<'EOF'
+/var/log/legacy/app.log {
+    weekly
+    rotate 8
+    compress
+    copytruncate
+}
+EOF
+
+# Check the systemd timer that runs logrotate
+systemctl status logrotate.timer
+
+# When will it next run?
+systemctl list-timers logrotate.timer
+
+# Run the unit now, rather than calling the binary
+sudo systemctl start logrotate.service
+
+# Its last run, in the journal
+journalctl -u logrotate --since today
+
+# The cron entry, on systems without the timer
+cat /etc/cron.daily/logrotate
+
+# See the rotated files
+ls -lh /var/log/nginx/
+
+# How much space logs are using
+du -sh /var/log/*
+
+# Largest logs on the system
+du -ah /var/log | sort -rh | head
+
+# Read a rotated, compressed log
+zcat /var/log/nginx/access.log.2.gz | head
+
+# Search every rotated log
+zgrep -i error /var/log/myapp/app.log*
+
+# Rotate by size rather than by date, in a config
+grep -r 'size' /etc/logrotate.d/ | head
+
+# A file still growing after rotation means the process kept the old handle
+sudo lsof -p "$(pgrep -o myapp)" | grep deleted
+
+# Journald has its own limits, not logrotate
+journalctl --disk-usage
+
+# Trim the journal to a size
+sudo journalctl --vacuum-size=500M
+
+# Trim the journal by age
+sudo journalctl --vacuum-time=14d

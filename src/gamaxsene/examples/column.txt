@@ -1,0 +1,97 @@
+## Line up text into readable columns
+
+# Line up whitespace-separated input into a table
+column -t /etc/fstab
+
+# A CSV as an aligned table
+column -t -s, users.csv
+
+# A colon-separated file
+column -t -s: /etc/passwd
+
+# A tab-separated file
+column -t -s$'\t' data.tsv
+
+# Do not merge repeated separators, so empty fields stay empty
+column -t -s, -n users.csv
+
+# Keep empty cells (the modern flag)
+column -t -s, --keep-empty-lines users.csv
+
+# Name the columns in the output
+column -t -s, -N 'NAME,EMAIL,ROLE' users.csv
+
+# Use the first line as the header
+column -t -s, --table-columns-limit 3 users.csv
+
+# Right-align numeric columns
+column -t -s, -R 2,3 sales.csv
+
+# Hide some columns
+column -t -s, -H 2 users.csv
+
+# Output as JSON instead of a table
+column -t -s, -N name,email,role -J users.csv
+
+# Fill columns down instead of across
+column -c 80 wordlist.txt
+
+# Fill across rows instead of down
+column -x -c 80 wordlist.txt
+
+# Set the total output width
+column -c 120 -t /etc/fstab
+
+# Read from a pipe
+mount | column -t
+
+# Tidy up df
+df -h | column -t
+
+# Tidy up a mount listing
+findmnt -l | column -t
+
+# Align ps output
+ps -eo pid,user,comm,%cpu | column -t
+
+# A readable view of /etc/passwd
+column -t -s: -N 'USER,X,UID,GID,NAME,HOME,SHELL' /etc/passwd
+
+# Group membership, lined up
+column -t -s: /etc/group
+
+# Align the output of a database query
+psql -At -F',' -c 'SELECT id, name, email FROM users LIMIT 10' | column -t -s,
+
+# Align docker output that is already tabular
+docker ps --format '{{.Names}}\t{{.Image}}\t{{.Status}}' | column -t -s$'\t'
+
+# Align kubectl output
+kubectl get pods --no-headers | column -t
+
+# Turn key=value lines into two columns
+sed 's/=/\t/' app.env | column -t -s$'\t'
+
+# Align a two-column report built with printf
+printf 'name\tsize\n' > /tmp/r.tsv
+
+# Make a markdown-ish table readable in the terminal
+sed 's/|/\t/g' table.md | column -t -s$'\t'
+
+# Pipe a wide table through a sideways-scrolling pager
+column -t -s, big.csv | less -S
+
+# Save an aligned copy
+column -t -s, users.csv > users-aligned.txt
+
+# When the data has quoted commas, csvlook handles it properly
+csvlook users.csv
+
+# Or use a proper CSV tool
+python3 -c "import csv,sys;[print(r) for r in csv.reader(sys.stdin)]" < users.csv
+
+# awk can align too, with full control
+awk -F, '{printf "%-20s %-30s %s\n", $1, $2, $3}' users.csv
+
+# Simple two-space alignment with expand
+expand -t 20 data.tsv

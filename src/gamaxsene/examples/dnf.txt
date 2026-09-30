@@ -1,0 +1,118 @@
+## Install, update and query packages on Fedora, RHEL and Rocky
+
+# Refresh metadata and install a package
+sudo dnf install nginx
+
+# Install without prompting
+sudo dnf install -y nginx
+
+# Install several packages
+sudo dnf install -y nginx postgresql-server redis
+
+# Install a specific version
+sudo dnf install -y nginx-1.24.0
+
+# Install a local rpm, resolving dependencies
+sudo dnf install -y ./myapp-1.0.rpm
+
+# Reinstall a package, restoring its files
+sudo dnf reinstall -y nginx
+
+# Remove a package
+sudo dnf remove -y nginx
+
+# Remove a package and its now-unused dependencies
+sudo dnf autoremove -y
+
+# Update everything
+sudo dnf upgrade -y
+
+# Update one package
+sudo dnf upgrade -y nginx
+
+# Apply only security updates
+sudo dnf upgrade --security -y
+
+# Check what updates are available, changing nothing
+dnf check-update
+
+# List updates without the exit-code behaviour
+dnf list --upgrades
+
+# Search for a package
+dnf search nginx
+
+# Search names only
+dnf search --all nginx
+
+# Show package details
+dnf info nginx
+
+# Is it installed, and which version?
+dnf list --installed nginx
+
+# List every installed package
+dnf list --installed
+
+# Count installed packages
+dnf list --installed | wc -l
+
+# Which package provides this file?
+dnf provides /usr/sbin/nginx
+
+# Which package provides this command?
+dnf provides '*/bin/htop'
+
+# What files does a package contain?
+dnf repoquery -l nginx
+
+# What does a package depend on?
+dnf repoquery --requires nginx
+
+# What depends on this package?
+dnf repoquery --whatrequires nginx
+
+# List enabled repositories
+dnf repolist
+
+# List every repository, disabled ones included
+dnf repolist --all
+
+# Enable a repository for one command
+sudo dnf --enablerepo=epel install -y htop
+
+# Disable a repository for one command
+sudo dnf --disablerepo=updates install -y nginx
+
+# Add a repository from a URL
+sudo dnf config-manager --add-repo https://example.com/myrepo.repo
+
+# Install the EPEL repository
+sudo dnf install -y epel-release
+
+# Work with module streams
+sudo dnf module list nodejs
+
+# Enable a module stream
+sudo dnf module enable -y nodejs:20
+
+# Transaction history
+sudo dnf history
+
+# Details of one transaction
+sudo dnf history info 42
+
+# Undo a transaction
+sudo dnf history undo 42
+
+# Clean the metadata cache
+sudo dnf clean all
+
+# Download a package without installing it
+dnf download nginx
+
+# The same tool on older CentOS and RHEL
+sudo yum install -y nginx
+
+# Query the rpm database directly
+rpm -qa | grep nginx

@@ -1,0 +1,103 @@
+## Show a directory as an indented tree
+
+# Tree of the current directory
+tree
+
+# Tree of a specific directory
+tree /etc/nginx
+
+# Limit the depth to 2 levels
+tree -L 2
+
+# Directories only, no files
+tree -d
+
+# Directories only, two levels deep: a quick map of a project
+tree -d -L 2
+
+# Include hidden files
+tree -a
+
+# Show file sizes
+tree -s
+
+# Human-readable sizes
+tree -h
+
+# Total size of each directory
+tree -h --du
+
+# Biggest directories first
+tree -h --du --sort=size
+
+# Sort by modification time, newest last
+tree -t
+
+# Reverse the sort
+tree -tr
+
+# Show permissions
+tree -p
+
+# Show owner and group
+tree -ug
+
+# Permissions, owner, size and date: a recursive ls -l
+tree -pughD
+
+# Print full paths
+tree -f
+
+# Full paths with no indentation lines, easy to pipe
+tree -fi
+
+# Only files matching a pattern
+tree -P '*.py'
+
+# Only matching files, and prune empty directories from the output
+tree -P '*.py' --prune
+
+# Exclude a pattern
+tree -I 'node_modules'
+
+# Exclude several patterns
+tree -I 'node_modules|.git|__pycache__|*.pyc'
+
+# A clean view of a Python project
+tree -a -I '.git|.venv|__pycache__|*.pyc' -L 3
+
+# Do not print the file and directory count at the end
+tree --noreport
+
+# Plain ASCII lines, for terminals or files that mangle box drawing
+tree --charset=ascii
+
+# No indentation lines at all
+tree -i
+
+# Output as JSON, for scripting
+tree -J -L 2
+
+# Output as XML
+tree -X -L 2
+
+# Output as HTML with links
+tree -H . -o index.html
+
+# Write the tree to a file for a README
+tree -a -I '.git|.venv' --charset=ascii > structure.txt
+
+# Follow symlinked directories
+tree -l
+
+# Show symlink targets
+tree -l -f
+
+# Count files and directories only
+tree | tail -n 1
+
+# When tree is not installed, approximate it with find
+find . -maxdepth 2 -not -path '*/.git/*' | sort
+
+# A one-line tree from find and sed
+find . -type d | sed -e 's;[^/]*/;|__;g' -e 's;__|; |;g'

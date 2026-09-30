@@ -1,0 +1,100 @@
+## Measure disk throughput, latency and utilisation
+
+# One report since boot
+iostat
+
+# Sample every 2 seconds
+iostat 2
+
+# Five samples, two seconds apart
+iostat 2 5
+
+# Extended statistics, which is where the useful columns are
+iostat -x 2 5
+
+# Extended, skipping devices with no activity
+iostat -xz 2 5
+
+# Human-readable units
+iostat -xh 2 5
+
+# Megabytes per second instead of blocks
+iostat -xm 2 5
+
+# Kilobytes per second
+iostat -xk 2 5
+
+# Device statistics only, no CPU section
+iostat -d -x 2 5
+
+# CPU statistics only
+iostat -c 2 5
+
+# One device
+iostat -x 2 5 /dev/sda
+
+# Several devices
+iostat -x 2 5 /dev/sda /dev/nvme0n1
+
+# Add a timestamp to each report
+iostat -xt 2 5
+
+# Show device names as the kernel sees them
+iostat -xN 2 5
+
+# Include partitions, not just whole devices
+iostat -xp 2 5
+
+# Partitions of one device
+iostat -xp /dev/sda 2 5
+
+# Skip the first report, which averages since boot
+iostat -xz 2 5 | awk 'NR>6'
+
+# Per-CPU breakdown alongside the disks
+iostat -x -c -p ALL 2 3
+
+# Is the disk saturated? Watch %util near 100
+iostat -xz 2 10
+
+# Is latency the problem? Watch r_await and w_await in milliseconds
+iostat -xz 2 10
+
+# How deep is the queue? Watch aqu-sz
+iostat -xz 2 10
+
+# Read and write throughput per device
+iostat -xm 2 5 | awk '/^[sn]/ {print $1, $3 "MB/s read", $9 "MB/s write"}'
+
+# Log samples for later analysis
+iostat -xzt 5 > iostat-$(date +%F).log
+
+# Which process is causing the IO
+sudo iotop -o
+
+# iotop in batch mode, for a log
+sudo iotop -o -b -n 5
+
+# Per-process IO from pidstat
+pidstat -d 2 5
+
+# IO wait from the CPU side
+vmstat 2 10
+
+# Which files are being written right now
+sudo lsof / 2>/dev/null | awk '$4 ~ /[0-9]+w/'
+
+# Historical IO, if sysstat collection is on
+sar -d -p 1 5
+
+# Yesterday's disk history
+sar -d -p -f /var/log/sysstat/sa$(date -d yesterday +%d)
+
+# Disk model and queue settings behind the numbers
+lsblk -o NAME,ROTA,SCHED,SIZE,MODEL
+
+# A quick throughput test on an idle disk
+sudo hdparm -tT /dev/sda
+
+# A write test, careful with the target path
+dd if=/dev/zero of=/tmp/testfile bs=1M count=1024 oflag=direct

@@ -1,0 +1,97 @@
+## Identify what a file actually is, whatever its name says
+
+# Identify a file
+file report.pdf
+
+# Identify several files
+file *
+
+# Identify everything in a tree
+find . -type f -exec file {} +
+
+# Print only the type, without the file name
+file -b report.pdf
+
+# Print the MIME type, useful for scripts and web servers
+file --mime-type report.pdf
+
+# MIME type and character encoding
+file -i report.pdf
+
+# Just the encoding of a text file
+file --mime-encoding notes.txt
+
+# Follow a symlink and describe its target
+file -L /usr/local/bin/myapp
+
+# Describe the symlink itself
+file -h /usr/local/bin/myapp
+
+# Look inside a compressed file
+file -z archive.tar.gz
+
+# Do not stop at the first match; keep looking
+file -k mystery.bin
+
+# Separate the name and type with a null byte, for safe parsing
+file -b0 *.bin
+
+# Read the list of files from another command
+find /tmp -type f -print0 | xargs -0 file
+
+# Read file names from a file
+file -f filelist.txt
+
+# Is this really a PDF, or has it been renamed?
+file -b --mime-type suspicious.pdf
+
+# Is a download an HTML error page rather than the archive you wanted?
+file downloaded.tar.gz
+
+# Which architecture is this binary?
+file /usr/bin/ls
+
+# Is a binary statically or dynamically linked?
+file /usr/bin/ls | grep -o 'dynamically linked\|statically linked'
+
+# Is this shell script using CRLF line endings?
+file script.sh | grep CRLF
+
+# Which text encoding is this file, before converting it?
+file -i legacy.txt
+
+# Convert it once you know
+iconv -f WINDOWS-1251 -t UTF-8 legacy.txt > utf8.txt
+
+# Find every shell script in a tree, by content rather than extension
+find . -type f -exec file --mime-type {} + | grep 'x-shellscript'
+
+# Find every image, whatever the extension
+find . -type f -exec file --mime-type {} + | grep 'image/'
+
+# Count files by type
+find . -type f -exec file -b --mime-type {} + | sort | uniq -c | sort -rn
+
+# Find broken or empty files
+find . -type f -exec file {} + | grep -i 'empty'
+
+# Check a core dump's origin
+file core.4821
+
+# Identify a disk image before mounting it
+file disk.img
+
+# What filesystem does this partition hold?
+sudo file -s /dev/sdb1
+
+# Look at the raw bytes when file is not sure
+xxd -l 64 mystery.bin
+
+# The first bytes often say it all
+head -c 16 mystery.bin | xxd
+
+# Check a certificate's format, PEM or DER
+file server.crt
+
+# Confirm an archive's compression before extracting
+file backup.tar.*

@@ -1,0 +1,97 @@
+## Encode and decode base64
+
+# Encode a string
+echo -n "hello" | base64
+
+# Encode without a trailing newline in the input
+printf 'hello' | base64
+
+# Decode a string
+echo "aGVsbG8=" | base64 -d
+
+# Encode a file
+base64 secret.key > secret.key.b64
+
+# Decode back to a file
+base64 -d secret.key.b64 > secret.key
+
+# Encode to one long line, with no wrapping
+base64 -w0 cert.pem
+
+# Wrap at 64 characters, the PEM convention
+base64 -w64 cert.der
+
+# Decode ignoring invalid characters, such as stray newlines
+base64 -di padded.b64
+
+# Encode a file into a variable
+encoded=$(base64 -w0 cert.pem)
+
+# Build an HTTP Basic auth header
+printf 'user:password' | base64 -w0
+
+# Use it in a curl call
+curl -H "Authorization: Basic $(printf 'user:pass' | base64 -w0)" https://api.example.com
+
+# Decode a Basic auth header you captured
+echo "dXNlcjpwYXNz" | base64 -d
+
+# Decode the payload of a JWT (the middle part)
+echo "$JWT" | cut -d. -f2 | base64 -di 2>/dev/null
+
+# Decode a JWT payload and format it
+echo "$JWT" | cut -d. -f2 | base64 -di 2>/dev/null | jq .
+
+# Create a Kubernetes secret value
+echo -n 'supersecret' | base64 -w0
+
+# Read a value back out of a Kubernetes secret
+kubectl get secret db -o jsonpath='{.data.password}' | base64 -d
+
+# Decode every value in a secret
+kubectl get secret db -o json | jq -r '.data | map_values(@base64d)'
+
+# Encode a small file to paste into a config
+base64 -w0 ca.crt
+
+# Embed an image as a data URI
+echo "data:image/png;base64,$(base64 -w0 logo.png)"
+
+# Encode a tarball to move it through a text-only channel
+tar -cz project/ | base64 -w0 > project.tar.gz.b64
+
+# Decode it on the other side
+base64 -d project.tar.gz.b64 | tar -xz
+
+# Encode and decode in one pipeline, as a check
+echo "round trip" | base64 | base64 -d
+
+# URL-safe base64, replacing + and / by hand
+echo -n "data" | base64 -w0 | tr '+/' '-_' | tr -d '='
+
+# Decode URL-safe base64
+echo "ZGF0YQ" | tr '_-' '/+' | base64 -di
+
+# Base32 instead
+echo -n "hello" | base32
+
+# Hex instead of base64
+echo -n "hello" | xxd -p
+
+# Decode hex
+echo "68656c6c6f" | xxd -r -p
+
+# Generate random bytes and encode them as a token
+openssl rand -base64 32
+
+# Random bytes with base64 directly
+head -c 32 /dev/urandom | base64 -w0
+
+# Encode a password for a config file that requires it
+printf '%s' "$PASSWORD" | base64 -w0
+
+# Check the encoded length before pasting it somewhere with a limit
+base64 -w0 cert.pem | wc -c
+
+# Remember base64 is encoding, not encryption
+gpg -c secret.txt

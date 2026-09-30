@@ -1,0 +1,103 @@
+## Find out which command will run, and where it lives
+
+# Path of a command
+which python3
+
+# Several commands at once
+which git docker kubectl
+
+# Every match on the PATH, not just the first
+which -a python3
+
+# Quietly test whether a command exists
+which -s docker
+
+# The portable, built-in way to do the same thing
+command -v python3
+
+# Use it as a guard in a script
+command -v docker > /dev/null || { echo "docker not installed"; exit 1; }
+
+# What kind of thing is this name: builtin, alias, function or file?
+type echo
+
+# Just the word, for scripting
+type -t echo
+
+# The path only, like which
+type -P python3
+
+# Every meaning of a name
+type -a python3
+
+# Is it an alias, and to what?
+type ll
+
+# Show the body of a shell function
+type deploy
+
+# Follow the resolved command through its symlinks
+realpath "$(command -v python3)"
+
+# Which python3 is this really?
+ls -l "$(command -v python3)"
+
+# Which package provides this command, on Debian and Ubuntu
+dpkg -S "$(command -v python3)"
+
+# Which package provides it, on Fedora and RHEL
+rpm -qf "$(command -v python3)"
+
+# Find a command that is not yet installed, on Debian
+apt-file search bin/htop
+
+# Find the package providing a command, on Fedora
+dnf provides '*/bin/htop'
+
+# Where are the man pages and binaries for a name?
+whereis python3
+
+# Binaries only
+whereis -b python3
+
+# Search the PATH by hand
+echo "$PATH" | tr ':' '\n' | while read -r d; do [ -x "$d/python3" ] && echo "$d/python3"; done
+
+# Why is the wrong version running? Look at PATH order
+echo "$PATH" | tr ':' '\n' | head
+
+# Version of whatever is first on the PATH
+python3 --version
+
+# Compare two installs
+"$(command -v python3)" --version; /usr/bin/python3 --version
+
+# Clear the shell's cache of command locations after changing PATH
+hash -r
+
+# Show the shell's cached lookups
+hash
+
+# Check a command exists before using it in a Makefile or CI step
+command -v jq >/dev/null 2>&1 && echo "jq available"
+
+# Test several dependencies at once
+for c in git jq curl; do command -v "$c" >/dev/null || echo "missing: $c"; done
+
+# Is it a shell builtin rather than a program?
+type -t cd
+
+# Run the external program when a builtin shadows it
+command -p echo hello
+
+# Bypass an alias for one invocation
+\ls
+
+# Bypass a function and run the builtin
+builtin cd /tmp
+
+# List everything executable on the PATH
+compgen -c | sort -u | head
+
+# Where does the alternatives system point?
+update-alternatives --display python3

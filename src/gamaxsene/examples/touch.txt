@@ -1,0 +1,94 @@
+## Create empty files and update timestamps
+
+# Create an empty file, or update its timestamp if it exists
+touch notes.txt
+
+# Create several files at once
+touch a.txt b.txt c.txt
+
+# Create a numbered range of files
+touch file-{1..5}.txt
+
+# Create files in a directory that already exists
+touch /var/log/myapp/app.log
+
+# Update the timestamp without creating the file if it is missing
+touch -c missing.txt
+
+# Update only the modification time
+touch -m notes.txt
+
+# Update only the access time
+touch -a notes.txt
+
+# Set a specific date and time
+touch -d '2026-01-15 09:30:00' report.pdf
+
+# Set a date with no time
+touch -d '2026-01-15' report.pdf
+
+# Set a timestamp relative to now
+touch -d '2 hours ago' report.pdf
+
+# Set a timestamp in the future
+touch -d 'next monday' report.pdf
+
+# Set the timestamp in the older numeric form (YYYYMMDDhhmm)
+touch -t 202601150930 report.pdf
+
+# Copy the timestamp from another file
+touch -r template.txt newfile.txt
+
+# Make a file look older than another, to force a rebuild
+touch -r Makefile -d '-1 hour' build/app.o
+
+# Create a placeholder so a service finds the file it expects
+touch /var/run/myapp.lock
+
+# Create a log file with the right owner and permissions
+touch /var/log/myapp/app.log && chown myapp:myapp /var/log/myapp/app.log
+
+# Create a file only if it does not exist (touch already does this safely)
+touch ~/.hushlogin
+
+# Create a marker to record that a step ran
+touch /var/lib/myapp/.migrated
+
+# Use a marker file as a simple guard in a script
+[ -f /var/lib/myapp/.migrated ] || ./migrate.sh
+
+# Bump every file in a tree, forcing a full rebuild
+find src -name '*.c' -exec touch {} +
+
+# Create the parent directory first, then the file
+mkdir -p /srv/app/etc && touch /srv/app/etc/config.yaml
+
+# Create a file with today's date in the name
+touch "backup-$(date +%F).log"
+
+# Create files from a list
+xargs -a names.txt touch
+
+# Do not follow a symlink; touch the link itself
+touch -h /usr/local/bin/myapp
+
+# Show what the timestamps actually are now
+stat notes.txt
+
+# Just the modification time
+stat -c '%y' notes.txt
+
+# Find files touched in the last 10 minutes
+find . -mmin -10 -type f
+
+# Find files newer than a reference file
+find . -newer template.txt
+
+# Create a sparse file of a given size (touch makes an empty one)
+truncate -s 100M disk.img
+
+# Create a file filled with zeros
+dd if=/dev/zero of=test.bin bs=1M count=10
+
+# Empty an existing file without changing its owner or permissions
+: > /var/log/myapp/app.log

@@ -6,6 +6,33 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-01
+
+### Added
+
+- 40 more commands, chosen for everyday work rather than completeness, taking
+  the tool from 77 to **117 commands** and from 2,540 to **3,918 examples**.
+  - Files and directories: `touch`, `chown`, `file`, `tree`, `realpath`
+  - Text processing: `cat`, `less`, `column`, `paste`, `rg`, `yq`, `base64`
+  - Processes and system: `htop`, `nohup`, `nice`, `screen`, `vmstat`,
+    `iostat`, `lsblk`, `logrotate`
+  - Shell and environment: `echo`, `env`, `which`, `time`, `timeout`
+  - Users and permissions: `id`
+  - Packages: `dpkg`, `dnf`, `snap`
+  - Editors: `vim`, `nano`
+  - Languages and package tools: `python`, `pip`, `npm`
+  - Databases: `psql`, `mysql`, `redis-cli`
+  - Security: `gpg`, `sha256sum`, `certbot`
+- Five new README sections: **Shell and environment**, **Packages**,
+  **Editors**, **Languages and package tools** and **Databases**.
+
+### Changed
+
+- `chown` closes an odd gap: `chmod` was covered from the first release but
+  changing ownership was not, although the two are used together constantly.
+- `apt` moved from *Processes and system* into the new *Packages* section,
+  next to `dpkg`, `dnf` and `snap`.
+
 ## [0.3.0] - 2026-09-30
 
 ### Added
@@ -77,7 +104,8 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Packaging with hatchling: the example files ship inside the wheel and are
   found with `importlib.resources`, wherever the package is installed.
 
-[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/Merab25/Gamaxsene/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/Merab25/Gamaxsene/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/Merab25/Gamaxsene/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Merab25/Gamaxsene/releases/tag/v0.1.0

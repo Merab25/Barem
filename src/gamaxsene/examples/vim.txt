@@ -1,0 +1,106 @@
+## Open, find and edit files with vim from the command line
+
+# Open a file
+vim notes.txt
+
+# Open several files, then :n and :prev to move between them
+vim a.txt b.txt
+
+# Open at a specific line
+vim +120 /var/log/syslog
+
+# Open at the end of the file
+vim + /var/log/syslog
+
+# Open at the first match of a pattern
+vim +/ERROR app.log
+
+# Open read-only
+vim -R /etc/nginx/nginx.conf
+
+# Open read-only and refuse writes entirely
+vim -M /etc/nginx/nginx.conf
+
+# Open with line numbers on
+vim -c 'set number' script.sh
+
+# Open with a setting applied
+vim -c 'set paste' config.yaml
+
+# Run commands then quit, for scripted edits
+vim -c '%s/old/new/g' -c 'wq' config.yaml
+
+# Edit in place non-interactively (ex mode)
+vim -es -c '%s/8080/9090/g' -c 'wq' config.yaml
+
+# Open all files matching a pattern
+vim $(grep -rl 'TODO' src/)
+
+# Open files from a search, positioned at the match
+vim +/TODO $(grep -rl TODO src/)
+
+# Open a file over SSH
+vim scp://merab@server//etc/nginx/nginx.conf
+
+# Open files split horizontally
+vim -o a.txt b.txt
+
+# Split vertically
+vim -O a.txt b.txt
+
+# Open in tabs
+vim -p a.txt b.txt
+
+# Diff two files
+vimdiff old.conf new.conf
+
+# The same via vim
+vim -d old.conf new.conf
+
+# Start without any config, to test whether a plugin is the problem
+vim -u NONE notes.txt
+
+# Start with a specific config
+vim -u ~/.vimrc.minimal notes.txt
+
+# Recover a file after a crash
+vim -r notes.txt
+
+# List recoverable swap files
+vim -r
+
+# Delete a leftover swap file
+rm .notes.txt.swp
+
+# Read standard input into vim
+ps aux | vim -
+
+# Write the current file as another name: :w newname
+vim notes.txt
+
+# Quit without saving: :q! — save and quit: :wq or :x
+vim notes.txt
+
+# Save a file you opened without permission: :w !sudo tee %
+vim /etc/hosts
+
+# Better: open it with sudo in the first place
+sudo vim /etc/hosts
+
+# Use sudo's safe editor, which edits a copy then installs it
+sudo -e /etc/nginx/nginx.conf
+
+# Set the editor for git, crontab and sudo -e
+export EDITOR=vim
+
+# Edit the crontab with it
+crontab -e
+
+# Show the version and compiled features
+vim --version | head -n 5
+
+# Built-in tutorial, about half an hour
+vimtutor
+
+# The friendlier editor when vim is not wanted
+nano notes.txt

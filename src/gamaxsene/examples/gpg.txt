@@ -1,0 +1,106 @@
+## Encrypt, decrypt, sign and verify with GnuPG
+
+# Encrypt a file with a passphrase, no keys involved
+gpg -c secret.txt
+
+# Symmetric encryption, choosing the cipher
+gpg -c --cipher-algo AES256 secret.txt
+
+# Produce ASCII armour instead of binary
+gpg -c -a secret.txt
+
+# Decrypt a file
+gpg -d secret.txt.gpg
+
+# Decrypt to a specific file
+gpg -o secret.txt -d secret.txt.gpg
+
+# Decrypt without a prompt, reading the passphrase from a file
+gpg --batch --passphrase-file pass.txt -d secret.txt.gpg
+
+# Generate a key pair, answering prompts
+gpg --full-generate-key
+
+# Generate a key with sensible defaults, no prompts
+gpg --quick-generate-key "Merab <merab@example.com>" ed25519 sign,cert 2y
+
+# List your public keys
+gpg --list-keys
+
+# List your secret keys
+gpg --list-secret-keys
+
+# List keys with full fingerprints
+gpg --list-keys --with-fingerprint
+
+# Show a key's fingerprint
+gpg --fingerprint merab@example.com
+
+# Export a public key in ASCII armour
+gpg --export -a merab@example.com > merab.pub.asc
+
+# Export a secret key, for backup
+gpg --export-secret-keys -a merab@example.com > merab.sec.asc
+
+# Import someone's public key
+gpg --import colleague.pub.asc
+
+# Fetch a key from a keyserver
+gpg --keyserver keys.openpgp.org --recv-keys 0xA1B2C3D4E5F60789
+
+# Send your key to a keyserver
+gpg --keyserver keys.openpgp.org --send-keys 0xA1B2C3D4E5F60789
+
+# Encrypt a file for one recipient
+gpg -e -r colleague@example.com report.pdf
+
+# Encrypt for several recipients
+gpg -e -r alice@example.com -r bob@example.com report.pdf
+
+# Encrypt and sign in one step
+gpg -e -s -r colleague@example.com report.pdf
+
+# Encrypt for yourself too, so you can read it later
+gpg -e -r colleague@example.com -r merab@example.com report.pdf
+
+# Trust a key for this operation without editing trust
+gpg --trust-model always -e -r colleague@example.com report.pdf
+
+# Sign a file, producing a detached signature
+gpg --detach-sign -a release.tar.gz
+
+# Verify a detached signature
+gpg --verify release.tar.gz.asc release.tar.gz
+
+# Sign a file inline, keeping the text readable
+gpg --clearsign NOTICE.txt
+
+# Verify a clear-signed file
+gpg --verify NOTICE.txt.asc
+
+# Verify a distribution's checksum file
+gpg --verify SHA256SUMS.gpg SHA256SUMS
+
+# Sign a git commit with your key
+git commit -S -m "Signed commit"
+
+# Tell git which key to use
+git config user.signingkey 0xA1B2C3D4E5F60789
+
+# Edit a key: change expiry, add a user id, set trust
+gpg --edit-key merab@example.com
+
+# Change the passphrase on a key
+gpg --passwd merab@example.com
+
+# Delete a public key
+gpg --delete-key colleague@example.com
+
+# Delete a secret key
+gpg --delete-secret-key merab@example.com
+
+# Where gpg keeps everything
+gpg --version
+
+# Restart the agent after changing its config
+gpgconf --kill gpg-agent
