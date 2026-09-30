@@ -1,0 +1,10 @@
+version: 2
+updates:
+  # The package itself has no dependencies, so the only thing that goes stale
+  # here is the set of actions the workflow pins.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci

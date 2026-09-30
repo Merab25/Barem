@@ -210,15 +210,15 @@ COMPLETION_SHELLS = ("bash", "zsh")
 
 def completion_script(shell: str) -> str:
     """The completion script for `shell`, shipped inside the package."""
-    path = resources.files("gamaxsene").joinpath("completions", f"gamaxsene.{shell}")
+    # One joinpath per segment: on Python 3.9 a zipped package hands back a
+    # zipfile.Path, whose joinpath only took a single argument back then.
+    path = resources.files("gamaxsene").joinpath("completions").joinpath(f"gamaxsene.{shell}")
     return path.read_text(encoding="utf-8").rstrip("\n")
 
 
 def option_names() -> list[str]:
     """Every option the parser accepts, so completion never drifts from it."""
-    return sorted(
-        option for action in build_parser()._actions for option in action.option_strings
-    )
+    return sorted(option for action in build_parser()._actions for option in action.option_strings)
 
 
 def vocabulary(sheet: Sheet) -> list[str]:

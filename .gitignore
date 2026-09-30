@@ -1,8 +1,30 @@
 __pycache__/
 *.py[cod]
+
+# builds
 dist/
 build/
 *.egg-info/
+
+# environments
 .venv/
 venv/
+
+# tool caches
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.tox/
+
+# coverage
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# editors and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp

@@ -19,15 +19,24 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Documentation",
+    "Topic :: System :: Systems Administration",
     "Topic :: Utilities",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "build"]
+dev = ["pytest", "build", "ruff"]
 
 [project.urls]
 Homepage = "https://github.com/Merab25/Gamaxsene"
+Repository = "https://github.com/Merab25/Gamaxsene"
 Issues = "https://github.com/Merab25/Gamaxsene/issues"
+Changelog = "https://github.com/Merab25/Gamaxsene/blob/main/CHANGELOG.md"
 
 # Creates the `gamaxsene` terminal command -> runs main() in src/gamaxsene/cli.py
 [project.scripts]
@@ -42,3 +51,26 @@ packages = ["src/gamaxsene"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"    # the oldest Python the package supports
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # import sorting
+    "UP",  # rewrite to modern syntax the supported Pythons allow
+    "B",   # bugbear: likely bugs
+    "C4",  # comprehensions
+    "SIM", # simplifications
+    "SLF", # private member access
+    "RUF",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# argparse has no public API for "every option you accept", and completion
+# has to know exactly that, so option_names() reads parser._actions.
+"src/gamaxsene/cli.py" = ["SLF001"]

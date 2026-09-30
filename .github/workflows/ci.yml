@@ -4,18 +4,46 @@ on:
   push:
   pull_request:
 
+# A new push to the same branch makes the previous run pointless.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ruff
+        run: python -m pip install --upgrade pip ruff
+
+      - name: Lint
+        run: ruff check --output-format=github .
+
+      - name: Check formatting
+        run: ruff format --check --diff .
+
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.9", "3.12", "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: pip
 
       # zsh is not on the runner by default, and without it the test that
       # syntax-checks the zsh completion script would quietly skip.
@@ -49,6 +77,7 @@ jobs:
         shell: bash
         run: |
           source <(gamaxsene --completion bash)
+
           COMP_WORDS=(gamaxsene doc) COMP_CWORD=1 COMPREPLY=()
           _gamaxsene
           echo "gamaxsene doc -> ${COMPREPLY[*]}"

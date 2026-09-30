@@ -57,7 +57,7 @@ pipx install git+https://github.com/Merab25/Gamaxsene.git
 pipx creates an isolated virtual environment for the tool and puts the `gamaxsene` command on your `PATH`.
 
 ```bash
-pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.1.0   # a specific release
+pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.2.0   # a specific release
 pipx upgrade gamaxsene                                             # update
 pipx uninstall gamaxsene                                           # remove
 ```
@@ -234,15 +234,23 @@ The new command shows up automatically in `--list`, `--help`, `--search` and tab
 
 ```text
 gamaxsene/
-├── .github/workflows/ci.yml   # CI: build, install the wheel, run tests on Python 3.9 / 3.12 / 3.13
+├── .github/
+│   ├── workflows/ci.yml       # CI: lint, then build + install the wheel and test on 3.9-3.13
+│   └── dependabot.yml         # keeps the pinned GitHub Actions current
 ├── src/gamaxsene/
 │   ├── __init__.py            # package version (single source of truth)
 │   ├── __main__.py            # enables `python -m gamaxsene`
 │   ├── cli.py                 # argument parsing, file parsing, filtering, output, completion
 │   ├── completions/           # the bash and zsh completion scripts, shipped too
 │   └── examples/              # one .txt file per command, shipped inside the package
-├── tests/test_cli.py          # parser, example files and CLI behaviour tests
-├── pyproject.toml             # package metadata, build backend, `gamaxsene` entry point
+├── tests/
+│   ├── test_cli.py            # parser, example files, CLI behaviour and completion
+│   └── test_docs.py           # the README's tables must match the example files
+├── pyproject.toml             # package metadata, build backend, entry point, ruff config
+├── .gitattributes             # keep the tree LF: the examples are read on Linux
+├── .editorconfig
+├── CHANGELOG.md
+├── CONTRIBUTING.md
 ├── LICENSE
 └── README.md
 ```
@@ -255,27 +263,35 @@ gamaxsene/
 - **Output**: colors are ANSI escape codes, enabled only when stdout is a terminal (`sys.stdout.isatty()`), so pipes, files and grep always get plain text.
 - **Completion**: the script printed by `--completion` is a real file in the package, not a string built in Python. On every TAB it calls the hidden `gamaxsene --complete <words>`, which prints one candidate per line. That call is handled before `argparse` runs, because the words arrive half-typed (`--no-c`, `-`) and `argparse` would try to read them as options.
 - **Isolation**: pipx installs the tool in its own virtual environment, so it never conflicts with system Python packages.
-- **Versioning**: the version is defined once in `src/gamaxsene/__init__.py` and read by the build backend (hatchling).
+- **Versioning**: the version is defined once in `src/gamaxsene/__init__.py` and read by the build backend (hatchling). A test checks that `CHANGELOG.md` has a section for it and that the README's install line names the matching tag.
 
 ## Development
 
 ```bash
 git clone https://github.com/Merab25/Gamaxsene.git
-cd gamaxsene
+cd Gamaxsene
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"    # editable install: code and example changes apply immediately
 
 gamaxsene find             # try it
 pytest                     # run the tests
+ruff check .               # lint
+ruff format .              # format
 python -m build            # build the wheel and sdist into dist/
 ```
+
+CI runs those same checks on Python 3.9 through 3.13, then installs the built
+wheel and smoke-tests the CLI and the generated bash completion script.
 
 To use your local copy as your everyday command, install it with pipx in editable mode:
 
 ```bash
 pipx install -e . --force
 ```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request, and
+[CHANGELOG.md](CHANGELOG.md) for what changed in each release.
 
 ## Roadmap
 

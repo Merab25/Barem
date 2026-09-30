@@ -1,0 +1,57 @@
+# Changelog
+
+All notable changes to this project are recorded here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the version
+numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.2.0] - 2026-09-30
+
+### Added
+
+- Tab completion for bash and zsh. `gamaxsene --completion bash` (or `zsh`)
+  prints a script to install; TAB then completes command names, keywords and
+  options. Candidates are read from the example files that are installed, so a
+  command or keyword added later is completed without regenerating anything.
+- `.gitattributes`, so the tree stays LF everywhere. The examples are shell
+  commands read on Linux, and a wheel built from a Windows checkout would
+  otherwise ship them with CRLF line endings.
+- `.editorconfig` and a ruff configuration (lint and format), both enforced in
+  CI alongside the tests.
+- CI installs zsh and drives the generated bash completion function, so a
+  broken completion script fails the build instead of silently offering nothing
+  on a user's machine.
+- A test that checks the README's command tables against the example files, so
+  the counts and summaries in the docs cannot drift unnoticed.
+
+### Fixed
+
+- Every GitHub URL said `YOUR_USERNAME`, which left the CI badge blank and made
+  the `pipx install` and `git clone` lines impossible to copy-paste.
+- `README.md` carried its title twice.
+- The test that runs `bash -n` over every example file piped the script in text
+  mode, so on Windows Python rewrote the newlines as CRLF and bash failed with
+  "unexpected end of file" on `date`, `dig` and `nc` rather than on any real
+  syntax error. It now sends bytes.
+- `completion_script()` walks one path segment at a time, because on Python 3.9
+  a zipped package hands back a `zipfile.Path`, whose `joinpath()` took only a
+  single argument at the time.
+
+## [0.1.0] - 2026-09-30
+
+### Added
+
+- First release: the `gamaxsene` command, 37 Linux commands and 1,236
+  copy-paste-ready examples.
+- Keyword filtering (`gamaxsene find size`), search across every command
+  (`gamaxsene -s port`), a command listing (`-l`) and grep-friendly one-line
+  output (`-1`).
+- Colors that switch off automatically when output is not a terminal, and
+  exit codes that make the tool usable in scripts.
+- Packaging with hatchling: the example files ship inside the wheel and are
+  found with `importlib.resources`, wherever the package is installed.
+
+[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Merab25/Gamaxsene/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/Merab25/Gamaxsene/releases/tag/v0.1.0

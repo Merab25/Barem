@@ -76,7 +76,7 @@ def test_examples_are_valid_shell_syntax(name):
     script = "\n".join(cmd for example in cli.load(name).examples for cmd in example.commands)
     # Send bytes, not text: on Windows text mode rewrites newlines as CRLF and bash then
     # fails on the stray carriage returns instead of on real syntax errors.
-    result = subprocess.run(["bash", "-n"], input=script.encode(), capture_output=True)
+    result = subprocess.run(["bash", "-n"], input=script.encode(), capture_output=True, check=False)
     assert result.returncode == 0, f"{name}.txt: {result.stderr.decode(errors='replace')}"
 
 
@@ -247,5 +247,5 @@ def test_completion_script_is_valid_shell_syntax(capsys, shell):
         pytest.skip(f"{shell} is not installed")
     cli.main(["--completion", shell])
     script = capsys.readouterr().out
-    result = subprocess.run([shell, "-n"], input=script.encode(), capture_output=True)
+    result = subprocess.run([shell, "-n"], input=script.encode(), capture_output=True, check=False)
     assert result.returncode == 0, result.stderr.decode(errors="replace")

@@ -1,0 +1,25 @@
+# Editor defaults. .gitattributes enforces LF in git; this keeps editors
+# from reintroducing CRLF or tabs before a commit is even made.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{yml,yaml,json,toml}]
+indent_size = 2
+
+# Example files are shell commands: a stray trailing space is harmless, but
+# indentation is never meaningful here, so leave the content exactly as typed.
+[src/gamaxsene/examples/*.txt]
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false    # two trailing spaces mean a line break
+
+[Makefile]
+indent_style = tab
