@@ -1,0 +1,94 @@
+## Translate, squeeze and delete characters
+
+# Lowercase to uppercase
+tr 'a-z' 'A-Z' < notes.txt
+
+# Uppercase to lowercase
+tr 'A-Z' 'a-z' < NOTES.TXT
+
+# Same thing with character classes
+tr '[:lower:]' '[:upper:]' < notes.txt
+
+# Replace one character with another
+tr ':' ' ' < /etc/passwd
+
+# Replace commas with tabs
+tr ',' '\t' < data.csv
+
+# Convert Windows line endings to Unix
+tr -d '\r' < windows.txt > unix.txt
+
+# Turn newlines into spaces, making one long line
+tr '\n' ' ' < list.txt
+
+# Turn spaces into newlines, one word per line
+tr ' ' '\n' < sentence.txt
+
+# Split on any whitespace, one word per line
+tr -s '[:space:]' '\n' < prose.txt
+
+# Delete a character entirely
+tr -d ':' < /etc/passwd
+
+# Delete all digits
+tr -d '[:digit:]' < mixed.txt
+
+# Keep only digits
+tr -cd '[:digit:]' < mixed.txt
+
+# Delete everything that is not printable
+tr -cd '[:print:]\n' < messy.log
+
+# Strip ANSI colour codes' escape character
+tr -d '\033' < colored.log
+
+# Squeeze repeated spaces into one
+tr -s ' ' < padded.txt
+
+# Squeeze repeated newlines, collapsing blank lines
+tr -s '\n' < spaced-out.txt
+
+# Squeeze and translate at the same time
+tr -s ' ' '\t' < report.txt
+
+# Complement: replace everything except letters with a newline
+tr -cs '[:alpha:]' '\n' < prose.txt
+
+# Count word frequency in a file
+tr -cs '[:alpha:]' '\n' < book.txt | tr 'A-Z' 'a-z' | sort | uniq -c | sort -rn | head
+
+# ROT13
+tr 'A-Za-z' 'N-ZA-Mn-za-m' < secret.txt
+
+# Swap two characters
+tr 'ab' 'ba' < swap.txt
+
+# Replace a set of punctuation with a single character
+tr '.,;:' '_' < messy.txt
+
+# Delete a specific set of characters
+tr -d '()[]{}' < code.txt
+
+# Generate a random password from /dev/urandom
+tr -cd '[:alnum:]' < /dev/urandom | head -c 20; echo
+
+# Random hex string
+tr -cd '0-9a-f' < /dev/urandom | head -c 32; echo
+
+# Normalise a name into a slug
+echo "My Report Name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-'
+
+# Turn a PATH into one directory per line
+echo "$PATH" | tr ':' '\n'
+
+# Turn a comma list into arguments
+echo "a,b,c" | tr ',' '\n' | xargs -n1 echo item
+
+# tr reads standard input only, so use a pipe for files as arguments
+cat a.txt b.txt | tr 'a-z' 'A-Z'
+
+# Truncate the second set to the length of the first
+tr 'abcdef' 'xy' < letters.txt
+
+# Delete the last character of every line
+sed 's/.$//' file.txt

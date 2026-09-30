@@ -1,0 +1,88 @@
+## Show the first lines or bytes of a file
+
+# First 10 lines (the default)
+head /var/log/syslog
+
+# First 20 lines
+head -n 20 /var/log/syslog
+
+# Short form
+head -20 /var/log/syslog
+
+# Just the first line
+head -n 1 report.csv
+
+# Everything except the last 5 lines
+head -n -5 report.txt
+
+# First 100 bytes
+head -c 100 binary.dat
+
+# First kilobyte
+head -c 1K app.log
+
+# First megabyte
+head -c 1M dump.sql
+
+# Several files, each with a header
+head -n 5 *.log
+
+# Several files with no headers
+head -q -n 5 *.log
+
+# Force the header even for a single file
+head -v -n 5 app.log
+
+# The CSV header row
+head -n 1 users.csv
+
+# Header plus the first few rows, to eyeball a CSV
+head -n 5 users.csv | column -t -s,
+
+# Peek at a huge file without loading it
+head -n 50 /var/log/nginx/access.log
+
+# Check what a downloaded file actually is
+head -c 200 suspicious.bin | xxd | head
+
+# Read the first line of a pipe
+ps aux | head -n 1
+
+# Top processes by memory
+ps aux --sort=-%mem | head -n 6
+
+# Largest files in a directory
+du -ah /var/log | sort -rh | head -n 10
+
+# Most frequent IPs in a log
+cut -d' ' -f1 access.log | sort | uniq -c | sort -rn | head
+
+# Stop a long pipeline early (head closes the pipe)
+find / -name "*.conf" 2>/dev/null | head -n 5
+
+# First few entries of a directory listing
+ls -lt /var/log | head
+
+# Skip the CSV header and show the next 5 rows
+tail -n +2 users.csv | head -n 5
+
+# Lines 10 to 20 of a file
+head -n 20 file.txt | tail -n 11
+
+# First line of every file in a directory
+head -n 1 -v *.txt
+
+# Read a fixed number of random bytes
+head -c 16 /dev/urandom | base64
+
+# Show the shebang of every script
+head -n 1 *.sh
+
+# Check a file's first line without a trailing newline problem
+head -n 1 file.txt | cat -A
+
+# Watch the top of a file that is being rewritten
+watch -n 2 head -n 20 /var/log/app.log
+
+# Combine with grep to search only the beginning of a file
+head -n 100 app.log | grep -i error

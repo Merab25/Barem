@@ -17,7 +17,8 @@ README = ROOT / "README.md"
 CHANGELOG = ROOT / "CHANGELOG.md"
 
 # A row of one of the "Available commands" tables: | `ls` | 32 | List ... |
-TABLE_ROW = re.compile(r"^\| `([a-z]+)` \| (\d+) \|", re.MULTILINE)
+# The name may contain a hyphen, as in `ssh-keygen`.
+TABLE_ROW = re.compile(r"^\| `([a-z][a-z0-9-]*)` \| (\d+) \|", re.MULTILINE)
 
 pytestmark = pytest.mark.skipif(not README.is_file(), reason="not running from a source checkout")
 

@@ -1,0 +1,97 @@
+## Send signals to processes by PID
+
+# Ask a process to shut down cleanly (SIGTERM, the default)
+kill 4821
+
+# Same thing, spelled out
+kill -TERM 4821
+
+# Force kill: the process cannot catch or ignore this
+kill -9 4821
+
+# Force kill, by name of the signal
+kill -KILL 4821
+
+# Interrupt, as if you pressed Ctrl-C
+kill -INT 4821
+
+# Hang up: most daemons reload their config on this
+kill -HUP 4821
+
+# Reload nginx by signalling the master process
+kill -HUP "$(cat /var/run/nginx.pid)"
+
+# Ask nginx to reopen its log files after rotation
+kill -USR1 "$(cat /var/run/nginx.pid)"
+
+# Graceful shutdown for nginx, finishing open requests
+kill -QUIT "$(cat /var/run/nginx.pid)"
+
+# Pause a process
+kill -STOP 4821
+
+# Resume a paused process
+kill -CONT 4821
+
+# Signal every process in a process group (note the minus)
+kill -TERM -4821
+
+# Signal several PIDs at once
+kill 4821 4822 4823
+
+# List all signal names and numbers
+kill -l
+
+# Which signal is number 9
+kill -l 9
+
+# Check whether a process exists without signalling it
+kill -0 4821 && echo "running"
+
+# Use that in a script to wait for a process to exit
+while kill -0 4821 2>/dev/null; do sleep 1; done
+
+# Find the PID first, then kill it
+pgrep -f "python manage.py runserver"
+
+# Kill what you found, by name
+pkill -f "python manage.py runserver"
+
+# Kill every process of one user
+pkill -u deploy
+
+# Kill the process listening on a port
+kill "$(lsof -ti :8080)"
+
+# Same, using ss to find it
+ss -ltnp 'sport = :8080'
+
+# Kill by name, one match only
+pkill -x nginx
+
+# Kill the newest matching process
+pkill -n nginx
+
+# Kill the oldest matching process
+pkill -o nginx
+
+# Try TERM first, then KILL if it is still alive
+kill 4821; sleep 5; kill -9 4821 2>/dev/null
+
+# Kill a whole tree of processes
+pkill -P 4821
+
+# Kill the most recent background job of this shell
+kill %1
+
+# Kill every job of this shell
+kill $(jobs -p)
+
+# Prefer systemd for a managed service
+systemctl stop nginx
+
+# Container processes belong to the runtime, so stop it there
+docker stop web
+
+# Kill a process stuck in uninterruptible sleep: check its state first
+ps -o pid,stat,wchan,cmd -p 4821

@@ -1,0 +1,97 @@
+## Show free and used disk space per filesystem
+
+# Free space on every mounted filesystem
+df
+
+# Human-readable sizes
+df -h
+
+# Powers of 1000 instead of 1024
+df -H
+
+# Only real filesystems, hiding tmpfs and squashfs
+df -h -x tmpfs -x devtmpfs -x squashfs
+
+# Only local filesystems, skipping network mounts
+df -hl
+
+# Space for the filesystem holding one path
+df -h /var/log
+
+# Space for the filesystem holding the current directory
+df -h .
+
+# Which filesystem a file lives on
+df -h /var/log/syslog
+
+# Show the filesystem type
+df -hT
+
+# Only filesystems of one type
+df -h -t ext4
+
+# Exclude a filesystem type
+df -h -t ext4 -t xfs
+
+# Inode usage instead of blocks
+df -i
+
+# Inode usage, human readable
+df -ih
+
+# A full filesystem with free space is usually out of inodes
+df -i /var
+
+# Pick exactly the columns you want
+df --output=source,target,size,used,avail,pcent
+
+# Just mount point and percentage used
+df --output=target,pcent
+
+# Sort filesystems by how full they are
+df -h | sort -k5 -rn | head
+
+# Find filesystems over 80% full
+df -h --output=pcent,target | awk 'NR>1 && +$1 > 80'
+
+# Alert on a specific filesystem
+df --output=pcent /var | tail -n 1 | tr -dc '0-9'
+
+# Use in a monitoring check
+[ "$(df --output=pcent / | tr -dc '0-9')" -gt 90 ] && echo "root nearly full"
+
+# Total across all filesystems
+df -h --total
+
+# Block size of 1 MB
+df -BM
+
+# Block size of 1 GB
+df -BG
+
+# Print all filesystems, including pseudo ones
+df -ha
+
+# Do not resolve symlinks in the argument
+df -h --no-sync /mnt/nfs
+
+# Skip the sync call, which can hang on a dead NFS mount
+df -h --no-sync
+
+# What is mounted where, with options
+findmnt
+
+# Mount points as a tree
+findmnt -t ext4,xfs
+
+# Which device backs a mount point
+findmnt -n -o SOURCE /var
+
+# Disk usage by directory, rather than by filesystem
+du -h --max-depth=1 /var | sort -rh
+
+# Largest directories on the root filesystem
+du -xh / 2>/dev/null | sort -rh | head -n 20
+
+# Block devices and their sizes
+lsblk

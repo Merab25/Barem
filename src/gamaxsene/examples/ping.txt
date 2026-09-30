@@ -1,0 +1,94 @@
+## Test whether a host answers, and measure round-trip time
+
+# Ping until you stop it
+ping example.com
+
+# Send 4 packets and stop
+ping -c 4 example.com
+
+# One packet, for a quick up/down check
+ping -c 1 192.168.1.1
+
+# Wait half a second between packets
+ping -i 0.5 -c 10 example.com
+
+# Flood ping, as fast as replies come back (root only)
+sudo ping -f -c 100 192.168.1.1
+
+# Give up after 5 seconds total
+ping -w 5 example.com
+
+# Give up waiting for a single reply after 2 seconds
+ping -W 2 -c 1 192.168.1.50
+
+# Quiet: only the summary
+ping -q -c 10 example.com
+
+# Force IPv4
+ping -4 example.com
+
+# Force IPv6
+ping -6 example.com
+
+# Ping an IPv6 address directly
+ping6 2606:4700:4700::1111
+
+# Do not resolve addresses to names, so output is faster
+ping -n -c 4 8.8.8.8
+
+# Use a specific source interface
+ping -I eth0 -c 4 192.168.1.1
+
+# Use a specific source address
+ping -I 192.168.1.10 -c 4 8.8.8.8
+
+# Larger payload, to test for MTU problems
+ping -s 1400 -c 4 example.com
+
+# Find the path MTU: do not fragment, increase size until it fails
+ping -M do -s 1472 -c 2 example.com
+
+# Set the TTL
+ping -t 1 -c 1 192.168.1.1
+
+# Add a timestamp to every line
+ping example.com | while read -r l; do echo "$(date +%T) $l"; done
+
+# Use ping in a script: is the host up?
+ping -c 1 -W 1 192.168.1.50 > /dev/null && echo up || echo down
+
+# Wait for a host to come back after a reboot
+until ping -c 1 -W 1 192.168.1.50 > /dev/null 2>&1; do sleep 2; done
+
+# Log packet loss over a long run
+ping -c 600 -i 1 example.com | tail -n 3
+
+# Just the average round-trip time
+ping -c 5 -q example.com | awk -F'/' '/rtt/ {print $5 " ms"}'
+
+# Just the packet loss percentage
+ping -c 5 -q example.com | awk '/packet loss/ {print $6}'
+
+# Scan a subnet for live hosts
+for i in $(seq 1 254); do ping -c 1 -W 1 "192.168.1.$i" > /dev/null 2>&1 && echo "192.168.1.$i up"; done
+
+# Better subnet sweep with fping
+fping -a -g 192.168.1.0/24 2>/dev/null
+
+# Better subnet sweep with nmap
+nmap -sn 192.168.1.0/24
+
+# When ICMP is blocked, test the port instead
+nc -z -w 2 example.com 443 && echo "port open"
+
+# TCP ping to a port
+ping -c 3 example.com || nc -zv example.com 443
+
+# Continuous latency graph
+mtr example.com
+
+# Report mode, 10 cycles
+mtr -r -c 10 example.com
+
+# Show the route packets take
+traceroute example.com

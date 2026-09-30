@@ -1,0 +1,97 @@
+## Compress and decompress single files with gzip
+
+# Compress a file, replacing it with file.gz
+gzip access.log
+
+# Decompress, replacing file.gz with file
+gunzip access.log.gz
+
+# Same as gunzip
+gzip -d access.log.gz
+
+# Keep the original file as well
+gzip -k access.log
+
+# Compress to standard output, leaving the original alone
+gzip -c access.log > access.log.gz
+
+# Maximum compression, slowest
+gzip -9 access.log
+
+# Fastest, least compression
+gzip -1 access.log
+
+# Show the compression ratio while working
+gzip -v access.log
+
+# Compress several files, each into its own .gz
+gzip *.log
+
+# Compress every log in a tree
+find /var/log/myapp -name '*.log' -exec gzip {} +
+
+# Read a compressed file without decompressing it
+zcat access.log.gz
+
+# Same, for a file that may or may not be compressed
+zcat -f access.log
+
+# Page through a compressed file
+zless access.log.gz
+
+# First lines of a compressed file
+zcat access.log.gz | head
+
+# Last lines of a compressed file
+zcat access.log.gz | tail
+
+# Search inside a compressed file
+zgrep -i error app.log.gz
+
+# Search every rotated log
+zgrep -i 'timeout' /var/log/myapp/app.log.*.gz
+
+# Count matches across rotated logs
+zgrep -c ERROR /var/log/myapp/app.log.*.gz
+
+# Compare two compressed files
+zdiff old.log.gz new.log.gz
+
+# Count lines without writing a temporary file
+zcat access.log.gz | wc -l
+
+# Test an archive for corruption
+gzip -t access.log.gz
+
+# Test every .gz in a directory
+gzip -t *.gz && echo "all good"
+
+# Show the uncompressed size and ratio
+gzip -l access.log.gz
+
+# Show details for many archives
+gzip -l *.gz
+
+# Compress a directory: gzip handles one file, so use tar
+tar -czf logs.tar.gz /var/log/myapp
+
+# Extract that tarball
+tar -xzf logs.tar.gz
+
+# Compress a database dump as it is produced
+mysqldump mydb | gzip > mydb.sql.gz
+
+# Restore straight from the compressed dump
+zcat mydb.sql.gz | mysql mydb
+
+# Stream a compressed backup to a remote host
+tar -cz /srv/data | ssh backup@host 'cat > data.tar.gz'
+
+# Recompress a .gz more tightly
+zcat old.log.gz | gzip -9 > old.log.new.gz && mv old.log.new.gz old.log.gz
+
+# Use all CPU cores for a large file
+pigz -9 huge.log
+
+# Compare compressors on the same file
+xz -9 -k big.log && zstd -19 -k big.log && gzip -9 -k big.log

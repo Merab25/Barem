@@ -1,0 +1,97 @@
+## Find and signal processes by name, user, age or command line
+
+# Find the PIDs of a process by name
+pgrep nginx
+
+# Show the name next to the PID
+pgrep -l nginx
+
+# Show the full command line
+pgrep -a nginx
+
+# Match against the whole command line, not just the process name
+pgrep -f "python manage.py runserver"
+
+# Exact name match, not a substring
+pgrep -x ssh
+
+# Count matches instead of listing them
+pgrep -c nginx
+
+# Processes of one user
+pgrep -u www-data
+
+# Processes of several users
+pgrep -u www-data,deploy
+
+# Combine user and name
+pgrep -u www-data nginx
+
+# The newest matching process
+pgrep -n nginx
+
+# The oldest matching process
+pgrep -o nginx
+
+# Children of a specific parent
+pgrep -P 1
+
+# Processes in a session
+pgrep -s 0
+
+# Processes attached to a terminal
+pgrep -t pts/0
+
+# Invert the match
+pgrep -v -u root
+
+# Terminate a process by name
+pkill nginx
+
+# Force kill by name
+pkill -9 nginx
+
+# Reload a daemon by name
+pkill -HUP nginx
+
+# Terminate by full command line
+pkill -f "celery worker"
+
+# Terminate every process of one user
+pkill -u deploy
+
+# Terminate only the newest match
+pkill -n chrome
+
+# Terminate children of a process
+pkill -P 4821
+
+# Ask for confirmation of what would be killed first
+pgrep -a -f "celery worker"
+
+# Echo before killing, as a dry run
+pgrep -a -f "celery worker" | awk '{print "would kill", $1}'
+
+# Kill by name across the whole system, exact match only
+pkill -x -9 stuck-daemon
+
+# Kill processes older than a day, found with etimes
+pgrep -f myworker | xargs -r ps -o pid,etimes,cmd -p
+
+# killall matches by exact name and is chattier
+killall -v nginx
+
+# killall with a signal
+killall -HUP nginx
+
+# killall, asking before each one
+killall -i chrome
+
+# killall for one user only
+killall -u deploy python3
+
+# Wait for the processes to actually be gone
+pkill nginx; while pgrep -x nginx > /dev/null; do sleep 1; done
+
+# Prefer systemd for services it manages
+systemctl reload nginx

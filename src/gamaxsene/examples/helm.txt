@@ -1,0 +1,124 @@
+## Install and manage Kubernetes applications with charts
+
+# Add a chart repository
+helm repo add bitnami https://charts.bitnami.com/bitnami
+
+# Update the local cache of every repository
+helm repo update
+
+# List configured repositories
+helm repo list
+
+# Search a repository
+helm search repo nginx
+
+# Search including older chart versions
+helm search repo nginx --versions
+
+# Search the public Artifact Hub
+helm search hub postgresql
+
+# Show a chart's default values
+helm show values bitnami/nginx
+
+# Show the chart metadata
+helm show chart bitnami/nginx
+
+# Show the README
+helm show readme bitnami/nginx
+
+# Install a chart as a named release
+helm install web bitnami/nginx
+
+# Install into a namespace, creating it if needed
+helm install web bitnami/nginx -n production --create-namespace
+
+# Install with a values file
+helm install web bitnami/nginx -f values-production.yaml
+
+# Override single values
+helm install web bitnami/nginx --set replicaCount=3 --set service.type=LoadBalancer
+
+# Pin the chart version
+helm install web bitnami/nginx --version 15.4.2
+
+# Wait until the resources are ready
+helm install web bitnami/nginx --wait --timeout 5m
+
+# Render the manifests without installing, to review them
+helm template web bitnami/nginx -f values-production.yaml
+
+# Dry run against the cluster, so it validates too
+helm install web bitnami/nginx --dry-run --debug
+
+# Install or upgrade in one command, which is what CI wants
+helm upgrade --install web bitnami/nginx -f values-production.yaml -n production
+
+# Upgrade and roll back automatically on failure
+helm upgrade web bitnami/nginx --atomic --timeout 5m
+
+# Upgrade keeping the values already set
+helm upgrade web bitnami/nginx --reuse-values --set image.tag=1.27
+
+# Reset to the chart defaults
+helm upgrade web bitnami/nginx --reset-values
+
+# List releases in the current namespace
+helm list
+
+# List releases in every namespace
+helm list -A
+
+# Include failed and pending releases
+helm list -A --all
+
+# Show a release's status
+helm status web -n production
+
+# Show the values a release was installed with
+helm get values web -n production
+
+# Show every value, defaults included
+helm get values web -n production --all
+
+# Show the rendered manifests of a release
+helm get manifest web -n production
+
+# Show the release notes again
+helm get notes web -n production
+
+# Release history
+helm history web -n production
+
+# Roll back to the previous revision
+helm rollback web -n production
+
+# Roll back to a specific revision
+helm rollback web 3 -n production
+
+# Uninstall a release
+helm uninstall web -n production
+
+# Uninstall but keep the history
+helm uninstall web -n production --keep-history
+
+# Diff an upgrade before running it (needs the helm-diff plugin)
+helm diff upgrade web bitnami/nginx -f values-production.yaml
+
+# Create a new chart skeleton
+helm create mychart
+
+# Check a chart for problems
+helm lint ./mychart
+
+# Package a chart into a .tgz
+helm package ./mychart
+
+# Install a local chart directory
+helm install web ./mychart -f values-production.yaml
+
+# Download a chart without installing it
+helm pull bitnami/nginx --untar
+
+# List the plugins you have installed
+helm plugin list

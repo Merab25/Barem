@@ -1,0 +1,88 @@
+## Move and rename files and directories
+
+# Rename a file
+mv notes.txt notes-2026.txt
+
+# Move a file into a directory
+mv report.pdf ~/Documents/
+
+# Move several files at once into a directory
+mv *.log /var/log/archive/
+
+# Rename a directory
+mv old-project new-project
+
+# Move a directory and everything in it
+mv ~/downloads/photos /mnt/backup/photos
+
+# Never overwrite an existing file
+mv -n draft.md published/
+
+# Ask before overwriting
+mv -i config.yaml /etc/myapp/
+
+# Overwrite without asking, even if the target is read-only
+mv -f config.yaml /etc/myapp/
+
+# Only move when the source is newer than the target
+mv -u build/app.js dist/app.js
+
+# Keep a backup of the file being replaced (app.js~)
+mv --backup=simple build/app.js dist/app.js
+
+# Numbered backups: app.js.~1~, app.js.~2~
+mv --backup=numbered build/app.js dist/app.js
+
+# Show what is being moved
+mv -v *.tar.gz /mnt/backup/
+
+# Move a file whose name starts with a dash
+mv -- -weird-name.txt renamed.txt
+
+# Move the contents of a directory, hidden files included
+mv /tmp/staging/. /var/www/html/
+
+# Move everything except one file
+find . -maxdepth 1 -type f ! -name keep.txt -exec mv -t archive/ {} +
+
+# Swap two file names using a temporary name
+mv a.txt tmp.txt && mv b.txt a.txt && mv tmp.txt b.txt
+
+# Move into the parent directory
+mv report.pdf ..
+
+# Move and rename in one step
+mv /tmp/upload-4f3a.bin /srv/files/invoice-2026-09.pdf
+
+# Rename many files by extension with a loop
+for f in *.jpeg; do mv "$f" "${f%.jpeg}.jpg"; done
+
+# Strip a prefix from every matching file
+for f in draft-*.md; do mv "$f" "${f#draft-}"; done
+
+# Lowercase every file name in the current directory
+for f in *; do mv "$f" "$(echo "$f" | tr 'A-Z' 'a-z')"; done
+
+# Add a date suffix to a file before replacing it
+mv access.log "access.log.$(date +%F)"
+
+# Rotate a log and let the service recreate it
+mv /var/log/myapp/app.log /var/log/myapp/app.log.1
+
+# Move only files older than 30 days
+find /var/log -maxdepth 1 -type f -mtime +30 -exec mv -t /var/log/old {} +
+
+# Move files listed in a text file
+xargs -a files-to-move.txt -I{} mv {} /srv/archive/
+
+# Target directory explicitly, so the last argument is not treated as one
+mv -t /srv/archive/ report.pdf invoice.pdf notes.txt
+
+# Move across filesystems (mv copies then deletes, so it is not atomic)
+mv /home/merab/bigfile.iso /mnt/usb/
+
+# Do not follow a symlink that points at a directory
+mv -T linkdir newname
+
+# Dry run: print the commands instead of running them
+for f in *.bak; do echo mv "$f" old/; done

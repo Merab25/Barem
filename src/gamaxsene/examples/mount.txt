@@ -1,0 +1,97 @@
+## Mount and unmount filesystems, and inspect what is mounted
+
+# What is mounted right now
+mount
+
+# A readable tree of mounts
+findmnt
+
+# Only real filesystems
+findmnt -t ext4,xfs,btrfs
+
+# Which device backs a path
+findmnt -n -o SOURCE /var
+
+# Mount options in effect for a path
+findmnt -n -o OPTIONS /
+
+# Mount a disk partition
+sudo mount /dev/sdb1 /mnt/data
+
+# Mount read-only
+sudo mount -o ro /dev/sdb1 /mnt/data
+
+# Mount with an explicit filesystem type
+sudo mount -t ext4 /dev/sdb1 /mnt/data
+
+# Mount by UUID, which survives device renaming
+sudo mount UUID=8f3a1b2c-4d5e-6f70-8192-a3b4c5d6e7f8 /mnt/data
+
+# Find the UUID of a device
+sudo blkid /dev/sdb1
+
+# List block devices with UUIDs and mount points
+lsblk -f
+
+# Mount everything listed in /etc/fstab
+sudo mount -a
+
+# Check fstab for mistakes without mounting
+sudo mount -a --fake --verbose
+
+# Remount an already-mounted filesystem with new options
+sudo mount -o remount,rw /
+
+# Remount read-only, for a filesystem check
+sudo mount -o remount,ro /mnt/data
+
+# Mount a directory at a second location
+sudo mount --bind /srv/data /var/www/html/data
+
+# Bind mount, read-only
+sudo mount --bind -o ro /srv/data /mnt/readonly
+
+# Mount an ISO image
+sudo mount -o loop,ro ubuntu.iso /mnt/iso
+
+# Mount a disk image file
+sudo mount -o loop,offset=1048576 disk.img /mnt/img
+
+# Mount a tmpfs of a fixed size
+sudo mount -t tmpfs -o size=512M tmpfs /mnt/scratch
+
+# Mount an NFS share
+sudo mount -t nfs 192.168.1.20:/export/data /mnt/nfs
+
+# NFS with sensible timeouts so a dead server does not hang forever
+sudo mount -t nfs -o soft,timeo=100,retrans=3 192.168.1.20:/export /mnt/nfs
+
+# Mount an SMB/CIFS share
+sudo mount -t cifs //192.168.1.30/share /mnt/smb -o username=merab
+
+# CIFS with credentials from a file, keeping the password out of history
+sudo mount -t cifs //192.168.1.30/share /mnt/smb -o credentials=/root/.smbcred
+
+# Unmount
+sudo umount /mnt/data
+
+# Unmount by device instead of mount point
+sudo umount /dev/sdb1
+
+# Lazy unmount: detach as soon as it stops being busy
+sudo umount -l /mnt/nfs
+
+# Force unmount, for an unresponsive network mount
+sudo umount -f /mnt/nfs
+
+# Find what is keeping a mount busy
+sudo lsof +f -- /mnt/data
+
+# Same, with fuser
+sudo fuser -vm /mnt/data
+
+# Kill whatever is holding the mount
+sudo fuser -km /mnt/data
+
+# Free space on the mounted filesystems
+df -h

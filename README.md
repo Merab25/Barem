@@ -26,7 +26,7 @@ find . -type f -size +10M -size -50M
 find / -xdev -type f -size +500M 2>/dev/null
 ```
 
-It currently ships **37 commands** and **1,236 examples** — about 30 per command, covering the options and flags you actually use at work.
+It currently ships **77 commands** and **2,540 examples** — about 30 per command, covering the options and flags you actually use at work.
 
 ## Features
 
@@ -57,7 +57,7 @@ pipx install git+https://github.com/Merab25/Gamaxsene.git
 pipx creates an isolated virtual environment for the tool and puts the `gamaxsene` command on your `PATH`.
 
 ```bash
-pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.2.0   # a specific release
+pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.3.0   # a specific release
 pipx upgrade gamaxsene                                             # update
 pipx uninstall gamaxsene                                           # remove
 ```
@@ -133,8 +133,14 @@ source <(gamaxsene --completion bash)
 | --- | ---: | --- |
 | `ls` | 32 | List directory contents with details, sorting and filtering |
 | `cp` | 30 | Copy files and directories, with backups, preserving attributes |
+| `mv` | 29 | Move and rename files and directories |
+| `rm` | 29 | Delete files and directories, by name, pattern or age |
+| `ln` | 30 | Create hard links and symbolic links |
+| `mkdir` | 29 | Create directories, including whole paths at once |
 | `find` | 37 | Search for files and directories by name, type, size, time and permissions |
+| `stat` | 29 | Show detailed file metadata: size, permissions, owner and timestamps |
 | `du` | 30 | Show disk usage of files and directories |
+| `df` | 32 | Show free and used disk space per filesystem |
 | `chmod` | 30 | Change file and directory permissions |
 | `tar` | 31 | Create, list and extract archives (.tar, .tar.gz, .tar.bz2, .tar.xz, .tar.zst) |
 
@@ -146,15 +152,40 @@ source <(gamaxsene --completion bash)
 | `sed` | 33 | Stream editor: find and replace, delete, insert and transform text |
 | `awk` | 31 | Process text column by column: filter, sum, count and reformat |
 | `sort` | 32 | Sort lines of text by alphabet, numbers, columns, versions and more |
+| `uniq` | 30 | Report or filter repeated lines in sorted input |
+| `cut` | 31 | Extract columns and character ranges from each line |
+| `tr` | 31 | Translate, squeeze and delete characters |
+| `head` | 29 | Show the first lines or bytes of a file |
+| `tail` | 30 | Show the last lines of a file, and follow a growing log |
+| `wc` | 31 | Count lines, words, characters and bytes |
+| `diff` | 33 | Compare files and directories line by line |
+| `tee` | 30 | Write standard input to a file and pass it on |
 | `xargs` | 30 | Build and run commands from standard input |
 | `jq` | 35 | Query, filter and transform JSON on the command line |
+
+### Archives and compression
+
+| Command | Examples | What it covers |
+| --- | ---: | --- |
+| `zip` | 31 | Create and update .zip archives |
+| `unzip` | 32 | List, test and extract .zip archives |
+| `gzip` | 32 | Compress and decompress single files with gzip |
 
 ### Processes and system
 
 | Command | Examples | What it covers |
 | --- | ---: | --- |
 | `ps` | 32 | Show running processes with CPU, memory, owner and command |
+| `top` | 32 | Watch processes, CPU and memory in real time |
+| `kill` | 32 | Send signals to processes by PID |
+| `pkill` | 32 | Find and signal processes by name, user, age or command line |
 | `lsof` | 30 | List open files, network sockets and the processes that use them |
+| `strace` | 33 | Trace system calls and signals to see what a process really does |
+| `free` | 33 | Show memory and swap usage |
+| `uname` | 36 | Show kernel, architecture and system information |
+| `mount` | 32 | Mount and unmount filesystems, and inspect what is mounted |
+| `dmesg` | 33 | Read the kernel ring buffer: boot, hardware and driver messages |
+| `watch` | 31 | Re-run a command periodically and watch the output change |
 | `systemctl` | 33 | Control systemd services, boot targets and timers |
 | `journalctl` | 33 | Read and filter systemd journal logs |
 | `crontab` | 32 | Schedule recurring jobs with cron (fields: minute hour day month weekday) |
@@ -162,17 +193,29 @@ source <(gamaxsene --completion bash)
 | `date` | 33 | Show, format and calculate dates and times |
 | `tmux` | 35 | Terminal multiplexer: sessions that survive disconnects, windows and panes |
 
+### Users and permissions
+
+| Command | Examples | What it covers |
+| --- | ---: | --- |
+| `useradd` | 36 | Create user accounts, home directories and groups |
+| `passwd` | 33 | Set and manage user passwords and account locking |
+| `sudo` | 33 | Run commands as another user, and inspect sudo rights |
+
 ### Networking
 
 | Command | Examples | What it covers |
 | --- | ---: | --- |
 | `ip` | 32 | Show and manage network interfaces, IP addresses, routes and ARP |
 | `ss` | 31 | Inspect network sockets and connections (modern netstat) |
+| `ping` | 31 | Test whether a host answers, and measure round-trip time |
+| `traceroute` | 32 | Show the network path packets take to a host |
 | `dig` | 30 | DNS lookups: records, resolvers, propagation and debugging |
+| `host` | 35 | Quick DNS lookups: names, addresses and mail servers |
 | `nc` | 30 | Netcat: test ports, send raw TCP/UDP data, move files (OpenBSD netcat) |
 | `curl` | 35 | Transfer data with URLs: HTTP requests, REST APIs and downloads |
 | `wget` | 31 | Non-interactive downloader: files, resumable downloads, website mirrors |
 | `ssh` | 34 | Secure shell: remote login, remote commands, keys and tunnels |
+| `scp` | 31 | Copy files to and from remote hosts over SSH |
 | `rsync` | 31 | Fast incremental sync of files, locally or over SSH |
 | `nmap` | 30 | Network scanner: hosts, ports, services (scan only networks you own or may test) |
 | `tcpdump` | 32 | Capture and inspect network packets |
@@ -183,16 +226,23 @@ source <(gamaxsene --completion bash)
 | Command | Examples | What it covers |
 | --- | ---: | --- |
 | `openssl` | 34 | TLS certificates, keys, CSRs, hashing, random data and encryption |
+| `ssh-keygen` | 34 | Create, inspect and manage SSH keys |
+| `ufw` | 36 | Manage the uncomplicated firewall on Ubuntu and Debian |
 
 ### DevOps and cloud
 
 | Command | Examples | What it covers |
 | --- | ---: | --- |
 | `git` | 44 | Version control: commits, branches, history, remotes and undo |
+| `gh` | 43 | GitHub from the terminal: repos, pull requests, issues and runs |
+| `make` | 36 | Build targets and run project tasks from a Makefile |
 | `docker` | 42 | Build, run and manage containers, images, volumes and Compose stacks |
 | `kubectl` | 42 | Manage Kubernetes clusters: pods, deployments, services, logs and rollouts |
+| `helm` | 41 | Install and manage Kubernetes applications with charts |
 | `terraform` | 38 | Infrastructure as code: plan, apply and manage cloud resources |
+| `ansible` | 37 | Run ad-hoc tasks and playbooks against your inventory |
 | `aws` | 38 | AWS CLI: S3, EC2, IAM, CloudWatch Logs, ECR, EKS and more |
+| `nginx` | 34 | Test, reload and inspect the nginx web server |
 
 Run `gamaxsene -l` for the live list.
 
@@ -296,7 +346,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request, and
 ## Roadmap
 
 - Publish to PyPI (`pipx install gamaxsene`)
-- More commands: `ufw`, `nginx`, `helm`, `ansible`, `strace`, `mount`, `useradd`
+- More commands: `nft`, `podman`, `psql`, `gpg`, `socat`, `mtr`, `iostat`, `setfacl`
 - Georgian descriptions
 
 ## Safety note

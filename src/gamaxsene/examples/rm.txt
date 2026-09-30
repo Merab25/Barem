@@ -1,0 +1,88 @@
+## Delete files and directories, by name, pattern or age
+
+# Delete one file
+rm notes.txt
+
+# Delete several files
+rm a.log b.log c.log
+
+# Delete every file matching a pattern
+rm *.tmp
+
+# Ask before each delete
+rm -i *.conf
+
+# Ask once before deleting more than three files
+rm -I *.log
+
+# Never prompt, and ignore files that do not exist
+rm -f /tmp/maybe-missing.pid
+
+# Delete a directory and everything inside it
+rm -r build/
+
+# Delete a directory tree without prompting
+rm -rf node_modules/
+
+# Show each file as it is deleted
+rm -rv old-release/
+
+# Delete an empty directory only
+rmdir empty-dir
+
+# Delete a directory and its now-empty parents
+rmdir -p a/b/c
+
+# Delete a file whose name starts with a dash
+rm -- -weird-file.txt
+
+# Delete a file with a space in the name
+rm "my old notes.txt"
+
+# Delete a file whose name contains a glob character
+rm 'report[final].pdf'
+
+# Refuse to cross into another filesystem
+rm -rf --one-file-system /mnt/data/scratch
+
+# Never delete / by accident (default on modern coreutils)
+rm -rf --preserve-root /
+
+# Delete hidden files in a directory but keep . and ..
+rm -rf /tmp/cache/.[!.]* /tmp/cache/*
+
+# Empty a directory without deleting the directory itself
+find /var/cache/myapp -mindepth 1 -delete
+
+# Delete files older than 30 days
+find /var/log/myapp -type f -mtime +30 -delete
+
+# Delete files older than 30 days, printing each one
+find /var/log/myapp -type f -mtime +30 -print -delete
+
+# Delete empty files
+find . -type f -empty -delete
+
+# Delete empty directories, deepest first
+find . -type d -empty -delete
+
+# Delete by extension anywhere in a tree
+find . -name "*.pyc" -delete
+
+# Delete Python caches recursively
+find . -type d -name __pycache__ -exec rm -rf {} +
+
+# Delete only files, leaving the directory structure
+find /srv/staging -type f -delete
+
+# Delete everything except one file
+find . -maxdepth 1 -type f ! -name keep.txt -delete
+
+# Delete a huge number of files without hitting the argument limit
+find /var/spool/old -type f -print0 | xargs -0 rm -f
+
+# Free the space held by a deleted file still open by a process
+: > /var/log/myapp/huge.log
+
+# See what would be deleted before deleting it
+find /var/log -type f -mtime +30 -print

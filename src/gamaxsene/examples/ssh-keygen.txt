@@ -1,0 +1,103 @@
+## Create, inspect and manage SSH keys
+
+# Create a modern Ed25519 key
+ssh-keygen -t ed25519 -C "merab@laptop"
+
+# Create it at a specific path
+ssh-keygen -t ed25519 -f ~/.ssh/deploy_ed25519 -C "deploy@ci"
+
+# Create an RSA key when the server is old
+ssh-keygen -t rsa -b 4096 -C "merab@laptop"
+
+# Create a key with no passphrase, for automation
+ssh-keygen -t ed25519 -N "" -f ~/.ssh/ci_ed25519 -C "ci@runner"
+
+# Create a key non-interactively, overwriting nothing
+ssh-keygen -t ed25519 -f ~/.ssh/new_key -N "" -q
+
+# Harder to brute-force: more KDF rounds
+ssh-keygen -t ed25519 -a 100 -C "merab@laptop"
+
+# Change the passphrase on an existing key
+ssh-keygen -p -f ~/.ssh/id_ed25519
+
+# Remove the passphrase
+ssh-keygen -p -N "" -f ~/.ssh/id_ed25519
+
+# Change the comment
+ssh-keygen -c -C "merab@newlaptop" -f ~/.ssh/id_ed25519
+
+# Show the public key of a private key
+ssh-keygen -y -f ~/.ssh/id_ed25519
+
+# Recreate a lost .pub file
+ssh-keygen -y -f ~/.ssh/id_ed25519 > ~/.ssh/id_ed25519.pub
+
+# Show a key's fingerprint
+ssh-keygen -lf ~/.ssh/id_ed25519.pub
+
+# Fingerprint in the older MD5 form
+ssh-keygen -lf -E md5 ~/.ssh/id_ed25519.pub
+
+# Fingerprint of a private key
+ssh-keygen -lf ~/.ssh/id_ed25519
+
+# Visual fingerprint art, easier to compare by eye
+ssh-keygen -lvf ~/.ssh/id_ed25519.pub
+
+# Fingerprints of every key in authorized_keys
+ssh-keygen -lf ~/.ssh/authorized_keys
+
+# Copy your public key to a server
+ssh-copy-id merab@server
+
+# Copy a specific key
+ssh-copy-id -i ~/.ssh/deploy_ed25519.pub deploy@server
+
+# Copy a key by hand when ssh-copy-id is unavailable
+cat ~/.ssh/id_ed25519.pub | ssh merab@server 'cat >> ~/.ssh/authorized_keys'
+
+# Fetch a server's host keys
+ssh-keyscan server.example.com
+
+# Add a host key to known_hosts up front, avoiding the prompt
+ssh-keyscan -H server.example.com >> ~/.ssh/known_hosts
+
+# Scan only for Ed25519 host keys
+ssh-keyscan -t ed25519 server.example.com
+
+# Remove a host from known_hosts after it was rebuilt
+ssh-keygen -R server.example.com
+
+# Find a host's entry in a hashed known_hosts
+ssh-keygen -F server.example.com
+
+# Check the server's key matches what you expect
+ssh-keygen -lf <(ssh-keyscan -t ed25519 server.example.com 2>/dev/null)
+
+# Load a key into the agent
+ssh-add ~/.ssh/id_ed25519
+
+# Load with a lifetime, so it expires
+ssh-add -t 8h ~/.ssh/id_ed25519
+
+# List keys the agent holds
+ssh-add -l
+
+# Remove all keys from the agent
+ssh-add -D
+
+# Start an agent in the current shell
+eval "$(ssh-agent -s)"
+
+# Correct permissions, or ssh will refuse the key
+chmod 700 ~/.ssh && chmod 600 ~/.ssh/id_ed25519 && chmod 644 ~/.ssh/id_ed25519.pub
+
+# Test which key a server accepts
+ssh -v -i ~/.ssh/deploy_ed25519 deploy@server true
+
+# Convert a key to PEM for a tool that needs it
+ssh-keygen -p -m PEM -f ~/.ssh/id_rsa
+
+# Sign a file with an SSH key
+ssh-keygen -Y sign -f ~/.ssh/id_ed25519 -n file release.tar.gz

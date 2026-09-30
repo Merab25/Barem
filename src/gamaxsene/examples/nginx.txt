@@ -1,0 +1,103 @@
+## Test, reload and inspect the nginx web server
+
+# Test the configuration before touching a running server
+sudo nginx -t
+
+# Test and print the full config as nginx sees it
+sudo nginx -T
+
+# Reload without dropping connections
+sudo nginx -s reload
+
+# The systemd equivalent, which also checks the unit
+sudo systemctl reload nginx
+
+# Graceful shutdown: finish open requests, then stop
+sudo nginx -s quit
+
+# Immediate stop
+sudo nginx -s stop
+
+# Reopen log files after rotation
+sudo nginx -s reopen
+
+# Show the version
+nginx -v
+
+# Version, compiler and configure arguments
+nginx -V
+
+# Which modules were compiled in
+nginx -V 2>&1 | tr ' ' '\n' | grep -- '--with'
+
+# Test a specific config file
+sudo nginx -t -c /etc/nginx/nginx.conf
+
+# Use a different prefix
+sudo nginx -p /usr/local/nginx -t
+
+# Set a directive from the command line
+sudo nginx -g 'worker_processes 4;' -t
+
+# Start nginx in the foreground, for a container
+nginx -g 'daemon off;'
+
+# Where are the config files
+nginx -V 2>&1 | grep -o 'conf-path=[^ ]*'
+
+# Enable a site on Debian and Ubuntu
+sudo ln -s /etc/nginx/sites-available/example.com /etc/nginx/sites-enabled/
+
+# Disable a site
+sudo rm /etc/nginx/sites-enabled/example.com
+
+# List enabled sites
+ls -l /etc/nginx/sites-enabled/
+
+# Show the config without comments or blank lines
+grep -vE '^\s*(#|$)' /etc/nginx/nginx.conf
+
+# Find which file defines a server name
+grep -rn "server_name example.com" /etc/nginx/
+
+# Find every listen directive
+grep -rn 'listen' /etc/nginx/sites-enabled/
+
+# Check the worker processes are running
+ps -o pid,user,cmd -C nginx
+
+# Which ports nginx is listening on
+sudo ss -ltnp | grep nginx
+
+# Follow the access log
+sudo tail -f /var/log/nginx/access.log
+
+# Follow the error log
+sudo tail -f /var/log/nginx/error.log
+
+# Errors only, newest last
+sudo grep -i '\[error\]' /var/log/nginx/error.log | tail
+
+# Top requested paths
+sudo awk '{print $7}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head
+
+# Status code distribution
+sudo awk '{print $9}' /var/log/nginx/access.log | sort | uniq -c | sort -rn
+
+# Busiest client addresses
+sudo awk '{print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head
+
+# Requests that took longest, when $request_time is logged
+sudo awk '{print $NF, $7}' /var/log/nginx/access.log | sort -rn | head
+
+# Count 5xx responses in the last rotation
+sudo awk '$9 ~ /^5/' /var/log/nginx/access.log | wc -l
+
+# Check the stub status endpoint, when enabled
+curl -s http://127.0.0.1/nginx_status
+
+# Verify a virtual host answers without changing DNS
+curl -sI -H 'Host: example.com' http://127.0.0.1/
+
+# Check the TLS certificate nginx is serving
+openssl s_client -connect example.com:443 -servername example.com < /dev/null 2>/dev/null | openssl x509 -noout -dates

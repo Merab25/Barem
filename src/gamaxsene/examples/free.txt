@@ -1,0 +1,100 @@
+## Show memory and swap usage
+
+# Memory in human-readable units
+free -h
+
+# In megabytes
+free -m
+
+# In gigabytes
+free -g
+
+# In kilobytes (the default)
+free
+
+# Powers of 1000 instead of 1024
+free -h --si
+
+# Add a total line for RAM plus swap
+free -h -t
+
+# Show low and high memory split
+free -h -l
+
+# Refresh every 2 seconds
+free -h -s 2
+
+# Refresh 5 times then stop
+free -h -s 2 -c 5
+
+# Wide output, keeping buffers and cache in separate columns
+free -h -w
+
+# The number that matters: available memory
+free -h | awk '/^Mem:/ {print $7}'
+
+# Used memory as a percentage
+free | awk '/^Mem:/ {printf "%.1f%%\n", $3/$2*100}'
+
+# Available memory as a percentage
+free | awk '/^Mem:/ {printf "%.1f%%\n", $7/$2*100}'
+
+# Swap in use
+free -h | awk '/^Swap:/ {print $3 " of " $2}'
+
+# Alert when available memory drops below 10%
+free | awk '/^Mem:/ {if ($7/$2 < 0.1) print "low memory"}'
+
+# The raw kernel numbers behind free
+cat /proc/meminfo
+
+# Just the headline values
+grep -E '^(MemTotal|MemFree|MemAvailable|SwapTotal|SwapFree)' /proc/meminfo
+
+# Total RAM in a script
+awk '/MemTotal/ {print $2}' /proc/meminfo
+
+# Which processes use the most memory
+ps aux --sort=-%mem | head
+
+# Resident memory per process, in MB
+ps -eo pid,comm,rss --sort=-rss | head | awk '{printf "%s %s %.0fMB\n", $1, $2, $3/1024}'
+
+# Memory of one process
+ps -o pid,rss,vsz,cmd -p 4821
+
+# Detailed memory map of a process
+pmap -x 4821 | tail -n 3
+
+# Memory by process, grouped and shared memory accounted for
+smem -rs uss | head
+
+# Who is using swap
+for p in /proc/[0-9]*; do awk -v p="$p" '/VmSwap/ && $2 > 0 {print p, $2, $3}' "$p/status" 2>/dev/null; done | sort -k2 -rn | head
+
+# Watch memory change over time
+watch -n 2 free -h
+
+# Memory and swap activity, sampled
+vmstat 2 5
+
+# Drop the page cache to see real usage (development only)
+sync && echo 3 > /proc/sys/vm/drop_caches
+
+# Check swappiness
+cat /proc/sys/vm/swappiness
+
+# Lower swappiness so the kernel prefers RAM
+sysctl -w vm.swappiness=10
+
+# Did the kernel kill something for memory?
+dmesg -T | grep -i 'out of memory'
+
+# OOM kills in the journal
+journalctl -k --grep='Out of memory'
+
+# Add a swap file when memory is tight
+fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+
+# Show active swap devices
+swapon --show

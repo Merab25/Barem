@@ -6,6 +6,31 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-30
+
+### Added
+
+- 40 more commands, taking the tool from 37 to **77 commands** and from 1,236
+  to **2,540 examples**. Every command the previous roadmap named is now
+  covered (`ufw`, `nginx`, `helm`, `ansible`, `strace`, `mount`, `useradd`).
+  - Files and directories: `mv`, `rm`, `ln`, `mkdir`, `stat`, `df`
+  - Text processing: `cut`, `tr`, `head`, `tail`, `wc`, `uniq`, `diff`, `tee`
+  - Archives and compression: `zip`, `unzip`, `gzip`
+  - Processes and system: `kill`, `pkill`, `top`, `watch`, `free`, `uname`,
+    `dmesg`, `mount`, `strace`
+  - Users and permissions: `useradd`, `passwd`, `sudo`
+  - Networking: `ping`, `traceroute`, `host`, `scp`
+  - Security: `ufw`, `ssh-keygen`
+  - DevOps: `nginx`, `ansible`, `helm`, `make`, `gh`
+- Two new README sections, **Archives and compression** and **Users and
+  permissions**, for the groups that did not fit the existing ones.
+
+### Fixed
+
+- The README table check only recognised command names made of letters, so
+  `ssh-keygen` would have been reported as missing from the docs. It now
+  accepts hyphens and digits.
+
 ## [0.2.0] - 2026-09-30
 
 ### Added
@@ -52,6 +77,7 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Packaging with hatchling: the example files ship inside the wheel and are
   found with `importlib.resources`, wherever the package is installed.
 
-[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/Merab25/Gamaxsene/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/Merab25/Gamaxsene/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Merab25/Gamaxsene/releases/tag/v0.1.0

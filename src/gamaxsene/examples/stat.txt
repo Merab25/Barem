@@ -1,0 +1,88 @@
+## Show detailed file metadata: size, permissions, owner and timestamps
+
+# Everything the filesystem knows about a file
+stat /var/log/syslog
+
+# Short, one line per file
+stat -t /var/log/syslog
+
+# Follow a symlink and describe the real file
+stat -L /usr/local/bin/myapp
+
+# Describe the symlink itself, not its target
+stat /usr/local/bin/myapp
+
+# Permissions in octal
+stat -c '%a' /etc/ssh/sshd_config
+
+# Permissions in both forms
+stat -c '%a %A %n' /etc/ssh/sshd_config
+
+# Owner and group names
+stat -c '%U:%G' /var/www/html
+
+# Owner and group numeric ids
+stat -c '%u:%g' /var/www/html
+
+# Size in bytes
+stat -c '%s' /var/log/syslog
+
+# Size in bytes with the file name
+stat -c '%s %n' *.log
+
+# Human-readable size for a single file
+du -h /var/log/syslog
+
+# Last modification time, human readable
+stat -c '%y' /var/log/syslog
+
+# Last modification time as a Unix timestamp
+stat -c '%Y' /var/log/syslog
+
+# All three timestamps at once
+stat -c 'access=%x modify=%y change=%z' /var/log/syslog
+
+# Birth (creation) time, when the filesystem records it
+stat -c '%w' /var/log/syslog
+
+# File type as a word
+stat -c '%F' /var/log
+
+# Inode number
+stat -c '%i' /var/log/syslog
+
+# Number of hard links
+stat -c '%h' /var/log/syslog
+
+# Device the file lives on
+stat -c '%D' /var/log/syslog
+
+# Number of allocated blocks and the block size
+stat -c '%b blocks of %B bytes' /var/log/syslog
+
+# Spot a sparse file: allocated size smaller than apparent size
+stat -c '%s bytes, %b x %B allocated' disk.img
+
+# Custom line for several files at once
+stat -c '%n %a %U %s' /etc/passwd /etc/shadow
+
+# Terse output that is easy to parse in a script
+stat --printf='%n\t%s\t%Y\n' *.log
+
+# Sort files by modification time using stat
+stat --printf='%Y %n\n' *.log | sort -rn
+
+# Compare two files by modification time
+stat -c '%Y %n' old.txt new.txt
+
+# Describe the filesystem instead of the file
+stat -f /home
+
+# Filesystem type and free blocks
+stat -f -c '%T %a/%b free' /home
+
+# Check whether a file changed, for a script
+before=$(stat -c %Y config.yaml); sleep 1; after=$(stat -c %Y config.yaml)
+
+# Fail clearly when the file does not exist
+stat /no/such/file 2>/dev/null || echo "missing"

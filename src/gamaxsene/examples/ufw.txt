@@ -1,0 +1,109 @@
+## Manage the uncomplicated firewall on Ubuntu and Debian
+
+# Show whether the firewall is on, and the rules
+sudo ufw status
+
+# Verbose status, with defaults and logging level
+sudo ufw status verbose
+
+# Numbered rules, which you need in order to delete one
+sudo ufw status numbered
+
+# Enable the firewall (do not lock yourself out: allow SSH first)
+sudo ufw allow OpenSSH
+
+# Now enable it
+sudo ufw enable
+
+# Disable the firewall
+sudo ufw disable
+
+# Reset to defaults, removing every rule
+sudo ufw reset
+
+# Sensible defaults: block incoming, permit outgoing
+sudo ufw default deny incoming
+
+# Allow all outgoing traffic
+sudo ufw default allow outgoing
+
+# Allow a port
+sudo ufw allow 8080
+
+# Allow a port for TCP only
+sudo ufw allow 8080/tcp
+
+# Allow a UDP port
+sudo ufw allow 51820/udp
+
+# Allow a port range
+sudo ufw allow 60000:60010/udp
+
+# Allow a named service from /etc/services
+sudo ufw allow https
+
+# Allow using an application profile
+sudo ufw allow 'Nginx Full'
+
+# List the available application profiles
+sudo ufw app list
+
+# Details of one profile
+sudo ufw app info 'Nginx Full'
+
+# Allow from a single IP
+sudo ufw allow from 203.0.113.10
+
+# Allow a whole subnet
+sudo ufw allow from 192.168.1.0/24
+
+# Allow one IP to one port
+sudo ufw allow from 203.0.113.10 to any port 22 proto tcp
+
+# Allow a subnet to a port, with a comment for future you
+sudo ufw allow from 10.0.0.0/8 to any port 5432 proto tcp comment 'postgres from vpn'
+
+# Restrict a rule to one interface
+sudo ufw allow in on eth1 to any port 3306
+
+# Deny a port
+sudo ufw deny 23
+
+# Reject instead of silently dropping
+sudo ufw reject 25
+
+# Block a single abusive address
+sudo ufw deny from 198.51.100.7
+
+# Rate-limit SSH against brute force
+sudo ufw limit ssh
+
+# Insert a rule at a specific position, so it is evaluated first
+sudo ufw insert 1 allow from 203.0.113.10
+
+# Delete a rule by its spec
+sudo ufw delete allow 8080
+
+# Delete a rule by number (numbers shift after each delete)
+sudo ufw delete 3
+
+# Allow routed traffic, for a gateway or Docker host
+sudo ufw route allow in on eth1 out on eth0
+
+# Turn logging on
+sudo ufw logging on
+
+# More detail in the log
+sudo ufw logging medium
+
+# Read what the firewall blocked
+sudo grep UFW /var/log/ufw.log | tail
+
+# Follow blocks live
+sudo tail -f /var/log/ufw.log | grep BLOCK
+
+# Reload after editing files under /etc/ufw
+sudo ufw reload
+
+# Check the rules ufw generated at the nftables level
+sudo nft list ruleset | head -n 40

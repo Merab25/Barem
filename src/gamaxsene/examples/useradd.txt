@@ -1,0 +1,109 @@
+## Create user accounts, home directories and groups
+
+# Create a user with a home directory and the default shell
+sudo useradd -m merab
+
+# Create a user with a specific shell
+sudo useradd -m -s /bin/bash merab
+
+# Create a user and set the full name
+sudo useradd -m -c "Merab Mokverashvili" merab
+
+# Create a user with a specific home directory
+sudo useradd -m -d /srv/merab merab
+
+# Create a user with a specific UID
+sudo useradd -m -u 1500 merab
+
+# Create a user and its primary group by name
+sudo useradd -m -g developers merab
+
+# Add secondary groups at creation time
+sudo useradd -m -G sudo,docker,www-data merab
+
+# Create a system account for a service: no home, no login
+sudo useradd -r -s /usr/sbin/nologin myapp
+
+# Service account with a home directory for its data
+sudo useradd -r -m -d /var/lib/myapp -s /usr/sbin/nologin myapp
+
+# Create a user with an expiry date
+sudo useradd -m -e 2026-12-31 contractor
+
+# Create a user without a group of their own
+sudo useradd -m -N -g users merab
+
+# Skip creating the home directory
+sudo useradd -M svc-backup
+
+# Set the password non-interactively from a hash
+sudo useradd -m -p "$(openssl passwd -6 'changeme')" merab
+
+# The friendlier Debian wrapper, which prompts for details
+sudo adduser merab
+
+# Add an existing user to a group
+sudo usermod -aG docker merab
+
+# Add to several groups at once, keeping existing ones
+sudo usermod -aG sudo,docker,adm merab
+
+# Replace the group list entirely (careful: -a is what keeps the old ones)
+sudo usermod -G developers merab
+
+# Change the login shell
+sudo usermod -s /bin/zsh merab
+
+# Change the home directory and move the contents
+sudo usermod -d /srv/merab -m merab
+
+# Rename a user
+sudo usermod -l newname oldname
+
+# Lock an account
+sudo usermod -L merab
+
+# Unlock an account
+sudo usermod -U merab
+
+# Expire an account immediately
+sudo usermod -e 1 merab
+
+# Set the password
+sudo passwd merab
+
+# Force a password change at next login
+sudo passwd -e merab
+
+# Create a group
+sudo groupadd developers
+
+# Create a system group with a fixed GID
+sudo groupadd -r -g 800 myapp
+
+# Delete a user but keep their files
+sudo userdel merab
+
+# Delete a user and their home directory and mail spool
+sudo userdel -r merab
+
+# See a user's groups
+id merab
+
+# Just the group names
+groups merab
+
+# Look a user up in passwd, LDAP or wherever nsswitch points
+getent passwd merab
+
+# List every human user (UID 1000 and above)
+awk -F: '$3 >= 1000 && $3 < 65534 {print $1}' /etc/passwd
+
+# Password ageing settings for a user
+sudo chage -l merab
+
+# Require a password change every 90 days
+sudo chage -M 90 merab
+
+# Set up an SSH key instead of a password
+sudo -u merab mkdir -p /home/merab/.ssh

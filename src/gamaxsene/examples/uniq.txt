@@ -1,0 +1,91 @@
+## Report or filter repeated lines in sorted input
+
+# Collapse adjacent duplicate lines
+uniq names.txt
+
+# uniq only sees adjacent duplicates, so sort first
+sort names.txt | uniq
+
+# Same thing, shorter
+sort -u names.txt
+
+# Count how many times each line occurs
+sort names.txt | uniq -c
+
+# Count, most frequent first
+sort names.txt | uniq -c | sort -rn
+
+# Only the lines that appear more than once
+sort names.txt | uniq -d
+
+# Every copy of every duplicated line
+sort names.txt | uniq -D
+
+# Only the lines that appear exactly once
+sort names.txt | uniq -u
+
+# Ignore case when comparing
+sort -f names.txt | uniq -i
+
+# Skip the first field when comparing
+sort -k2 data.txt | uniq -f1
+
+# Skip the first 8 characters when comparing
+uniq -s8 timestamped.log
+
+# Compare only the first 5 characters
+uniq -w5 codes.txt
+
+# Compare only field 2 onwards, ignoring a leading timestamp
+cut -d' ' -f2- app.log | sort | uniq -c | sort -rn
+
+# Separate groups of duplicates with a blank line
+sort names.txt | uniq --all-repeated=separate
+
+# Count requests per IP in an access log
+cut -d' ' -f1 access.log | sort | uniq -c | sort -rn | head
+
+# Most requested URLs
+awk '{print $7}' access.log | sort | uniq -c | sort -rn | head
+
+# HTTP status code distribution
+awk '{print $9}' access.log | sort | uniq -c | sort -rn
+
+# Count log lines per level
+grep -oE '\b(DEBUG|INFO|WARN|ERROR)\b' app.log | sort | uniq -c
+
+# Find duplicate lines in a config file
+sort nginx.conf | uniq -d
+
+# Find duplicate file names across two directories
+cat <(ls dir1) <(ls dir2) | sort | uniq -d
+
+# Find duplicate files by checksum
+find . -type f -exec md5sum {} + | sort | uniq -w32 -d
+
+# Lines that are in both files
+sort a.txt b.txt | uniq -d
+
+# Lines unique to one of two files
+sort a.txt b.txt | uniq -u
+
+# Compare two sorted files field by field instead
+comm -12 <(sort a.txt) <(sort b.txt)
+
+# Unique values in a CSV column
+cut -d, -f3 users.csv | tail -n +2 | sort -u
+
+# Count unique visitors
+cut -d' ' -f1 access.log | sort -u | wc -l
+
+# Deduplicate while keeping the original order (awk, not uniq)
+awk '!seen[$0]++' names.txt
+
+# Deduplicate a PATH, keeping order
+echo "$PATH" | tr ':' '\n' | awk '!seen[$0]++' | paste -sd:
+
+# Count how many distinct commands are in shell history
+awk '{print $1}' ~/.bash_history | sort | uniq -c | sort -rn | head
+
+# Write the counts to a report
+sort access-ips.txt | uniq -c | sort -rn > top-ips.txt

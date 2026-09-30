@@ -1,0 +1,94 @@
+## Count lines, words, characters and bytes
+
+# Lines, words and bytes at once
+wc /var/log/syslog
+
+# Count lines
+wc -l /var/log/syslog
+
+# Count words
+wc -w report.txt
+
+# Count bytes
+wc -c archive.tar
+
+# Count characters, which differs from bytes for UTF-8
+wc -m utf8.txt
+
+# Length of the longest line
+wc -L config.yaml
+
+# Just the number, with no file name
+wc -l < /var/log/syslog
+
+# Several files, with a total
+wc -l *.log
+
+# Only the total for many files
+cat *.log | wc -l
+
+# Count files in a directory
+ls -1 /etc | wc -l
+
+# Count files in a tree
+find /var/log -type f | wc -l
+
+# Count files safely when names contain newlines
+find /var/log -type f -printf '.' | wc -c
+
+# Count matching lines (grep -c is usually better)
+grep -c ERROR app.log
+
+# Count lines that do not match
+grep -vc ERROR app.log
+
+# Count unique values in a column
+cut -d, -f2 users.csv | sort -u | wc -l
+
+# Count rows in a CSV, excluding the header
+tail -n +2 users.csv | wc -l
+
+# Count processes for one user
+ps -u merab --no-headers | wc -l
+
+# Count established connections
+ss -tn state established | tail -n +2 | wc -l
+
+# Count lines of code in a project, ignoring blanks
+grep -rv '^\s*$' --include='*.py' src/ | wc -l
+
+# Count lines per file, largest first
+wc -l *.py | sort -rn | head
+
+# Count commits in a git repository
+git rev-list --count HEAD
+
+# Length of a string
+echo -n "hello" | wc -c
+
+# Length of a variable, without spawning a process
+s=hello; echo "${#s}"
+
+# Count the columns in a CSV header
+head -n 1 users.csv | tr ',' '\n' | wc -l
+
+# Check whether a file is empty
+[ -s file.txt ] && echo "has content" || echo "empty"
+
+# Count lines in a compressed file
+zcat access.log.gz | wc -l
+
+# Count entries in a JSON array
+jq 'length' items.json
+
+# Count how many packages are installed
+dpkg -l | grep '^ii' | wc -l
+
+# Use the count in a variable
+n=$(wc -l < access.log); echo "$n lines"
+
+# Compare two files by line count
+echo "$(wc -l < a.txt) vs $(wc -l < b.txt)"
+
+# Count bytes written by a pipeline
+tar -cf - /etc 2>/dev/null | wc -c

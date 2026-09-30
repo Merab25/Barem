@@ -1,0 +1,97 @@
+## Show the network path packets take to a host
+
+# Trace the route to a host
+traceroute example.com
+
+# Do not resolve hop names, which is much faster
+traceroute -n example.com
+
+# Use ICMP instead of UDP, often gets further through firewalls
+sudo traceroute -I example.com
+
+# Use TCP to a specific port, best for hosts behind a firewall
+sudo traceroute -T -p 443 example.com
+
+# Plain UDP to a port
+traceroute -U -p 33434 example.com
+
+# Force IPv4
+traceroute -4 example.com
+
+# Force IPv6
+traceroute -6 example.com
+
+# Stop after 15 hops
+traceroute -m 15 example.com
+
+# Start reporting from hop 5
+traceroute -f 5 example.com
+
+# One probe per hop instead of three
+traceroute -q 1 example.com
+
+# Wait only 1 second per probe
+traceroute -w 1 -n example.com
+
+# Leave from a specific interface
+traceroute -i eth0 example.com
+
+# Use a specific source address
+traceroute -s 192.168.1.10 example.com
+
+# Larger packets, to look for MTU problems
+traceroute example.com 1400
+
+# Show the AS number of each hop
+traceroute -A -n example.com
+
+# Trace to an IP rather than a name
+traceroute -n 8.8.8.8
+
+# The interactive, continuously updating alternative
+mtr example.com
+
+# mtr without name resolution
+mtr -n example.com
+
+# mtr in report mode, 20 cycles, good for sharing
+mtr -r -c 20 example.com
+
+# mtr report as wide output with both names and IPs
+mtr -rw -c 20 example.com
+
+# mtr using TCP to port 443
+sudo mtr -T -P 443 example.com
+
+# mtr as JSON, for monitoring
+mtr -r -c 10 --json example.com
+
+# tracepath, which needs no root and finds the MTU
+tracepath example.com
+
+# tracepath for IPv6
+tracepath -6 example.com
+
+# Where does the path leave your network?
+traceroute -n example.com | head -n 5
+
+# Compare the path to two different destinations
+traceroute -n 8.8.8.8 > a.txt; traceroute -n 1.1.1.1 > b.txt; diff a.txt b.txt
+
+# Save a trace with a timestamp for a support ticket
+{ date; traceroute -n example.com; } > trace-$(date +%F-%H%M).txt
+
+# Check the first hop is your expected gateway
+ip route get 8.8.8.8
+
+# Your default gateway
+ip route show default
+
+# Is the problem DNS rather than routing?
+dig +short example.com
+
+# Is the host simply refusing ICMP?
+nc -zv example.com 443
+
+# Latency to each hop over time
+mtr --report-cycles 100 -r example.com

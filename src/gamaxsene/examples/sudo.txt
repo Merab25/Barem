@@ -1,0 +1,102 @@
+## Run commands as another user, and inspect sudo rights
+
+# Run one command as root
+sudo systemctl restart nginx
+
+# Start an interactive root shell
+sudo -i
+
+# Root shell keeping the current environment and directory
+sudo -s
+
+# Run as another user
+sudo -u www-data ls /var/www
+
+# Run as another user with their full login environment
+sudo -iu postgres
+
+# Run a shell command as another user
+sudo -u postgres psql -c 'SELECT version();'
+
+# Run as another user and group
+sudo -u deploy -g docker docker ps
+
+# Show what you are allowed to run
+sudo -l
+
+# Show what another user is allowed to run
+sudo -l -U merab
+
+# Check whether a specific command is permitted
+sudo -l /usr/bin/systemctl
+
+# Validate your cached credentials without running anything
+sudo -v
+
+# Drop the cached credentials immediately
+sudo -k
+
+# Run a command and force a password prompt even if cached
+sudo -k systemctl restart nginx
+
+# Non-interactive: fail instead of prompting, for scripts and cron
+sudo -n systemctl is-active nginx
+
+# Read the password from standard input
+echo 'mypassword' | sudo -S systemctl restart nginx
+
+# Preserve the whole environment
+sudo -E ./deploy.sh
+
+# Preserve specific variables
+sudo --preserve-env=PATH,HOME ./deploy.sh
+
+# Keep a variable that sudo normally strips
+sudo HTTP_PROXY=http://proxy:3128 apt update
+
+# Redirect as root: the redirect happens as you, so use tee
+echo 'setting=1' | sudo tee /etc/myapp/conf.d/extra.conf
+
+# Append as root
+echo '127.0.0.1 myapp.local' | sudo tee -a /etc/hosts
+
+# Run a whole pipeline as root
+sudo bash -c 'dmesg | grep -i error > /root/errors.txt'
+
+# Write a file as root with a heredoc
+sudo tee /etc/sysctl.d/99-tuning.conf > /dev/null <<'EOF'
+net.core.somaxconn = 1024
+EOF
+
+# Edit a file with sudo's safe editor
+sudo -e /etc/myapp/config.yaml
+
+# Edit the sudoers file safely, with syntax checking
+sudo visudo
+
+# Edit a drop-in rather than the main file
+sudo visudo -f /etc/sudoers.d/deploy
+
+# Check sudoers syntax without editing
+sudo visudo -c
+
+# Grant a user passwordless access to one command
+echo 'deploy ALL=(ALL) NOPASSWD: /bin/systemctl restart myapp' | sudo tee /etc/sudoers.d/deploy
+
+# Set the right permissions on a sudoers drop-in
+sudo chmod 440 /etc/sudoers.d/deploy
+
+# Who used sudo, and for what
+sudo journalctl -t sudo --since today
+
+# sudo activity in the auth log
+sudo grep sudo /var/log/auth.log | tail
+
+# Find which group grants sudo on this system
+getent group sudo wheel 2>/dev/null
+
+# Run a command with a timeout, as root
+sudo timeout 30 ./long-task.sh
+
+# Keep your PATH when root's PATH is too narrow
+sudo env "PATH=$PATH" ./script.sh

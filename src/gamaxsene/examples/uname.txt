@@ -1,0 +1,109 @@
+## Show kernel, architecture and system information
+
+# Everything at once
+uname -a
+
+# Kernel name
+uname -s
+
+# Kernel release, the version you usually want
+uname -r
+
+# Full kernel version string with build date
+uname -v
+
+# Machine architecture
+uname -m
+
+# Processor type
+uname -p
+
+# Hardware platform
+uname -i
+
+# Operating system
+uname -o
+
+# Network node hostname
+uname -n
+
+# Is this 64-bit?
+uname -m | grep -q x86_64 && echo "64-bit"
+
+# Are we on ARM?
+uname -m | grep -qE 'aarch64|arm' && echo "ARM"
+
+# Kernel major.minor only
+uname -r | cut -d. -f1,2
+
+# Compare kernel version in a script
+[ "$(uname -r | cut -d. -f1)" -ge 5 ] && echo "kernel 5 or newer"
+
+# Distribution name and version
+cat /etc/os-release
+
+# Just the pretty name
+grep PRETTY_NAME /etc/os-release
+
+# Distribution id, for a script
+. /etc/os-release && echo "$ID $VERSION_ID"
+
+# The lsb_release view, when installed
+lsb_release -a
+
+# Short distribution description
+lsb_release -ds
+
+# Debian version
+cat /etc/debian_version
+
+# Red Hat family version
+cat /etc/redhat-release
+
+# Hostname
+hostname
+
+# Fully qualified domain name
+hostname -f
+
+# All of the above, tidily, from systemd
+hostnamectl
+
+# CPU details
+lscpu
+
+# CPU model name only
+lscpu | grep 'Model name'
+
+# Number of CPUs
+nproc
+
+# Number of CPUs the kernel knows about
+getconf _NPROCESSORS_ONLN
+
+# Total RAM
+free -h | awk '/^Mem:/ {print $2}'
+
+# Block devices
+lsblk
+
+# PCI devices
+lspci
+
+# USB devices
+lsusb
+
+# Virtual machine or bare metal?
+systemd-detect-virt
+
+# DMI information: vendor, product, serial
+sudo dmidecode -s system-product-name
+
+# Uptime and load
+uptime
+
+# Boot time
+uptime -s
+
+# Architecture the way dpkg names it
+dpkg --print-architecture

@@ -1,0 +1,94 @@
+## Write standard input to a file and pass it on
+
+# Show output and save it at the same time
+make 2>&1 | tee build.log
+
+# Append instead of overwriting
+./deploy.sh | tee -a deploy.log
+
+# Write to several files at once
+./run.sh | tee out1.log out2.log
+
+# Save output and keep piping it onward
+ps aux | tee processes.txt | grep nginx
+
+# Write to a file that needs root, without running the whole pipe as root
+echo "net.ipv4.ip_forward=1" | sudo tee /etc/sysctl.d/99-forward.conf
+
+# Append to a protected file as root
+echo "127.0.0.1 myapp.local" | sudo tee -a /etc/hosts
+
+# The classic reason tee exists: sudo does not apply to a redirect
+echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
+
+# Write a whole heredoc to a protected file
+sudo tee /etc/myapp/config.yaml > /dev/null <<'EOF'
+port: 8080
+debug: false
+EOF
+
+# Discard the terminal output, keep only the file
+./noisy.sh | tee output.log > /dev/null
+
+# Keep going even if one output file cannot be written
+./run.sh | tee -a /var/log/run.log 2>/dev/null
+
+# Ignore interrupts, so tee survives Ctrl-C
+long-job | tee -i job.log
+
+# Capture stdout and stderr together
+./build.sh 2>&1 | tee build.log
+
+# Capture stderr only
+./build.sh 2>&1 >/dev/null | tee errors.log
+
+# Send output to two different pipelines
+./gen.sh | tee >(gzip > out.gz) | wc -l
+
+# Compress a copy while watching the plain output
+tail -f app.log | tee >(gzip > app-copy.log.gz)
+
+# Count lines while still saving them
+cat access.log | tee copy.log | wc -l
+
+# Checksum a download while writing it to disk
+curl -s https://example.com/file.iso | tee file.iso | sha256sum
+
+# Save a database dump and compress it in one pass
+mysqldump mydb | tee dump.sql | gzip > dump.sql.gz
+
+# Log a command's output with a timestamped file name
+./backup.sh | tee "backup-$(date +%F).log"
+
+# Watch a test run and keep the log for CI
+pytest -v | tee test-results.txt
+
+# See an interactive installer's output and record it
+./install.sh | tee -a install.log
+
+# Split output to a file and to a pager
+dmesg | tee dmesg.txt | less
+
+# Feed the same input to two commands
+echo "hello" | tee >(tr 'a-z' 'A-Z') >(wc -c) > /dev/null
+
+# Write to a named pipe as well as a file
+mkfifo /tmp/events; ./producer | tee /tmp/events > events.log
+
+# Keep a copy of what goes into a remote command
+cat data.csv | tee sent.csv | ssh dbhost 'cat > /tmp/data.csv'
+
+# Record a whole shell session instead (tee's bigger cousin)
+script -q session.log
+
+# Tee inside a loop, appending each iteration
+for h in web1 web2; do ssh "$h" uptime | tee -a uptime.log; done
+
+# Save output but exit with the real command's status, not tee's
+set -o pipefail; ./build.sh | tee build.log
+
+# Check the exit status of the first command in the pipe
+./build.sh | tee build.log; echo "${PIPESTATUS[0]}"
+
+# Write nothing to stdout, only to the log, but keep the exit code
+set -o pipefail; ./build.sh | tee build.log >/dev/null

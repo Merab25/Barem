@@ -1,0 +1,91 @@
+## Create hard links and symbolic links
+
+# Create a symbolic link to a file
+ln -s /opt/myapp/bin/myapp /usr/local/bin/myapp
+
+# Create a symbolic link to a directory
+ln -s /mnt/data/uploads /var/www/html/uploads
+
+# Replace an existing link, so a deploy can switch versions
+ln -sfn /srv/releases/v1.4.2 /srv/current
+
+# Force: overwrite the target if it already exists
+ln -sf /etc/myapp/prod.yaml /etc/myapp/config.yaml
+
+# Use -n with -f so a link to a directory is replaced, not followed
+ln -sfn /srv/releases/v2.0.0 /srv/current
+
+# Create the link inside a directory, keeping the source name
+ln -s /opt/myapp/bin/myapp /usr/local/bin/
+
+# Create a hard link (same inode, same data)
+ln /var/log/app.log /var/log/app-hardlink.log
+
+# Show what is being linked
+ln -sv /opt/node/bin/node /usr/local/bin/node
+
+# Create a relative symlink automatically
+ln -sr /srv/shared/assets /var/www/html/assets
+
+# Relative link written by hand, so it survives a moved parent
+cd /var/www/html && ln -s ../../srv/assets assets
+
+# Link every file from one directory into another
+ln -s /opt/configs/* /etc/myapp/
+
+# Back up the target before replacing it
+ln -sfb /etc/nginx/sites-available/site /etc/nginx/sites-enabled/site
+
+# Enable an nginx site the usual way
+ln -s /etc/nginx/sites-available/example.com /etc/nginx/sites-enabled/
+
+# Enable a systemd unit stored outside /etc
+ln -s /opt/myapp/myapp.service /etc/systemd/system/myapp.service
+
+# See where a symlink points
+readlink /srv/current
+
+# Resolve a symlink all the way to the real file
+readlink -f /usr/local/bin/myapp
+
+# Resolve a path even if the last part does not exist yet
+realpath -m /srv/current/config.yaml
+
+# Show the link and its target in a listing
+ls -l /usr/local/bin/myapp
+
+# List every symlink in a directory tree
+find /etc -type l
+
+# Find symlinks that point nowhere
+find /etc -xtype l
+
+# Find broken symlinks and show their targets
+find /var/www -xtype l -exec ls -l {} +
+
+# Delete a symlink without touching what it points to
+rm /var/www/html/uploads
+
+# Never add a trailing slash when deleting a link to a directory
+rm /srv/current
+
+# Count how many hard links a file has
+stat -c '%h %n' /var/log/app.log
+
+# Find every hard link to the same inode
+find / -xdev -samefile /var/log/app.log 2>/dev/null
+
+# Show the inode, to confirm two names are the same file
+ls -i /var/log/app.log /var/log/app-hardlink.log
+
+# Hard-link a whole tree instead of copying it (fast, shares data)
+cp -al /srv/site /srv/site-snapshot
+
+# Deduplicate a backup by hard-linking against the previous one
+rsync -a --link-dest=/backup/2026-09-29 /srv/data/ /backup/2026-09-30/
+
+# A symlink can cross filesystems, a hard link cannot
+ln -s /mnt/usb/archive.tar.gz /home/merab/archive.tar.gz
+
+# Link a dotfile from a git-tracked directory into place
+ln -sf ~/dotfiles/.bashrc ~/.bashrc

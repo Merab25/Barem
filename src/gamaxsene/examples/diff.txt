@@ -1,0 +1,100 @@
+## Compare files and directories line by line
+
+# Compare two files
+diff old.conf new.conf
+
+# Unified diff, the format patches and git use
+diff -u old.conf new.conf
+
+# Unified diff with more context
+diff -U10 old.conf new.conf
+
+# Side by side
+diff -y old.conf new.conf
+
+# Side by side, fitting a wide terminal
+diff -y -W 200 old.conf new.conf
+
+# Side by side, showing only the differing lines
+diff -y --suppress-common-lines old.conf new.conf
+
+# Report only whether the files differ
+diff -q old.conf new.conf
+
+# Say so when the files are the same
+diff -s old.conf new.conf
+
+# Ignore all whitespace
+diff -w old.conf new.conf
+
+# Ignore changes in the amount of whitespace
+diff -b old.conf new.conf
+
+# Ignore blank lines
+diff -B old.conf new.conf
+
+# Ignore case
+diff -i old.conf new.conf
+
+# Ignore lines matching a pattern, such as a timestamp
+diff -I '^# Generated' old.conf new.conf
+
+# Compare two directories
+diff -r dir1 dir2
+
+# Compare directories, listing only which files differ
+diff -rq dir1 dir2
+
+# Compare directories but skip files that exist on one side only
+diff -r --no-dereference dir1 dir2
+
+# Exclude a directory from a recursive compare
+diff -r --exclude=.git repo1 repo2
+
+# Exclude several patterns
+diff -r --exclude='*.pyc' --exclude=__pycache__ src1 src2
+
+# Colour the output
+diff --color=always -u old.conf new.conf
+
+# Produce a patch file
+diff -u original.py modified.py > fix.patch
+
+# Apply that patch
+patch original.py < fix.patch
+
+# Apply a patch inside a directory tree
+patch -p1 < fix.patch
+
+# Reverse a patch
+patch -R original.py < fix.patch
+
+# Dry run: check whether a patch applies
+patch --dry-run -p1 < fix.patch
+
+# Compare command output instead of files
+diff <(ls dir1) <(ls dir2)
+
+# Compare the output of a command on two hosts
+diff <(ssh web1 'rpm -qa | sort') <(ssh web2 'rpm -qa | sort')
+
+# Compare a file with its git HEAD version
+diff <(git show HEAD:config.yaml) config.yaml
+
+# Compare sorted files, so order does not matter
+diff <(sort a.txt) <(sort b.txt)
+
+# Compare JSON regardless of key order
+diff <(jq -S . a.json) <(jq -S . b.json)
+
+# Three-way compare, showing which side changed
+diff3 mine.txt base.txt theirs.txt
+
+# Compare binary files
+cmp old.bin new.bin
+
+# Show every differing byte
+cmp -l old.bin new.bin | head
+
+# Use git's nicer diff on files outside a repository
+git diff --no-index old.conf new.conf

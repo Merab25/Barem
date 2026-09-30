@@ -1,0 +1,97 @@
+## List, test and extract .zip archives
+
+# Extract into the current directory
+unzip archive.zip
+
+# Extract into a specific directory
+unzip archive.zip -d /srv/www
+
+# List the contents without extracting
+unzip -l archive.zip
+
+# Verbose listing with compression ratios
+unzip -v archive.zip
+
+# List only the file names, for scripting
+unzip -Z1 archive.zip
+
+# Test the archive for corruption
+unzip -t archive.zip
+
+# Extract one file only
+unzip archive.zip config.yaml
+
+# Extract everything matching a pattern
+unzip archive.zip '*.css'
+
+# Extract several patterns
+unzip archive.zip '*.js' '*.css' -d public/
+
+# Exclude a pattern while extracting everything else
+unzip archive.zip -x '*.log'
+
+# Exclude a whole directory
+unzip site.zip -x 'node_modules/*'
+
+# Overwrite existing files without asking
+unzip -o archive.zip
+
+# Never overwrite: skip files that already exist
+unzip -n archive.zip
+
+# Update: extract only newer files, and files that are missing
+unzip -u archive.zip
+
+# Freshen: update existing files only, add nothing new
+unzip -f archive.zip
+
+# Quiet, printing only errors
+unzip -q archive.zip -d /srv/www
+
+# Very quiet
+unzip -qq archive.zip
+
+# Flatten the archive, ignoring stored directory names
+unzip -j docs.zip -d flat/
+
+# Extract to standard output, to pipe a file out
+unzip -p archive.zip config.yaml
+
+# Read a file from the archive without writing to disk
+unzip -p archive.zip data.csv | head
+
+# Count lines in a file inside the archive
+unzip -p logs.zip app.log | wc -l
+
+# Search inside an archived file
+unzip -p logs.zip app.log | grep -i error
+
+# Extract a password-protected archive (prompts for the password)
+unzip -P - secrets.zip
+
+# Password on the command line (visible in ps, avoid on shared hosts)
+unzip -P hunter2 secrets.zip
+
+# Convert line endings to Unix while extracting text files
+unzip -a windows-docs.zip
+
+# Never convert line endings
+unzip -aa archive.zip
+
+# Keep the archive's timestamps (the default) and show them
+unzip -l archive.zip | head
+
+# Extract a split archive, starting from the first volume
+unzip big.zip
+
+# Handle a zip whose names are in a non-UTF-8 encoding
+unzip -O cp1251 russian.zip
+
+# Preview before extracting into a live directory
+unzip -l release.zip | tail -n 20
+
+# Extract, then fix ownership for a web server
+unzip -q site.zip -d /var/www/html && chown -R www-data:www-data /var/www/html
+
+# Unzip every archive in a directory into its own folder
+for z in *.zip; do unzip -q "$z" -d "${z%.zip}"; done

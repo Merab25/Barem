@@ -1,0 +1,88 @@
+## Create directories, including whole paths at once
+
+# Create a directory
+mkdir reports
+
+# Create several directories at once
+mkdir logs cache tmp
+
+# Create a whole path, making parents as needed
+mkdir -p /srv/myapp/releases/v1.0.0
+
+# Do not fail if the directory already exists
+mkdir -p /var/log/myapp
+
+# Show each directory as it is created
+mkdir -pv /srv/myapp/{bin,etc,log}
+
+# Create several subdirectories with brace expansion
+mkdir -p project/{src,tests,docs}
+
+# Nested brace expansion
+mkdir -p site/{css,js,img}/{min,src}
+
+# A directory per month
+mkdir -p archive/2026/{01,02,03,04,05,06,07,08,09,10,11,12}
+
+# Create a directory with specific permissions
+mkdir -m 750 /srv/private
+
+# World-readable directory, no write for others
+mkdir -m 755 /var/www/html
+
+# Private directory, owner only
+mkdir -m 700 ~/.ssh
+
+# Shared directory with the setgid bit, so new files keep the group
+mkdir -m 2775 /srv/shared
+
+# Sticky bit, so users can only delete their own files
+mkdir -m 1777 /srv/upload
+
+# -m is not affected by umask, unlike a plain mkdir
+mkdir -m 777 /tmp/wide-open
+
+# Create parents with one mode and the leaf with another
+mkdir -p -m 700 ~/.config/myapp
+
+# Create a directory named after today
+mkdir -p "backups/$(date +%F)"
+
+# Create a directory named with date and time
+mkdir -p "backups/$(date +%Y-%m-%d_%H-%M-%S)"
+
+# Create a directory and enter it
+mkdir -p /srv/build && cd /srv/build
+
+# Create a temporary directory with a unique name
+mktemp -d
+
+# Temporary directory with a recognisable prefix
+mktemp -d -t myapp-XXXXXX
+
+# Temporary directory in a specific place
+mktemp -d /var/tmp/deploy-XXXXXX
+
+# Use a temporary directory and clean it up on exit
+d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT
+
+# Create a directory tree for each user in a list
+for u in alice bob carol; do mkdir -p "/home/$u/public_html"; done
+
+# Create the parent directory of a file before writing to it
+mkdir -p "$(dirname /srv/myapp/etc/config.yaml)"
+
+# Recreate the directory structure of a tree, without the files
+find src -type d -exec mkdir -p build/{} \;
+
+# Create a directory and hand it to a service user
+mkdir -p /var/lib/myapp && chown myapp:myapp /var/lib/myapp
+
+# Create a mount point
+mkdir -p /mnt/backup
+
+# Fail loudly if the directory already exists (no -p)
+mkdir /srv/myapp
+
+# Check it worked
+ls -ld /srv/myapp/releases/v1.0.0

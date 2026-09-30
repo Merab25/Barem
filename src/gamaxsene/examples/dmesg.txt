@@ -1,0 +1,100 @@
+## Read the kernel ring buffer: boot, hardware and driver messages
+
+# Show the kernel log
+dmesg
+
+# Human-readable timestamps instead of seconds since boot
+dmesg -T
+
+# Colourised output
+dmesg -L
+
+# Follow new messages as they arrive
+dmesg -w
+
+# Follow with readable timestamps
+dmesg -Tw
+
+# Page through it
+dmesg -T | less
+
+# Last 50 lines
+dmesg -T | tail -n 50
+
+# Only errors and worse
+dmesg -l err,crit,alert,emerg
+
+# Warnings and above
+dmesg -l warn,err,crit
+
+# Only informational messages
+dmesg -l info
+
+# Filter by subsystem
+dmesg -f kern
+
+# Show the facility and level of each line
+dmesg -x
+
+# Decode without timestamps, for diffing between boots
+dmesg -t
+
+# Look for a specific device
+dmesg | grep -i eth0
+
+# USB device events, useful right after plugging something in
+dmesg -T | grep -i usb | tail
+
+# Disk and filesystem errors
+dmesg -T | grep -iE 'ata|sd[a-z]|i/o error'
+
+# Filesystem remounted read-only, a classic failure
+dmesg -T | grep -i 'read-only'
+
+# Out-of-memory kills
+dmesg -T | grep -i 'out of memory'
+
+# Which process the OOM killer chose
+dmesg -T | grep -i 'killed process'
+
+# Segfaults
+dmesg -T | grep -i segfault
+
+# Firewall drops, when logging is enabled
+dmesg -T | grep -i 'iptables\|nft'
+
+# Link up and down events
+dmesg -T | grep -i 'link is\|link down'
+
+# Kernel taint or module problems
+dmesg -T | grep -iE 'taint|module'
+
+# Boot messages only, from this boot
+dmesg -T | head -n 50
+
+# Clear the ring buffer
+sudo dmesg -C
+
+# Read then clear
+sudo dmesg -c
+
+# Watch for new errors only
+dmesg -w -l err
+
+# Same information through systemd, with boot selection
+journalctl -k
+
+# Kernel messages from the previous boot
+journalctl -k -b -1
+
+# Kernel messages since a time
+journalctl -k --since "1 hour ago"
+
+# Search kernel messages with journald
+journalctl -k --grep='i/o error'
+
+# Follow kernel messages through journald
+journalctl -k -f
+
+# Read the buffer without root, if permitted
+cat /proc/sys/kernel/dmesg_restrict

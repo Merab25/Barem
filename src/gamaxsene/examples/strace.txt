@@ -1,0 +1,100 @@
+## Trace system calls and signals to see what a process really does
+
+# Trace a command from the start
+strace ls /tmp
+
+# Attach to a running process
+sudo strace -p 4821
+
+# Attach and follow every thread
+sudo strace -f -p 4821
+
+# Write the trace to a file instead of the terminal
+strace -o trace.log ls /tmp
+
+# One file per traced process
+strace -ff -o trace ./myapp
+
+# Only file-related calls
+strace -e trace=file ls /tmp
+
+# Only the files a program opens
+strace -e trace=openat,open ./myapp
+
+# Only network calls
+strace -e trace=network curl -s https://example.com
+
+# Only process management
+strace -e trace=process ./deploy.sh
+
+# Only reads and writes
+strace -e trace=read,write ./myapp
+
+# Exclude noisy calls
+strace -e 'trace=!futex,clock_gettime' -p 4821
+
+# Show a summary instead of every call
+strace -c ls -R /etc
+
+# Summary, sorted by time spent
+strace -c -S time ./myapp
+
+# Time each call, to find the slow one
+strace -T ls /tmp
+
+# Only calls slower than 10ms
+strace -T -e trace=all ./myapp 2>&1 | awk -F'<' '$2+0 > 0.01'
+
+# Wall-clock timestamp on every line
+strace -tt ./myapp
+
+# Relative time between calls
+strace -r ./myapp
+
+# Do not truncate strings at 32 characters
+strace -s 1024 -e trace=write -p 4821
+
+# Print argv and environment of the traced program
+strace -v -e trace=execve ./myapp
+
+# Follow forks, essential for shells and servers
+strace -f ./start.sh
+
+# Which config file does it read?
+strace -f -e trace=openat ./myapp 2>&1 | grep -v ENOENT
+
+# Which files does it fail to find?
+strace -f -e trace=openat ./myapp 2>&1 | grep ENOENT
+
+# What is a hung process waiting on?
+sudo strace -p 4821
+
+# Why is a connection failing?
+strace -e trace=connect,socket curl -s http://localhost:8080
+
+# What is it writing to the network?
+sudo strace -f -e trace=sendto,write -s 2048 -p 4821
+
+# Watch a process's exit path
+strace -e trace=exit_group ./myapp
+
+# Trace only the signals a process receives
+strace -e signal=all -p 4821
+
+# Follow a systemd service by finding its main PID
+sudo strace -f -p "$(systemctl show -p MainPID --value nginx)"
+
+# Trace inside a container from the host
+sudo nsenter -t "$(docker inspect -f '{{.State.Pid}}' web)" -n -p strace -p 1
+
+# Library calls instead of system calls
+ltrace ./myapp
+
+# Which shared libraries does it need?
+ldd ./myapp
+
+# Lighter-weight tracing for a busy production process
+sudo perf trace -p 4821
+
+# Remember strace slows the traced process down considerably
+strace -c -p 4821

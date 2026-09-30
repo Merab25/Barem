@@ -1,0 +1,91 @@
+## Show the last lines of a file, and follow a growing log
+
+# Last 10 lines (the default)
+tail /var/log/syslog
+
+# Last 50 lines
+tail -n 50 /var/log/syslog
+
+# Short form
+tail -50 /var/log/syslog
+
+# Follow the file as it grows
+tail -f /var/log/nginx/access.log
+
+# Follow, and keep following if the file is rotated or recreated
+tail -F /var/log/myapp/app.log
+
+# Follow with no initial output, only new lines
+tail -n 0 -f /var/log/myapp/app.log
+
+# Follow several files at once, with a header per file
+tail -f /var/log/nginx/access.log /var/log/nginx/error.log
+
+# Start from line 100 to the end
+tail -n +100 big.log
+
+# Skip the CSV header row
+tail -n +2 users.csv
+
+# Last 500 bytes
+tail -c 500 app.log
+
+# Last kilobyte
+tail -c 1K app.log
+
+# Follow and stop when the writing process exits
+tail -f --pid=1234 /var/log/myapp/app.log
+
+# Follow and filter for errors
+tail -f /var/log/myapp/app.log | grep -i --line-buffered error
+
+# Follow and highlight a pattern without hiding other lines
+tail -f app.log | grep --line-buffered -E --color=always 'ERROR|$'
+
+# Follow and pull out one field
+tail -f access.log | awk '{print $1, $9}'
+
+# Follow JSON logs and pretty-print them
+tail -f app.log | jq -c '{level, msg}'
+
+# Follow and write to a second file at the same time
+tail -f app.log | tee errors.log
+
+# Check the poll interval when inotify is unavailable
+tail -f --sleep-interval=5 app.log
+
+# Last lines of every log in a directory
+tail -n 5 /var/log/*.log
+
+# Suppress the file-name headers
+tail -q -n 5 /var/log/*.log
+
+# Force a header for one file
+tail -v -n 5 app.log
+
+# Lines 10 to 20 of a file
+tail -n +10 file.txt | head -n 11
+
+# The last line only
+tail -n 1 report.csv
+
+# Second-to-last line
+tail -n 2 report.csv | head -n 1
+
+# Read a log that has no trailing newline
+tail -c 200 app.log | cat -A
+
+# Follow a systemd service instead (journald, not a file)
+journalctl -u nginx -f
+
+# Follow a container's output
+docker logs -f --tail 50 web
+
+# Follow a Kubernetes pod
+kubectl logs -f deploy/web --tail=50
+
+# Watch a file grow in size rather than content
+watch -n 1 'ls -l /var/log/app.log'
+
+# Stop following with Ctrl-C, or run it in the background
+tail -f app.log > /tmp/snapshot.log &

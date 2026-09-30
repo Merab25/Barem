@@ -1,0 +1,130 @@
+## GitHub from the terminal: repos, pull requests, issues and runs
+
+# Log in
+gh auth login
+
+# Show who you are logged in as
+gh auth status
+
+# Configure git to authenticate through gh
+gh auth setup-git
+
+# Clone a repository
+gh repo clone Merab25/Gamaxsene
+
+# Create a repository from the current directory
+gh repo create my-project --public --source=. --remote=origin --push
+
+# Show a repository's details
+gh repo view Merab25/Gamaxsene
+
+# Open it in a browser
+gh repo view --web
+
+# Fork a repository and clone it
+gh repo fork owner/repo --clone
+
+# List your repositories
+gh repo list --limit 20
+
+# Create a pull request interactively
+gh pr create
+
+# Create one non-interactively
+gh pr create --title "Add tab completion" --body "Closes #12" --base main
+
+# Create a draft pull request
+gh pr create --draft --fill
+
+# Use the commit messages as title and body
+gh pr create --fill
+
+# List open pull requests
+gh pr list
+
+# List pull requests assigned to you
+gh pr list --assignee @me
+
+# Show a pull request
+gh pr view 42
+
+# Show it with the full diff
+gh pr diff 42
+
+# Check out a pull request's branch locally
+gh pr checkout 42
+
+# Watch its checks until they finish
+gh pr checks 42 --watch
+
+# Approve a pull request
+gh pr review 42 --approve
+
+# Request changes with a comment
+gh pr review 42 --request-changes --body "Please add a test"
+
+# Comment on a pull request
+gh pr comment 42 --body "Looks good, merging after CI"
+
+# Merge with a squash and delete the branch
+gh pr merge 42 --squash --delete-branch
+
+# Merge once the checks pass, without waiting around
+gh pr merge 42 --squash --auto --delete-branch
+
+# Rebase merge
+gh pr merge 42 --rebase --delete-branch
+
+# Close a pull request without merging
+gh pr close 42
+
+# Show the status of your pull requests everywhere
+gh pr status
+
+# Create an issue
+gh issue create --title "Completion misses subcommands" --body "Steps to reproduce..."
+
+# List open issues
+gh issue list
+
+# Filter issues by label
+gh issue list --label bug --state open
+
+# Show an issue
+gh issue view 12
+
+# Close an issue with a comment
+gh issue close 12 --comment "Fixed in v0.2.0"
+
+# List recent workflow runs
+gh run list --limit 10
+
+# Runs for one branch
+gh run list --branch main
+
+# Show a run, with the failing steps
+gh run view 36765027771
+
+# Show the log of a failed run
+gh run view 36765027771 --log-failed
+
+# Follow a run until it finishes
+gh run watch 36765027771
+
+# Rerun the failed jobs of a run
+gh run rerun 36765027771 --failed
+
+# Trigger a workflow_dispatch workflow
+gh workflow run ci.yml --ref main
+
+# Create a release from a tag, with notes
+gh release create v0.2.0 --generate-notes
+
+# Upload a build artefact to a release
+gh release upload v0.2.0 dist/gamaxsene-0.2.0-py3-none-any.whl
+
+# Call any REST endpoint
+gh api repos/Merab25/Gamaxsene --jq '.stargazers_count'
+
+# Paginate a list endpoint
+gh api --paginate repos/Merab25/Gamaxsene/commits --jq '.[].sha'

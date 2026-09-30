@@ -1,0 +1,97 @@
+## Watch processes, CPU and memory in real time
+
+# Start top
+top
+
+# Sort by memory use instead of CPU
+top -o %MEM
+
+# Sort by CPU explicitly
+top -o %CPU
+
+# Only one user's processes
+top -u www-data
+
+# Only specific PIDs
+top -p 4821,4822
+
+# Run a fixed number of refreshes, then exit
+top -n 1
+
+# Batch mode: plain output, good for scripts and logs
+top -b -n 1
+
+# Batch mode, top 20 lines only
+top -b -n 1 | head -n 27
+
+# Refresh every 5 seconds
+top -d 5
+
+# Sub-second refresh
+top -d 0.5
+
+# Batch mode snapshot into a file
+top -b -n 1 > /tmp/top-$(date +%F-%H%M).txt
+
+# Log the top CPU consumers every 10 seconds
+top -b -d 10 -n 6 | grep -A 10 '^ *PID'
+
+# Show individual threads, not just processes
+top -H
+
+# Threads of one process
+top -H -p 4821
+
+# Hide idle processes
+top -i
+
+# Show full command lines
+top -c
+
+# Start with the command line shown, one shot, in batch mode
+top -b -c -n 1 | head -n 20
+
+# Set the width so long command lines are not truncated
+top -b -n 1 -w 512
+
+# Use a specific config file
+top -c -n 1 -b
+
+# Keys that matter while top is running: sort by memory
+top
+
+# Simpler, static alternative: processes by CPU
+ps aux --sort=-%cpu | head
+
+# Processes by memory
+ps aux --sort=-%mem | head
+
+# A friendlier interactive viewer, if installed
+htop
+
+# htop filtered to one user
+htop -u www-data
+
+# htop showing a process tree
+htop -t
+
+# Just the load average
+uptime
+
+# Load average from the kernel
+cat /proc/loadavg
+
+# CPU usage per core, sampled twice
+mpstat -P ALL 1 2
+
+# Overall CPU and IO, sampled every 2 seconds
+vmstat 2 5
+
+# Memory summary instead
+free -h
+
+# Which process is using the most IO
+iotop -o
+
+# Per-process CPU over time
+pidstat 2 5

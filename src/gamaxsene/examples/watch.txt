@@ -1,0 +1,94 @@
+## Re-run a command periodically and watch the output change
+
+# Re-run every 2 seconds (the default)
+watch df -h
+
+# Every 5 seconds
+watch -n 5 df -h
+
+# Every half second
+watch -n 0.5 'cat /proc/loadavg'
+
+# Highlight what changed since the last run
+watch -d free -h
+
+# Keep the highlight until the value changes again
+watch -d=cumulative free -h
+
+# Hide the header, showing only the output
+watch -t df -h
+
+# Quote the command when it contains pipes or redirection
+watch 'ps aux --sort=-%mem | head'
+
+# Watch a directory fill up
+watch 'ls -lh /srv/uploads | tail'
+
+# Watch a file grow
+watch -n 1 'ls -l /var/log/app.log'
+
+# Watch the size of a directory
+watch -n 10 'du -sh /var/lib/mysql'
+
+# Watch the tail of a log
+watch -n 2 'tail -n 20 /var/log/myapp/app.log'
+
+# Watch open connections on a port
+watch "ss -tn 'sport = :443' | wc -l"
+
+# Watch a service's status
+watch -n 5 systemctl status nginx --no-pager
+
+# Watch Kubernetes pods come up
+watch kubectl get pods
+
+# Watch pods in a namespace, with changes highlighted
+watch -d 'kubectl get pods -n production'
+
+# Watch a deployment roll out
+watch 'kubectl get deploy web -o wide'
+
+# Watch running containers
+watch -n 5 'docker ps --format "table {{.Names}}\t{{.Status}}"'
+
+# Watch memory of one process
+watch -n 2 'ps -o pid,rss,cmd -p 4821'
+
+# Watch CPU temperature
+watch -n 5 sensors
+
+# Watch disk IO
+watch -n 2 'iostat -x 1 2 | tail -n 20'
+
+# Watch the ARP table
+watch -n 5 'ip neigh'
+
+# Exit as soon as the output changes
+watch -g 'ls /tmp/ready'
+
+# Exit when a command starts succeeding
+watch -g -n 2 'curl -sf http://localhost:8080/health'
+
+# Exit when a command fails
+watch -e 'systemctl is-active nginx'
+
+# Beep when the output changes
+watch -b -n 5 'ls /srv/incoming'
+
+# Keep colour in the watched command's output
+watch --color 'git -c color.ui=always status -s'
+
+# Watch a command that needs a shell function, via bash -c
+watch -n 5 'bash -c "echo $(date +%T) $(uptime)"'
+
+# Wait for a port to open, then stop
+watch -g -n 1 'nc -z localhost 5432'
+
+# Wait for a file to appear, then stop
+watch -g -n 1 'test -f /tmp/done'
+
+# Simple loop when watch is not installed
+while true; do clear; df -h; sleep 5; done
+
+# Follow a log instead of re-running tail
+tail -f /var/log/myapp/app.log

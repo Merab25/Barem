@@ -1,0 +1,94 @@
+## Create and update .zip archives
+
+# Zip a few files
+zip archive.zip report.pdf notes.txt
+
+# Zip a directory and everything in it
+zip -r site.zip public_html/
+
+# Zip the contents quietly
+zip -qr site.zip public_html/
+
+# Maximum compression
+zip -9 -r site.zip public_html/
+
+# No compression, just packaging
+zip -0 -r images.zip photos/
+
+# Show progress as files are added
+zip -r -v site.zip public_html/
+
+# Add files to an existing archive
+zip archive.zip extra.txt
+
+# Update only files that changed
+zip -u archive.zip report.pdf
+
+# Refresh: update existing entries but add nothing new
+zip -f archive.zip
+
+# Delete an entry from an archive
+zip -d archive.zip notes.txt
+
+# Move files into the archive, deleting the originals
+zip -m archive.zip temp-report.pdf
+
+# Exclude a pattern
+zip -r site.zip public_html/ -x '*.log'
+
+# Exclude several patterns
+zip -r src.zip project/ -x '*.pyc' -x '*/__pycache__/*' -x '*/.git/*'
+
+# Exclude using a list from a file
+zip -r site.zip public_html/ -x@exclude.txt
+
+# Include only matching files
+zip -r css.zip public_html/ -i '*.css'
+
+# Store paths relative to a directory, without the leading folder
+cd public_html && zip -r ../site.zip .
+
+# Drop directory names, storing a flat archive
+zip -j docs.zip reports/*.pdf
+
+# Follow symlinks and store what they point to
+zip -r --symlinks=no bundle.zip app/
+
+# Store symlinks as symlinks
+zip -ry bundle.zip app/
+
+# Encrypt with a password (prompts, so the password stays out of history)
+zip -er secrets.zip private/
+
+# Password on the command line (visible in ps, avoid on shared hosts)
+zip -P hunter2 -r secrets.zip private/
+
+# Split into 100 MB volumes
+zip -r -s 100m big.zip data/
+
+# Add a comment to the archive
+zip -z archive.zip
+
+# Test that an archive is valid
+zip -T archive.zip
+
+# Show what is inside without extracting
+unzip -l archive.zip
+
+# Zip only files changed in the last day
+find . -mtime -1 -type f -print | zip changed.zip -@
+
+# Zip a list of files from another command
+git ls-files | zip source.zip -@
+
+# Zip standard input into an entry
+zip archive.zip -
+
+# Timestamp the archive name
+zip -r "backup-$(date +%F).zip" /etc/myapp
+
+# Recreate an archive from scratch, replacing the old one
+rm -f site.zip && zip -r site.zip public_html/
+
+# For Unix-to-Unix transfer, tar preserves permissions better
+tar -czf site.tar.gz public_html/

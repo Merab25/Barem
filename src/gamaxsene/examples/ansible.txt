@@ -1,0 +1,112 @@
+## Run ad-hoc tasks and playbooks against your inventory
+
+# Check which hosts answer
+ansible all -m ping
+
+# Ping one group
+ansible webservers -m ping
+
+# Use a specific inventory file
+ansible all -i inventory.ini -m ping
+
+# List the hosts a pattern matches, without doing anything
+ansible all --list-hosts
+
+# Run a shell command everywhere
+ansible all -a 'uptime'
+
+# Run a command as root
+ansible all -b -a 'systemctl restart nginx'
+
+# Become a specific user
+ansible all -b --become-user=postgres -a 'psql -c "SELECT 1"'
+
+# Ask for the sudo password
+ansible all -b -K -a 'apt update'
+
+# Use the shell module when you need pipes or redirection
+ansible all -m shell -a 'df -h | tail -n 5'
+
+# Gather all facts about a host
+ansible web1 -m setup
+
+# One fact only
+ansible web1 -m setup -a 'filter=ansible_distribution*'
+
+# Install a package
+ansible all -b -m apt -a 'name=nginx state=present update_cache=yes'
+
+# Install on Red Hat family
+ansible all -b -m dnf -a 'name=nginx state=present'
+
+# Manage a service
+ansible all -b -m service -a 'name=nginx state=restarted enabled=yes'
+
+# Copy a file out to every host
+ansible all -b -m copy -a 'src=./nginx.conf dest=/etc/nginx/nginx.conf backup=yes'
+
+# Fetch a file from every host into a local tree
+ansible all -m fetch -a 'src=/var/log/app.log dest=./logs/'
+
+# Create a directory with permissions
+ansible all -b -m file -a 'path=/srv/app state=directory owner=app mode=0755'
+
+# Add a line to a file, idempotently
+ansible all -b -m lineinfile -a 'path=/etc/hosts line="10.0.0.5 db"'
+
+# Run a playbook
+ansible-playbook site.yml
+
+# Playbook with an explicit inventory
+ansible-playbook -i production site.yml
+
+# Dry run: report what would change
+ansible-playbook --check site.yml
+
+# Dry run showing the file differences
+ansible-playbook --check --diff site.yml
+
+# Limit to one host
+ansible-playbook site.yml --limit web1
+
+# Limit to a group
+ansible-playbook site.yml --limit 'webservers:!web3'
+
+# Run only tagged tasks
+ansible-playbook site.yml --tags deploy
+
+# Skip tagged tasks
+ansible-playbook site.yml --skip-tags slow
+
+# Start at a named task, after fixing a failure
+ansible-playbook site.yml --start-at-task 'Install nginx'
+
+# Pass a variable
+ansible-playbook site.yml -e 'app_version=1.4.2'
+
+# Pass variables from a file
+ansible-playbook site.yml -e @vars/production.yml
+
+# Verbose, for debugging
+ansible-playbook site.yml -vv
+
+# Show the tasks without running them
+ansible-playbook site.yml --list-tasks
+
+# Syntax check only
+ansible-playbook site.yml --syntax-check
+
+# Encrypt a secrets file
+ansible-vault encrypt vars/secrets.yml
+
+# Edit an encrypted file
+ansible-vault edit vars/secrets.yml
+
+# Run a playbook that needs the vault password
+ansible-playbook site.yml --ask-vault-pass
+
+# Install roles and collections a project needs
+ansible-galaxy install -r requirements.yml
+
+# Lint a playbook before committing
+ansible-lint site.yml

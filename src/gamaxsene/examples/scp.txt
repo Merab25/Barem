@@ -1,0 +1,94 @@
+## Copy files to and from remote hosts over SSH
+
+# Copy a local file to a remote host
+scp report.pdf merab@server:/srv/reports/
+
+# Copy from a remote host to the current directory
+scp merab@server:/var/log/app.log .
+
+# Copy to the remote home directory
+scp report.pdf merab@server:
+
+# Rename while copying
+scp report.pdf merab@server:/srv/reports/report-2026.pdf
+
+# Copy a directory recursively
+scp -r public_html merab@server:/var/www/
+
+# Copy several files at once
+scp a.txt b.txt c.txt merab@server:/tmp/
+
+# Copy with a glob from the remote side (quoted so the local shell leaves it alone)
+scp 'merab@server:/var/log/*.log' ./logs/
+
+# Preserve modification times and permissions
+scp -p report.pdf merab@server:/srv/
+
+# Compress in transit, useful on slow links
+scp -C bigfile.sql merab@server:/tmp/
+
+# Quiet: no progress meter
+scp -q report.pdf merab@server:/srv/
+
+# Verbose, for debugging a failing copy
+scp -v report.pdf merab@server:/srv/
+
+# Use a non-standard port
+scp -P 2222 report.pdf merab@server:/srv/
+
+# Use a specific private key
+scp -i ~/.ssh/deploy_ed25519 report.pdf deploy@server:/srv/
+
+# Use a host defined in ~/.ssh/config
+scp report.pdf production:/srv/reports/
+
+# Limit bandwidth to 1000 Kbit/s
+scp -l 1000 bigfile.iso merab@server:/tmp/
+
+# Copy between two remote hosts, routing through your machine
+scp merab@web1:/srv/data.csv merab@web2:/srv/
+
+# Copy directly between remote hosts, without passing through yours
+scp -3 merab@web1:/srv/data.csv merab@web2:/srv/
+
+# Force the older SCP protocol, for very old servers
+scp -O report.pdf merab@server:/srv/
+
+# Use SFTP protocol explicitly (the default in newer OpenSSH)
+scp -s report.pdf merab@server:/srv/
+
+# Jump through a bastion host
+scp -J bastion.example.com report.pdf merab@internal:/srv/
+
+# Pass any ssh option through
+scp -o StrictHostKeyChecking=accept-new report.pdf merab@server:/srv/
+
+# Connect timeout, so a dead host fails fast
+scp -o ConnectTimeout=5 report.pdf merab@server:/srv/
+
+# Copy a file that needs root on the far side, via a staging directory
+scp nginx.conf merab@server:/tmp/ && ssh merab@server 'sudo mv /tmp/nginx.conf /etc/nginx/'
+
+# Copy an IPv6 host's file (brackets required)
+scp 'merab@[2606:4700:4700::1111]:/tmp/file' .
+
+# Copy a whole tree and keep going after errors: rsync is better
+rsync -av public_html/ merab@server:/var/www/html/
+
+# Resume an interrupted transfer, which scp cannot do
+rsync -avP bigfile.iso merab@server:/tmp/
+
+# Mirror a directory, deleting what is gone locally
+rsync -av --delete public_html/ merab@server:/var/www/html/
+
+# Stream a directory as a tarball instead
+tar -cz public_html | ssh merab@server 'tar -xz -C /var/www'
+
+# Pull a database dump straight into a local file
+ssh merab@dbhost 'mysqldump mydb | gzip' > mydb.sql.gz
+
+# Interactive file browsing over SSH
+sftp merab@server
+
+# Check the file arrived intact
+ssh merab@server 'sha256sum /srv/reports/report.pdf'; sha256sum report.pdf

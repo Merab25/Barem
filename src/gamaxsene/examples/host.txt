@@ -1,0 +1,106 @@
+## Quick DNS lookups: names, addresses and mail servers
+
+# Look up a name
+host example.com
+
+# Reverse lookup an IP
+host 93.184.216.34
+
+# Only the A record
+host -t A example.com
+
+# Only the AAAA record
+host -t AAAA example.com
+
+# Mail servers
+host -t MX example.com
+
+# Name servers
+host -t NS example.com
+
+# TXT records, where SPF and verification tokens live
+host -t TXT example.com
+
+# SPF record specifically
+host -t TXT example.com | grep spf
+
+# CNAME target
+host -t CNAME www.example.com
+
+# SOA record, with the zone serial
+host -t SOA example.com
+
+# SRV record
+host -t SRV _sip._tcp.example.com
+
+# CAA record, which controls who may issue certificates
+host -t CAA example.com
+
+# Every record type the resolver will return
+host -a example.com
+
+# Verbose output, closer to dig
+host -v example.com
+
+# Ask a specific resolver
+host example.com 1.1.1.1
+
+# Ask Google's resolver
+host example.com 8.8.8.8
+
+# Ask the domain's own authoritative server
+host -t NS example.com
+
+# Query the authoritative server directly
+host example.com ns1.example.com
+
+# Force TCP instead of UDP
+host -T example.com
+
+# Force IPv4 transport
+host -4 example.com
+
+# Force IPv6 transport
+host -6 example.com
+
+# Set the timeout in seconds
+host -W 2 example.com
+
+# Retry count
+host -R 1 example.com
+
+# Check whether a name resolves at all, in a script
+host -t A example.com > /dev/null 2>&1 && echo "resolves"
+
+# Just the IP, stripping the prose
+host example.com | awk '/has address/ {print $4; exit}'
+
+# All A records, one per line
+host -t A example.com | awk '/has address/ {print $4}'
+
+# Compare what two resolvers say, to spot stale caches
+diff <(host example.com 1.1.1.1) <(host example.com 8.8.8.8)
+
+# Check propagation across several resolvers
+for r in 1.1.1.1 8.8.8.8 9.9.9.9; do echo "$r: $(host -t A example.com "$r" | awk '/has address/ {print $4; exit}')"; done
+
+# Reverse lookup every IP in a file
+while read -r ip; do echo "$ip $(host "$ip" | awk '{print $NF}')"; done < ips.txt
+
+# The more detailed tool, when you need flags and TTLs
+dig example.com
+
+# Short answer only
+dig +short example.com
+
+# Trace the delegation from the root
+dig +trace example.com
+
+# The deprecated but still common alternative
+nslookup example.com
+
+# Who owns the domain
+whois example.com
+
+# What does the local resolver config say?
+cat /etc/resolv.conf

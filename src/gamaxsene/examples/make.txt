@@ -1,0 +1,109 @@
+## Build targets and run project tasks from a Makefile
+
+# Build the first (default) target
+make
+
+# Build a named target
+make install
+
+# Common project tasks
+make test
+
+# Clean build artefacts
+make clean
+
+# Rebuild from scratch
+make clean && make
+
+# Build with 8 parallel jobs
+make -j8
+
+# Use one job per CPU
+make -j"$(nproc)"
+
+# Parallel, but keep the output of each job together
+make -j8 --output-sync=target
+
+# Dry run: print the commands without running them
+make -n install
+
+# Print the commands even when the Makefile silences them
+make --trace
+
+# Keep going after an error, building what it can
+make -k
+
+# Stop at the first error (the default)
+make -S
+
+# Use a Makefile with a different name
+make -f Makefile.dev
+
+# Build in another directory
+make -C /srv/project install
+
+# Override a variable on the command line
+make CC=clang
+
+# Override, beating even assignments inside the Makefile
+make -e PREFIX=/usr/local
+
+# Pass extra compiler flags
+make CFLAGS="-O2 -g"
+
+# Set the install prefix
+make install PREFIX=/opt/myapp
+
+# Install into a staging directory, for packaging
+make install DESTDIR=/tmp/pkgroot
+
+# Show why make thinks a target is out of date
+make -d install 2>&1 | head -n 40
+
+# Quieter debugging, just the basics
+make --debug=b
+
+# Ask whether a target is up to date, via the exit status
+make -q install && echo "up to date"
+
+# Touch targets instead of rebuilding them
+make -t
+
+# Pretend a file is newer, forcing dependents to rebuild
+make -W src/main.c
+
+# Assume a file is old, so it is not rebuilt
+make -o config.h
+
+# List every variable and rule make knows
+make -p | head -n 40
+
+# List the targets a Makefile defines
+make -pRrq 2>/dev/null | awk -F: '/^[a-zA-Z0-9_.-]+:/ && !/=/ {print $1}' | sort -u
+
+# Simpler target list, when targets are documented with ##
+grep -E '^[a-zA-Z0-9_-]+:.*?## ' Makefile
+
+# The usual self-documenting help target
+make help
+
+# Print a variable's value
+make print-CFLAGS
+
+# Time how long a build takes
+time make -j8
+
+# Log a build for later reading
+make -j8 2>&1 | tee build.log
+
+# Check the Makefile for tab-versus-space mistakes
+cat -A Makefile | head -n 20
+
+# Run a target ignoring its dependencies is not possible; use a phony one
+make .PHONY
+
+# Configure, build and install the classic way
+./configure --prefix=/usr/local && make -j"$(nproc)" && sudo make install
+
+# Uninstall, when the Makefile supports it
+sudo make uninstall
