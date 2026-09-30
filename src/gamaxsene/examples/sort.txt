@@ -1,0 +1,97 @@
+## Sort lines of text by alphabet, numbers, columns, versions and more
+
+# Sort alphabetically
+sort names.txt
+
+# Reverse order
+sort -r names.txt
+
+# Numeric sort
+sort -n numbers.txt
+
+# Numeric, largest first
+sort -rn scores.txt
+
+# Human-readable sizes (1K, 5M, 2G)
+du -sh * | sort -h
+
+# Remove duplicates while sorting
+sort -u emails.txt
+
+# Case-insensitive
+sort -f names.txt
+
+# Sort by the second column
+sort -k2 data.txt
+
+# Numeric sort by the third column only
+sort -k3,3n data.txt
+
+# Custom separator: /etc/passwd by UID
+sort -t: -k3,3n /etc/passwd
+
+# CSV by the second column
+sort -t, -k2,2 users.csv
+
+# Several keys: by column 3, then column 2 numeric descending
+sort -t, -k3,3 -k2,2nr sales.csv
+
+# Version numbers (1.2.10 after 1.2.9)
+sort -V versions.txt
+
+# Month names (Jan, Feb, ...)
+sort -M months.txt
+
+# Scientific notation numbers
+sort -g values.txt
+
+# Random order
+sort -R playlist.txt
+
+# Check if a file is already sorted
+sort -c data.txt
+
+# Sort a file in place
+sort -o names.txt names.txt
+
+# Stable sort: keep original order of equal lines
+sort -s -k1,1 log.txt
+
+# Ignore leading blanks
+sort -b file.txt
+
+# Dictionary order: only letters, digits and blanks
+sort -d words.txt
+
+# Merge already-sorted files
+sort -m sorted1.txt sorted2.txt
+
+# Sort by characters 5 to 8 of the first field
+sort -k1.5,1.8 codes.txt
+
+# Big files: more memory and CPU cores
+sort --parallel=4 -S 2G huge.log -o huge.sorted
+
+# Use another temp directory for huge files
+sort -T /mnt/bigdisk huge.txt > huge.sorted.txt
+
+# Sort IP addresses correctly
+sort -t. -k1,1n -k2,2n -k3,3n -k4,4n ips.txt
+
+# Count and rank: top 10 IPs in a log
+awk '{print $1}' access.log | sort | uniq -c | sort -rn | head
+
+# Only lines that appear more than once
+sort names.txt | uniq -d
+
+# Sort by line length
+awk '{print length, $0}' file.txt | sort -n | cut -d' ' -f2-
+
+# Processes using the most memory
+ps aux | sort -k4 -rn | head
+
+# Sort a CSV but keep the header line on top
+(head -1 data.csv; tail -n +2 data.csv | sort -t, -k2) > sorted.csv
+
+# Null-separated input (file names with spaces)
+find . -type f -print0 | sort -z | xargs -0 md5sum

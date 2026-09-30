@@ -1,0 +1,91 @@
+## Show disk usage of files and directories
+
+# Total size of a directory, human-readable
+du -sh /var/log
+
+# Size of every item in the current directory
+du -sh *
+
+# Include hidden files and folders
+du -sh .[!.]* *
+
+# Sort items by size, largest first
+du -sh * | sort -rh
+
+# Top 10 largest directories
+du -h /var | sort -rh | head -10
+
+# Only one level deep
+du -h --max-depth=1 /home
+
+# Two levels deep (short option)
+du -h -d 2 /opt
+
+# Include files, not only directories
+du -ah /var/log | sort -rh | head -20
+
+# Grand total at the end
+du -ch *.log
+
+# Only the grand total
+du -ch *.log | tail -1
+
+# Exclude files matching a pattern
+du -sh --exclude="*.iso" ~/Downloads
+
+# Exclude a directory
+du -sh --exclude=node_modules project/
+
+# Largest top-level folders on the root disk only
+sudo du -xh --max-depth=1 / 2>/dev/null | sort -rh | head
+
+# Apparent size (real file length, not disk blocks)
+du -sh --apparent-size vm-disk.img
+
+# Size in bytes
+du -sb project/
+
+# Size in megabytes
+du -sm /var/lib/docker
+
+# Size in gigabytes
+du -s -BG /data
+
+# Show last modification time too
+du -h --time --max-depth=1 /var/backups
+
+# Only entries bigger than 1 GB
+du -h --threshold=1G /home
+
+# Do not include subdirectories in each folder's size
+du -Sh /var | sort -rh | head
+
+# Follow symlinks
+du -shL /opt/current
+
+# Count inodes (number of files) instead of size
+du --inodes -s /var/lib/php/sessions
+
+# Find directories with too many small files
+du --inodes -d 1 /var | sort -n
+
+# Total size of files found by find
+find . -name "*.mp4" -print0 | du -ch --files0-from=- | tail -1
+
+# Size of all rotated gzip logs
+du -ch /var/log/*.gz | tail -1
+
+# Size of each user's home directory
+sudo du -sh /home/*
+
+# Size of the systemd journal
+du -sh /var/log/journal
+
+# Docker storage usage
+sudo du -sh /var/lib/docker/overlay2
+
+# Watch a directory grow
+watch -n 5 du -sh /var/lib/mysql
+
+# Largest files in the current tree
+du -ah . | sort -rh | head -20

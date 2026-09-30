@@ -1,0 +1,91 @@
+## Netcat: test ports, send raw TCP/UDP data, move files (OpenBSD netcat)
+
+# Check if a port is open
+nc -zv example.com 443
+
+# Check with a 3-second timeout
+nc -zv -w 3 db.internal 5432
+
+# Scan a port range
+nc -zv 192.168.1.10 20-100
+
+# Check a UDP port
+nc -zuv 192.168.1.1 53
+
+# No DNS lookup, numeric only
+nc -nzv 10.0.0.5 22
+
+# Force IPv4
+nc -4 -zv example.com 443
+
+# Wait in a script until a port is open
+until nc -z localhost 5432; do echo "waiting for postgres..."; sleep 1; done
+
+# Check SSH on several servers
+for h in web1 web2 web3; do nc -z -w 2 "$h" 22 && echo "$h up" || echo "$h down"; done
+
+# Read the service banner
+nc -v example.com 22
+
+# Listen on a port
+nc -l 9000
+
+# Keep listening after a client disconnects
+nc -lk 9000
+
+# Save everything received to a file
+nc -lk 9000 >> incoming.log
+
+# Simple chat: connect to a listener
+nc 192.168.1.20 9000
+
+# Receive a file
+nc -l 9000 > received.tar.gz
+
+# Send a file (-N closes when done)
+nc -N 192.168.1.20 9000 < backup.tar.gz
+
+# Send a whole directory
+tar -czf - project/ | nc -N 192.168.1.20 9000
+
+# Receive and unpack a directory
+nc -l 9000 | tar -xzf -
+
+# Raw HTTP request by hand
+printf "GET / HTTP/1.1\r\nHost: example.com\r\nConnection: close\r\n\r\n" | nc example.com 80
+
+# One-shot HTTP server with a fixed response
+printf "HTTP/1.1 200 OK\r\n\r\nhello\n" | nc -l 8080
+
+# Serve a file over HTTP once
+{ printf "HTTP/1.1 200 OK\r\n\r\n"; cat index.html; } | nc -l 8080
+
+# Talk to an SMTP server (CRLF line endings)
+nc -C mail.example.com 25
+
+# Ping Redis
+echo PING | nc -w 1 localhost 6379
+
+# Listen for UDP messages
+nc -lu 5140
+
+# Send a syslog message over UDP
+echo "<14>test message from nc" | nc -u -w 1 logserver 514
+
+# Send a JSON line to a TCP log collector
+echo '{"level":"info","msg":"hello"}' | nc -N logstash.local 5000
+
+# Connect to a Unix socket
+nc -U /var/run/app.sock
+
+# Connect through a SOCKS5 proxy
+nc -X 5 -x 127.0.0.1:1080 internal-host 22
+
+# Network throughput test (receiver runs: nc -l 9000 > /dev/null)
+dd if=/dev/zero bs=1M count=1000 | nc -N 192.168.1.20 9000
+
+# Test a port inside a Docker network
+docker run --rm --network mynet busybox nc -zv db 5432
+
+# Test a Kubernetes service from inside the cluster
+kubectl run nc-test -it --rm --image=busybox --restart=Never -- nc -zv my-service 80

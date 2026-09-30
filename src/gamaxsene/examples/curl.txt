@@ -1,0 +1,106 @@
+## Transfer data with URLs: HTTP requests, REST APIs and downloads
+
+# Simple GET request
+curl https://example.com
+
+# Download and keep the remote file name
+curl -O https://example.com/files/app.tar.gz
+
+# Download and save under another name
+curl -o page.html https://example.com
+
+# Follow redirects
+curl -L https://example.com/latest
+
+# Common script combo: fail on errors, silent, show errors, follow redirects
+curl -fsSL https://get.docker.com -o get-docker.sh
+
+# Only response headers
+curl -I https://example.com
+
+# Response headers plus body
+curl -i https://api.example.com/users
+
+# Verbose: see TLS handshake and request/response headers
+curl -v https://example.com
+
+# POST JSON
+curl -X POST https://api.example.com/users -H "Content-Type: application/json" -d '{"name":"Merab","role":"admin"}'
+
+# POST JSON, short form (curl 7.82+)
+curl --json '{"name":"Merab"}' https://api.example.com/users
+
+# POST JSON from a file
+curl -X POST -H "Content-Type: application/json" -d @payload.json https://api.example.com/items
+
+# POST form data
+curl -d "username=merab&password=secret" https://example.com/login
+
+# Upload a file (multipart form)
+curl -F "file=@report.pdf" https://api.example.com/upload
+
+# PUT request
+curl -X PUT -H "Content-Type: application/json" -d '{"status":"done"}' https://api.example.com/tasks/42
+
+# DELETE request
+curl -X DELETE https://api.example.com/tasks/42
+
+# Bearer token authentication
+curl -H "Authorization: Bearer $TOKEN" https://api.example.com/me
+
+# Basic authentication
+curl -u admin:password https://example.com/admin
+
+# Only the HTTP status code
+curl -s -o /dev/null -w "%{http_code}\n" https://example.com
+
+# Timing breakdown: DNS, connect, first byte, total
+curl -s -o /dev/null -w "dns:%{time_namelookup} connect:%{time_connect} ttfb:%{time_starttransfer} total:%{time_total}\n" https://example.com
+
+# Health check in a script
+curl -fs https://api.example.com/health > /dev/null || echo "service DOWN"
+
+# Retry on failure
+curl --retry 5 --retry-delay 2 https://api.example.com/health
+
+# Timeouts: 5s to connect, 30s total
+curl --connect-timeout 5 --max-time 30 https://api.example.com
+
+# Resume a broken download
+curl -C - -O https://example.com/big.iso
+
+# Limit download speed
+curl --limit-rate 1M -O https://example.com/big.iso
+
+# Download a numbered series of files
+curl -O "https://example.com/images/img[1-10].jpg"
+
+# Ignore certificate errors (testing only)
+curl -k https://localhost:8443
+
+# Trust a custom CA certificate
+curl --cacert ca.crt https://internal.example.local
+
+# Client certificate (mutual TLS)
+curl --cert client.crt --key client.key https://mtls.example.com
+
+# Save and send cookies
+curl -c cookies.txt -b cookies.txt https://example.com/dashboard
+
+# Custom User-Agent
+curl -A "Mozilla/5.0" https://example.com
+
+# Use a proxy
+curl -x http://proxy.local:3128 https://example.com
+
+# Test a server before DNS points to it
+curl --resolve example.com:443:203.0.113.10 https://example.com
+
+# Talk to the Docker API over its Unix socket
+curl --unix-socket /var/run/docker.sock http://localhost/containers/json
+
+# Your public IP address
+curl -s https://ifconfig.me
+
+# API call piped into jq
+curl -s https://api.github.com/repos/python/cpython | jq '.stargazers_count'

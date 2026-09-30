@@ -1,0 +1,101 @@
+## Schedule recurring jobs with cron (fields: minute hour day month weekday)
+
+# Edit your cron jobs
+crontab -e
+
+# List your cron jobs
+crontab -l
+
+# Back up your cron jobs
+crontab -l > crontab-backup.txt
+
+# Install cron jobs from a file (replaces current ones)
+crontab mycron.txt
+
+# Remove ALL your cron jobs (careful)
+crontab -r
+
+# List / edit another user's cron jobs
+sudo crontab -u www-data -l
+sudo crontab -u www-data -e
+
+# Add a job without opening an editor
+(crontab -l 2>/dev/null; echo "0 3 * * * /usr/local/bin/backup.sh") | crontab -
+
+# Every minute
+* * * * * /usr/local/bin/heartbeat.sh
+
+# Every 5 minutes
+*/5 * * * * /usr/local/bin/check.sh
+
+# Every hour at minute 0
+0 * * * * /usr/local/bin/hourly.sh
+
+# Every 2 hours
+0 */2 * * * /usr/local/bin/task.sh
+
+# Every day at 03:00
+0 3 * * * /usr/local/bin/backup.sh
+
+# Twice a day, 09:00 and 21:00
+0 9,21 * * * /usr/local/bin/report.sh
+
+# Weekdays at 09:00
+0 9 * * 1-5 /usr/local/bin/standup-reminder.sh
+
+# Every 15 minutes during work hours on weekdays
+*/15 9-18 * * 1-5 /usr/local/bin/sync.sh
+
+# Every Sunday at midnight
+0 0 * * 0 /usr/local/bin/weekly.sh
+
+# First day of every month
+0 0 1 * * /usr/local/bin/monthly-invoice.sh
+
+# First day of every quarter
+0 0 1 1,4,7,10 * /usr/local/bin/quarterly.sh
+
+# Last day of the month (runs on 28-31, checks if tomorrow is the 1st)
+0 23 28-31 * * [ "$(date -d tomorrow +\%d)" = "01" ] && /usr/local/bin/month-end.sh
+
+# Once after every reboot
+@reboot /usr/local/bin/start-agent.sh
+
+# Shortcuts: @hourly @daily @weekly @monthly @yearly
+@daily /usr/local/bin/cleanup.sh
+
+# Every 30 seconds (cron itself is limited to 1 minute)
+* * * * * /usr/local/bin/job.sh
+* * * * * sleep 30; /usr/local/bin/job.sh
+
+# Append output and errors to a log file
+0 3 * * * /usr/local/bin/backup.sh >> /var/log/backup.log 2>&1
+
+# Throw all output away
+*/5 * * * * /usr/local/bin/ping.sh > /dev/null 2>&1
+
+# % must be escaped in crontab lines
+0 2 * * * tar -czf /backups/etc-$(date +\%F).tar.gz /etc
+
+# Variables at the top of the crontab
+MAILTO="admin@example.com"
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Do not start a new run while the old one is still running
+*/5 * * * * flock -n /tmp/sync.lock /usr/local/bin/sync.sh
+
+# Run a Python app job from its virtualenv
+0 6 * * * cd /opt/app && .venv/bin/python manage.py cleanup >> /var/log/app-cron.log 2>&1
+
+# Renew Let's Encrypt certificates twice a day
+0 0,12 * * * certbot renew --quiet
+
+# Weekly Docker cleanup
+0 4 * * 0 docker system prune -af --filter "until=168h" > /dev/null 2>&1
+
+# System-wide job in /etc/cron.d/ (has an extra user field)
+0 4 * * * root /usr/local/bin/cleanup.sh
+
+# Check if cron ran your job
+grep CRON /var/log/syslog
+journalctl -u cron --since today

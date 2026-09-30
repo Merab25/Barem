@@ -1,0 +1,94 @@
+## Non-interactive downloader: files, resumable downloads, website mirrors
+
+# Download a file
+wget https://example.com/files/app.tar.gz
+
+# Save under another name
+wget -O app.tar.gz https://example.com/releases/latest.tar.gz
+
+# Save into a directory
+wget -P ~/Downloads https://example.com/file.iso
+
+# Resume a broken download
+wget -c https://example.com/big.iso
+
+# Download in the background (output goes to wget-log)
+wget -b https://example.com/big.iso
+
+# Quiet mode
+wget -q https://example.com/file.txt
+
+# Print to stdout instead of saving
+wget -qO- https://example.com/install.sh | less
+
+# Download all URLs listed in a file
+wget -i urls.txt
+
+# Limit download speed
+wget --limit-rate=2m https://example.com/big.iso
+
+# Retry up to 10 times, waiting between tries
+wget --tries=10 --waitretry=5 https://example.com/file.zip
+
+# Timeout after 15 seconds
+wget -T 15 https://example.com/file.zip
+
+# Only download if the remote file is newer
+wget -N https://example.com/data.csv
+
+# Log output to a file
+wget -o download.log https://example.com/big.iso
+
+# Force IPv4
+wget -4 https://example.com/file.zip
+
+# Mirror a website for offline reading
+wget --mirror --convert-links --adjust-extension --page-requisites --no-parent https://example.com/docs/
+
+# Recursive download 2 levels deep
+wget -r -l 2 https://example.com/
+
+# Download only PDFs from a directory
+wget -r -np -A "*.pdf" https://example.com/papers/
+
+# Skip images during a recursive download
+wget -r -np -R "*.jpg,*.png" https://example.com/site/
+
+# All files into one folder, no directory tree
+wget -r -np -nd -A "*.mp3" https://example.com/music/
+
+# Remove host name and leading folders from saved paths
+wget -r -np -nH --cut-dirs=2 https://example.com/pub/files/
+
+# Be polite: random wait between requests
+wget -r --wait=2 --random-wait https://example.com/
+
+# Stop after downloading 500 MB in total
+wget -Q 500m -i urls.txt
+
+# Username and password prompt
+wget --user=admin --ask-password https://example.com/private/file.zip
+
+# Add a custom header (API token)
+wget --header="Authorization: Bearer $TOKEN" https://api.example.com/export.csv
+
+# Custom User-Agent
+wget -U "Mozilla/5.0" https://example.com/
+
+# Skip certificate check (self-signed, testing only)
+wget --no-check-certificate https://self-signed.local/file
+
+# Check if a URL exists without downloading
+wget --spider https://example.com/file.zip
+
+# Show server response headers
+wget -S --spider https://example.com
+
+# Find broken links on a site
+wget --spider -r -nd -nv -o spider.log https://example.com/
+
+# Log in with POST and save the session cookie
+wget --save-cookies cookies.txt --keep-session-cookies --post-data="user=merab&pass=secret" https://example.com/login
+
+# Download with the saved session cookie
+wget --load-cookies cookies.txt https://example.com/members/report.pdf

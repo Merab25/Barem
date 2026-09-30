@@ -1,0 +1,91 @@
+## Network scanner: hosts, ports, services (scan only networks you own or may test)
+
+# Scan the 1000 most common ports of a host
+nmap 192.168.1.10
+
+# Scan the official public test host
+nmap scanme.nmap.org
+
+# Scan a whole subnet
+nmap 192.168.1.0/24
+
+# Scan an IP range
+nmap 192.168.1.10-50
+
+# Targets from a file
+nmap -iL targets.txt
+
+# Exclude a host from the scan
+nmap 192.168.1.0/24 --exclude 192.168.1.1
+
+# Only find live hosts, no port scan
+nmap -sn 192.168.1.0/24
+
+# Skip host discovery (host blocks ping)
+nmap -Pn 10.0.0.5
+
+# Specific ports
+nmap -p 22,80,443 192.168.1.10
+
+# Port range
+nmap -p 1-1024 192.168.1.10
+
+# All 65535 ports
+nmap -p- 192.168.1.10
+
+# Top 100 ports
+nmap --top-ports 100 192.168.1.10
+
+# Fast scan (100 ports)
+nmap -F 192.168.1.10
+
+# Show only open ports
+nmap --open 192.168.1.0/24
+
+# Detect service versions
+nmap -sV 192.168.1.10
+
+# Detect the operating system
+sudo nmap -O 192.168.1.10
+
+# Aggressive: OS, versions, scripts, traceroute
+sudo nmap -A 192.168.1.10
+
+# SYN (half-open) scan, the default as root
+sudo nmap -sS 192.168.1.10
+
+# Full TCP connect scan (no root needed)
+nmap -sT 192.168.1.10
+
+# UDP scan of common services
+sudo nmap -sU -p 53,123,161 192.168.1.10
+
+# Faster timing template
+nmap -T4 192.168.1.0/24
+
+# Default safe scripts
+nmap -sC 192.168.1.10
+
+# Check TLS versions and ciphers of your server
+nmap --script ssl-enum-ciphers -p 443 192.168.1.10
+
+# Web page titles across a network
+nmap --script http-title -p 80,443 192.168.1.0/24
+
+# Known vulnerability checks
+nmap --script vuln 192.168.1.10
+
+# Why a port is in its state
+nmap --reason -p 22 192.168.1.10
+
+# Save output in all formats (normal, XML, grepable)
+nmap -oA scan-results 192.168.1.0/24
+
+# IPs of hosts with SSH open
+nmap -p 22 --open -oG - 192.168.1.0/24 | awk '/22\/open/ {print $2}'
+
+# IPv6 scan
+nmap -6 2001:db8::10
+
+# Resume an interrupted scan
+nmap --resume scan-results.gnmap

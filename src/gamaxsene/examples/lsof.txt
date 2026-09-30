@@ -1,0 +1,94 @@
+## List open files, network sockets and the processes that use them
+
+# All open files (long output)
+sudo lsof
+
+# Which process uses a file
+sudo lsof /var/log/syslog
+
+# Which process uses a port
+sudo lsof -i :8080
+
+# All network connections
+sudo lsof -i
+
+# Fast: no DNS and no port name lookups
+sudo lsof -nP -i
+
+# TCP only / UDP only
+sudo lsof -i tcp
+sudo lsof -i udp
+
+# Listening TCP ports
+sudo lsof -iTCP -sTCP:LISTEN -nP
+
+# Established TCP connections
+sudo lsof -iTCP -sTCP:ESTABLISHED -nP
+
+# IPv4 only / IPv6 only
+sudo lsof -i 4
+sudo lsof -i 6
+
+# Connections to a host
+sudo lsof -i @192.168.1.50
+
+# Connections to a host and port
+sudo lsof -i @db.internal:5432
+
+# A port range
+sudo lsof -i :8000-8100
+
+# Files opened by a program
+sudo lsof -c nginx
+
+# Files opened by a PID
+sudo lsof -p 1234
+
+# Files opened by a user
+sudo lsof -u www-data
+
+# All users except root
+sudo lsof -u ^root
+
+# AND conditions: network files of one user
+sudo lsof -a -u merab -i
+
+# Open files inside a directory (recursive)
+sudo lsof +D /var/www
+
+# Why a disk cannot be unmounted ("target is busy")
+sudo lsof /mnt/usb
+
+# Deleted files still held open (disk full but du shows less)
+sudo lsof +L1
+
+# Same, with grep
+sudo lsof -nP | grep "(deleted)"
+
+# Only PIDs (for scripts)
+sudo lsof -t -i :3000
+
+# Kill whatever is using port 3000
+sudo kill $(sudo lsof -t -i :3000)
+
+# Repeat every 2 seconds
+sudo lsof -r 2 -i :443
+
+# Unix domain sockets
+sudo lsof -U
+
+# Which log files a process writes to
+sudo lsof -p 1234 | grep "\.log"
+
+# Which shared libraries a process loaded (e.g. libssl version)
+sudo lsof -p 1234 | grep "\.so"
+
+# Which process uses a device
+sudo lsof /dev/video0
+
+# Processes with the most open files
+sudo lsof -n | awk 'NR > 1 {print $2, $1}' | sort | uniq -c | sort -rn | head
+
+# Open file count of a process vs its limit
+sudo lsof -p 1234 | wc -l
+grep "open files" /proc/1234/limits

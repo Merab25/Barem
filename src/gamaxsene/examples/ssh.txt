@@ -1,0 +1,103 @@
+## Secure shell: remote login, remote commands, keys and tunnels
+
+# Connect to a server
+ssh user@server.com
+
+# Connect on a custom port
+ssh -p 2222 user@server.com
+
+# Connect with a specific key (e.g. AWS EC2)
+ssh -i ~/.ssh/aws-key.pem ubuntu@203.0.113.10
+
+# Use a host alias from ~/.ssh/config (Host, HostName, User, Port, IdentityFile)
+ssh myserver
+
+# Show the final config ssh will use for a host
+ssh -G myserver | grep -E "^(hostname|user|port) "
+
+# Run one command remotely
+ssh user@server "df -h /"
+
+# Run several commands remotely
+ssh user@server "sudo apt update && sudo apt upgrade -y"
+
+# Run a local script on the remote server
+ssh user@server "bash -s" < setup.sh
+
+# Force a terminal for interactive programs
+ssh -t user@server "sudo htop"
+
+# Generate a new key pair (modern and recommended)
+ssh-keygen -t ed25519 -C "merab@laptop"
+
+# Copy your public key to a server (passwordless login)
+ssh-copy-id user@server
+
+# Copy a specific key to a server on a custom port
+ssh-copy-id -i ~/.ssh/id_ed25519.pub -p 2222 user@server
+
+# Show the fingerprint of a key
+ssh-keygen -lf ~/.ssh/id_ed25519.pub
+
+# Change the passphrase of a key
+ssh-keygen -p -f ~/.ssh/id_ed25519
+
+# Recreate the public key from the private key
+ssh-keygen -y -f ~/.ssh/id_ed25519 > ~/.ssh/id_ed25519.pub
+
+# Remove an old host key after a server was reinstalled
+ssh-keygen -R server.com
+
+# Start the agent and load your key once
+eval "$(ssh-agent -s)" && ssh-add ~/.ssh/id_ed25519
+
+# List keys loaded in the agent
+ssh-add -l
+
+# Forward your agent (use keys on the next hop)
+ssh -A user@bastion
+
+# Local port forward: reach a remote database on localhost:5432
+ssh -L 5432:localhost:5432 user@db-server
+
+# Port forward in the background without a shell
+ssh -fN -L 8080:internal-app:80 user@bastion
+
+# Remote port forward: expose your local port 3000 on the server
+ssh -R 9000:localhost:3000 user@public-server
+
+# SOCKS proxy through the server
+ssh -D 1080 -N user@server
+
+# Jump through a bastion host
+ssh -J user@bastion user@private-server
+
+# Jump through several hosts
+ssh -J user@bastion1,user@bastion2 user@target
+
+# Debug connection problems
+ssh -vvv user@server
+
+# Keep the connection alive
+ssh -o ServerAliveInterval=60 user@server
+
+# Check if a server is reachable within 5 seconds
+ssh -o ConnectTimeout=5 user@server exit && echo "reachable"
+
+# Skip host key checks (throwaway VMs only)
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null user@10.0.0.5
+
+# Reuse one connection for faster repeated logins
+ssh -o ControlMaster=auto -o ControlPath=~/.ssh/cm-%r@%h:%p -o ControlPersist=10m user@server
+
+# Compress traffic on slow links
+ssh -C user@server
+
+# Run graphical apps from the server (X11 forwarding)
+ssh -X user@server
+
+# Upload a file through a pipe
+cat backup.sql | ssh user@server "cat > /tmp/backup.sql"
+
+# Test your GitHub SSH authentication
+ssh -T git@github.com

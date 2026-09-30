@@ -1,0 +1,91 @@
+## Build and run commands from standard input
+
+# Pass words from input as arguments
+echo "file1 file2 file3" | xargs rm
+
+# Safe with spaces in file names (use with find -print0)
+find . -name "*.tmp" -print0 | xargs -0 rm -f
+
+# Use a placeholder for where the input goes
+cat hosts.txt | xargs -I {} ping -c 1 {}
+
+# One argument per command run
+cat urls.txt | xargs -n 1 curl -sO
+
+# Run 4 jobs in parallel
+cat urls.txt | xargs -P 4 -n 1 wget -q
+
+# Use all CPU cores to compress logs
+find logs/ -name "*.log" -print0 | xargs -0 -P "$(nproc)" -n 1 gzip
+
+# Print each command before running it
+echo a b c | xargs -t -n 1 echo
+
+# Ask before running each command
+find . -name "*.bak" | xargs -p rm
+
+# Do nothing if the input is empty
+grep -rl "TODO" . | xargs -r wc -l
+
+# One argument per line, spaces allowed
+xargs -d '\n' -a files.txt rm
+
+# Read arguments from a file
+xargs -a packages.txt sudo apt install -y
+
+# Run each input line as its own command
+xargs -L 1 echo < pairs.txt
+
+# Several commands per item with sh -c
+cat servers.txt | xargs -I {} sh -c 'echo "== {}"; ssh {} uptime'
+
+# Rename .jpeg to .jpg
+ls *.jpeg | xargs -I {} sh -c 'mv "$1" "${1%.jpeg}.jpg"' _ {}
+
+# grep through files found by find
+find . -name "*.py" | xargs grep -n "import os"
+
+# Count lines of code, skipping node_modules
+find . -name "*.js" -not -path "*/node_modules/*" -print0 | xargs -0 wc -l | tail -1
+
+# Copy found files into one directory
+find . -name "*.pdf" -print0 | xargs -0 cp -t ~/pdfs/
+
+# chmod all directories
+find . -type d -print0 | xargs -0 chmod 755
+
+# Kill processes matching a pattern
+pgrep -f "celery worker" | xargs -r kill
+
+# Remove stopped Docker containers
+docker ps -aq -f status=exited | xargs -r docker rm
+
+# Remove dangling Docker images
+docker images -q -f dangling=true | xargs -r docker rmi
+
+# Delete git branches already merged into main
+git branch --merged main | grep -v "main" | xargs -r git branch -d
+
+# Delete failed Kubernetes pods
+kubectl get pods --field-selector=status.phase=Failed -o name | xargs -r kubectl delete
+
+# HTTP status code for a list of URLs, 8 at a time
+cat urls.txt | xargs -P 8 -I {} curl -s -o /dev/null -w "%{http_code} {}\n" {}
+
+# Run a command on many servers in parallel
+xargs -a hosts.txt -P 10 -I {} ssh -o ConnectTimeout=5 {} "df -h /"
+
+# Create several directories
+echo dev staging prod | xargs mkdir -p
+
+# Group input into batches of 3
+seq 1 10 | xargs -n 3 echo
+
+# Join lines into one line
+cat list.txt | xargs
+
+# Trim leading and trailing spaces
+echo "   hello world   " | xargs
+
+# Show user info for every account
+cut -d: -f1 /etc/passwd | xargs -I {} id {}

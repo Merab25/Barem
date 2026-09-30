@@ -1,0 +1,99 @@
+## Show and manage network interfaces, IP addresses, routes and ARP
+
+# All interfaces and addresses
+ip a
+
+# Short overview: interface, state, addresses
+ip -br a
+
+# Colored output
+ip -c a
+
+# One interface
+ip addr show eth0
+
+# IPv4 addresses only
+ip -4 addr
+
+# Only the IPv4 address of eth0
+ip -4 -br addr show eth0 | awk '{print $3}'
+
+# Link layer: interfaces and MAC addresses
+ip link show
+
+# Short link overview
+ip -br link
+
+# Traffic statistics of an interface
+ip -s link show eth0
+
+# Bring an interface up / down
+sudo ip link set eth0 up
+sudo ip link set eth0 down
+
+# Add an IP address
+sudo ip addr add 192.168.1.50/24 dev eth0
+
+# Remove an IP address
+sudo ip addr del 192.168.1.50/24 dev eth0
+
+# Remove all addresses from an interface
+sudo ip addr flush dev eth0
+
+# Routing table
+ip route
+
+# Which route and source IP are used to reach a host
+ip route get 8.8.8.8
+
+# Add a default gateway
+sudo ip route add default via 192.168.1.1
+
+# Replace the default gateway
+sudo ip route replace default via 192.168.1.1 dev eth0
+
+# Route a network through a specific gateway
+sudo ip route add 10.10.0.0/16 via 192.168.1.254 dev eth0
+
+# Delete a route
+sudo ip route del 10.10.0.0/16
+
+# All routing tables
+ip route show table all
+
+# Policy routing rules
+ip rule show
+
+# ARP / neighbor table
+ip neigh
+
+# Clear the ARP cache of an interface
+sudo ip neigh flush dev eth0
+
+# Change the MTU (jumbo frames)
+sudo ip link set dev eth0 mtu 9000
+
+# Change the MAC address
+sudo ip link set dev eth0 address 02:11:22:33:44:55
+
+# Create a VLAN interface
+sudo ip link add link eth0 name eth0.100 type vlan id 100
+
+# Delete a virtual interface
+sudo ip link del eth0.100
+
+# Create a bridge
+sudo ip link add br0 type bridge
+
+# Create a veth pair (how containers get networking)
+sudo ip link add veth0 type veth peer name veth1
+
+# Create a network namespace and run a command inside
+sudo ip netns add testns
+sudo ip netns exec testns ip a
+
+# Watch network changes live
+ip monitor
+
+# JSON output for scripts
+ip -j addr | jq -r '.[].ifname'

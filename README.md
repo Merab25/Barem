@@ -1,4 +1,3 @@
-# Gamaxsene
 # gamaxsene
 
 [![CI](https://github.com/YOUR_USERNAME/gamaxsene/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/gamaxsene/actions/workflows/ci.yml)

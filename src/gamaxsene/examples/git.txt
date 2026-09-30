@@ -1,0 +1,141 @@
+## Version control: commits, branches, history, remotes and undo
+
+# Start a new repository
+git init
+
+# Clone a repository
+git clone git@github.com:user/repo.git
+
+# Shallow clone: only the latest commit (fast)
+git clone --depth 1 https://github.com/user/repo.git
+
+# Clone only one branch
+git clone -b develop --single-branch https://github.com/user/repo.git
+
+# Short status with branch info
+git status -sb
+
+# Stage all changes
+git add .
+
+# Stage parts of files interactively
+git add -p
+
+# Commit with a message
+git commit -m "Add grep examples"
+
+# Fix the last commit without changing its message
+git commit --amend --no-edit
+
+# Compact history graph of all branches
+git log --oneline --graph --decorate --all
+
+# History of one file with changes
+git log -p -- src/gamaxsene/cli.py
+
+# Search commit messages
+git log --grep="fix" --oneline
+
+# Find commits that added or removed a string
+git log -S "API_KEY" --oneline
+
+# Commits by an author in the last 2 weeks
+git log --author="Merab" --since="2 weeks ago" --oneline
+
+# Unstaged changes
+git diff
+
+# Staged changes (what will be committed)
+git diff --staged
+
+# Files that differ between two branches
+git diff --name-only main..feature
+
+# Who changed each line
+git blame -L 10,30 cli.py
+
+# Show a file as it was 2 commits ago
+git show HEAD~2:src/gamaxsene/cli.py
+
+# Create a branch and switch to it
+git switch -c feature/search
+
+# List local and remote branches
+git branch -a
+
+# Delete a branch locally and on the remote
+git branch -d feature/search
+git push origin --delete feature/search
+
+# Merge a branch, always with a merge commit
+git merge --no-ff feature/search
+
+# Replay your branch on top of main
+git rebase main
+
+# Squash or reword the last 3 commits
+git rebase -i HEAD~3
+
+# Pull with rebase instead of a merge commit
+git pull --rebase
+
+# First push of a branch, remember the upstream
+git push -u origin main
+
+# Force push, but refuse if someone else pushed
+git push --force-with-lease
+
+# Show remotes / add another remote
+git remote -v
+git remote add upstream https://github.com/original/repo.git
+
+# Fetch all remotes and remove deleted branches
+git fetch --all --prune
+
+# Save unfinished work, then bring it back
+git stash push -m "wip search feature"
+git stash pop
+
+# Unstage a file
+git restore --staged file.txt
+
+# Throw away local changes to a file
+git restore file.txt
+
+# Undo the last commit, keep the changes
+git reset --soft HEAD~1
+
+# Undo a pushed commit with a new commit
+git revert a1b2c3d
+
+# Copy one commit to the current branch
+git cherry-pick a1b2c3d
+
+# Create and push a release tag
+git tag -a v0.1.0 -m "First release"
+git push origin v0.1.0
+
+# Recover "lost" commits after a bad reset
+git reflog
+git reset --hard HEAD@{2}
+
+# Find the commit that introduced a bug
+git bisect start
+git bisect bad
+git bisect good v0.1.0
+
+# Preview, then delete untracked files and folders
+git clean -fdn
+git clean -fd
+
+# Stop tracking a file but keep it on disk
+git rm --cached .env
+
+# Work on another branch in a second folder
+git worktree add ../hotfix hotfix-branch
+
+# Create a command alias
+git config --global alias.lg "log --oneline --graph --decorate --all"
+
+# Commit count per contributor
+git shortlog -sn

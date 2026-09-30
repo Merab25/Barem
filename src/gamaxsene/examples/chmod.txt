@@ -1,0 +1,93 @@
+## Change file and directory permissions
+
+# Make a script executable
+chmod +x deploy.sh
+
+# Executable only for the owner
+chmod u+x script.sh
+
+# Remove write permission for group and others
+chmod go-w file.txt
+
+# Read-only for everyone
+chmod a=r notes.txt
+
+# Set exact permissions for each class
+chmod u=rwx,g=rx,o= private-script.sh
+
+# 755: owner full, others read and execute (scripts, dirs)
+chmod 755 /usr/local/bin/tool
+
+# 644: owner read/write, others read (normal files)
+chmod 644 index.html
+
+# 600: only owner can read/write (private keys, secrets)
+chmod 600 ~/.ssh/id_ed25519
+
+# 700: only owner can access (.ssh directory)
+chmod 700 ~/.ssh
+
+# 400: fix "UNPROTECTED PRIVATE KEY FILE" for AWS .pem keys
+chmod 400 aws-key.pem
+
+# 640: owner read/write, group read (config with secrets)
+chmod 640 /etc/app/secrets.conf
+
+# Apply recursively
+chmod -R 755 /var/www/html
+
+# 755 for directories and 644 for files
+find /var/www -type d -exec chmod 755 {} +
+find /var/www -type f -exec chmod 644 {} +
+
+# Capital X: execute only on directories (and already-executable files)
+chmod -R u=rwX,go=rX /srv/share
+
+# Group gets the same permissions as the owner
+chmod g=u shared.txt
+
+# Remove all access for others, recursively
+chmod -R o-rwx /home/merab
+
+# Show each change
+chmod -v 644 *.conf
+
+# Report only files that actually changed
+chmod -c -R g+w /srv/project
+
+# Copy permissions from another file
+chmod --reference=good.conf bad.conf
+
+# setuid: run as the file owner
+chmod u+s /usr/local/bin/helper
+
+# setgid on a directory: new files inherit the group
+chmod g+s /srv/shared
+
+# Shared team folder: group writable plus setgid
+chmod 2775 /srv/team
+
+# Sticky bit: users can only delete their own files (like /tmp)
+chmod +t /srv/uploads
+chmod 1777 /srv/tmp
+
+# Make all shell scripts executable
+find . -name "*.sh" -exec chmod +x {} +
+
+# Remove the execute bit from files but not directories
+find . -type f -exec chmod a-x {} +
+
+# Remove setuid from all files in a directory
+find /opt/app -perm -4000 -exec chmod u-s {} +
+
+# Show permissions in numeric form
+stat -c "%a %n" *
+
+# Make a file executable in git (for other clones too)
+git update-index --chmod=+x deploy.sh
+
+# Default permissions for new files (umask, related to chmod)
+umask 027
+
+# List numeric permissions of every file in a tree
+find . -printf "%m %p\n"

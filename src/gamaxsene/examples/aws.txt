@@ -1,0 +1,116 @@
+## AWS CLI: S3, EC2, IAM, CloudWatch Logs, ECR, EKS and more
+
+# Set up credentials and default region
+aws configure
+
+# Set up a named profile
+aws configure --profile work
+
+# Log in with AWS SSO / IAM Identity Center
+aws sso login --profile work
+
+# Which account and user am I using?
+aws sts get-caller-identity
+
+# Use a profile and region for one command
+aws s3 ls --profile work --region eu-central-1
+
+# Use a profile for the whole shell session
+export AWS_PROFILE=work
+
+# List all regions
+aws ec2 describe-regions --query "Regions[].RegionName" --output text
+
+# List S3 buckets
+aws s3 ls
+
+# List objects recursively with total size
+aws s3 ls s3://my-bucket/logs/ --recursive --human-readable --summarize
+
+# Create a bucket
+aws s3 mb s3://my-unique-bucket-name --region eu-central-1
+
+# Upload a file
+aws s3 cp backup.tar.gz s3://my-bucket/backups/
+
+# Download a file
+aws s3 cp s3://my-bucket/backups/backup.tar.gz .
+
+# Deploy a static website (mirror a folder)
+aws s3 sync ./dist s3://my-website-bucket --delete
+
+# Sync with excludes
+aws s3 sync . s3://my-bucket/project --exclude "*.log" --exclude ".git/*"
+
+# Delete a prefix recursively
+aws s3 rm s3://my-bucket/tmp/ --recursive
+
+# Temporary download link valid for 1 hour
+aws s3 presign s3://my-bucket/report.pdf --expires-in 3600
+
+# Stream a database dump straight into S3
+pg_dump app | gzip | aws s3 cp - "s3://my-bucket/db/app-$(date +%F).sql.gz"
+
+# EC2 instances as a table: ID, state, type, private IP
+aws ec2 describe-instances --query "Reservations[].Instances[].[InstanceId,State.Name,InstanceType,PrivateIpAddress]" --output table
+
+# IDs of running instances
+aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" --query "Reservations[].Instances[].InstanceId" --output text
+
+# Instances with a tag, showing their Name tag
+aws ec2 describe-instances --filters "Name=tag:Env,Values=prod" --query "Reservations[].Instances[].[InstanceId,Tags[?Key=='Name']|[0].Value]" --output table
+
+# Start / stop an instance
+aws ec2 start-instances --instance-ids i-0abc123def4567890
+aws ec2 stop-instances --instance-ids i-0abc123def4567890
+
+# Wait until an instance is running (scripts)
+aws ec2 wait instance-running --instance-ids i-0abc123def4567890
+
+# Latest Ubuntu 24.04 AMI ID for the current region
+aws ssm get-parameters --names /aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id --query "Parameters[0].Value" --output text
+
+# Launch an instance with a Name tag
+aws ec2 run-instances --image-id ami-0abcdef1234567890 --instance-type t3.micro --key-name my-key --security-group-ids sg-0123456789abcdef0 --subnet-id subnet-0123456789abcdef0 --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=web-1}]"
+
+# Allow SSH only from your current public IP
+aws ec2 authorize-security-group-ingress --group-id sg-0123456789abcdef0 --protocol tcp --port 22 --cidr "$(curl -s https://checkip.amazonaws.com)/32"
+
+# Shell on an instance without SSH keys (Session Manager)
+aws ssm start-session --target i-0abc123def4567890
+
+# List IAM users
+aws iam list-users --query "Users[].UserName" --output text
+
+# Attach a managed policy to a user
+aws iam attach-user-policy --user-name deploy --policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+
+# Follow CloudWatch logs live
+aws logs tail /aws/lambda/my-function --follow --since 1h
+
+# Search logs for errors in the last hour
+aws logs filter-log-events --log-group-name /ecs/api --filter-pattern "ERROR" --start-time "$(date -d '1 hour ago' +%s000)"
+
+# Invoke a Lambda function
+aws lambda invoke --function-name my-function --payload '{"key":"value"}' --cli-binary-format raw-in-base64-out response.json
+
+# Log Docker in to ECR
+aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 123456789012.dkr.ecr.eu-central-1.amazonaws.com
+
+# Configure kubectl for an EKS cluster
+aws eks update-kubeconfig --name my-cluster --region eu-central-1
+
+# Read a secret from Secrets Manager
+aws secretsmanager get-secret-value --secret-id prod/db --query SecretString --output text | jq -r .password
+
+# Read an encrypted SSM parameter
+aws ssm get-parameter --name /app/prod/db_url --with-decryption --query Parameter.Value --output text
+
+# Deploy a CloudFormation stack
+aws cloudformation deploy --template-file stack.yaml --stack-name my-stack --capabilities CAPABILITY_IAM
+
+# Cost of this month so far
+aws ce get-cost-and-usage --time-period Start="$(date +%Y-%m-01)",End="$(date +%F)" --granularity MONTHLY --metrics UnblendedCost
+
+# Built-in help for any command
+aws s3 sync help

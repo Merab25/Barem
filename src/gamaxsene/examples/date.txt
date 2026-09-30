@@ -1,0 +1,100 @@
+## Show, format and calculate dates and times
+
+# Current date and time
+date
+
+# Date in ISO format (2026-09-30)
+date +%F
+
+# ISO 8601 with time and timezone
+date --iso-8601=seconds
+
+# Custom format
+date +"%Y-%m-%d %H:%M:%S"
+
+# Only hours and minutes
+date +%H:%M
+
+# Timestamp for file names
+date +%Y%m%d-%H%M%S
+
+# Unix timestamp (seconds since 1970)
+date +%s
+
+# Unix timestamp in milliseconds
+date +%s%3N
+
+# Nanoseconds part
+date +%N
+
+# Unix timestamp to readable date
+date -d @1767225600
+
+# Time in UTC
+date -u
+
+# Time in another timezone
+TZ="America/New_York" date
+
+# Convert a UTC time to another timezone
+TZ="Asia/Tokyo" date -d "2026-09-30 09:00 UTC"
+
+# Email format (RFC 5322)
+date -R
+
+# RFC 3339 format
+date --rfc-3339=seconds
+
+# Yesterday's date
+date -d yesterday +%F
+
+# Date in 3 days
+date -d "+3 days" +%F
+
+# Next Monday
+date -d "next monday" +%F
+
+# First day of this month
+date +%Y-%m-01
+
+# Last day of this month
+date -d "$(date +%Y-%m-01) +1 month -1 day" +%F
+
+# Reformat a given date
+date -d "2026-09-30 14:30" +"%d/%m/%Y %I:%M %p"
+
+# Name of the weekday
+date +%A
+
+# ISO week number
+date +%V
+
+# Day of the year
+date +%j
+
+# Days until a date
+echo "$(( ($(date -d 2026-12-31 +%s) - $(date +%s)) / 86400 )) days left"
+
+# Loop over a range of dates
+d=2026-09-01; while [ "$d" != 2026-09-08 ]; do echo "$d"; d=$(date -I -d "$d + 1 day"); done
+
+# Is today a weekend?
+[ "$(date +%u)" -ge 6 ] && echo "weekend"
+
+# Last modification time of a file
+date -r /etc/hosts
+
+# Measure how long a command takes
+start=$(date +%s); sleep 2; echo "took $(( $(date +%s) - start ))s"
+
+# Timestamped log line
+echo "[$(date +"%F %T")] backup started" >> backup.log
+
+# Set the system clock
+sudo date -s "2026-09-30 12:00:00"
+
+# Change the system timezone
+sudo timedatectl set-timezone UTC
+
+# Check time sync (NTP) status
+timedatectl status

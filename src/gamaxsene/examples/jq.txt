@@ -1,0 +1,106 @@
+## Query, filter and transform JSON on the command line
+
+# Pretty-print JSON
+jq . data.json
+
+# Pretty-print an API response
+curl -s https://api.github.com/users/torvalds | jq .
+
+# Get one field
+jq '.name' user.json
+
+# Raw string without quotes
+jq -r '.name' user.json
+
+# Nested field
+jq '.address.city' user.json
+
+# First element of an array
+jq '.[0]' users.json
+
+# One field from every element
+jq '.[].email' users.json
+
+# Filter elements by a condition
+jq '.[] | select(.age > 30)' users.json
+
+# Names of active users
+jq -r '.[] | select(.status == "active") | .name' users.json
+
+# Filter by regex
+jq '.[] | select(.email | test("@gmail\\.com$"))' users.json
+
+# Pick only some fields
+jq '.[] | {name, email}' users.json
+
+# Rename fields
+jq '.[] | {username: .login, id}' users.json
+
+# Array of one field
+jq 'map(.name)' users.json
+
+# Number of elements
+jq 'length' users.json
+
+# List keys of an object
+jq 'keys' config.json
+
+# Sort by a field
+jq 'sort_by(.age)' users.json
+
+# Sort descending
+jq 'sort_by(.age) | reverse' users.json
+
+# Group and count
+jq 'group_by(.country) | map({country: .[0].country, count: length})' users.json
+
+# Unique values
+jq '[.[].country] | unique' users.json
+
+# Sum of a field
+jq 'map(.price) | add' orders.json
+
+# One compact JSON object per line
+jq -c '.[]' users.json
+
+# Export as CSV
+jq -r '.[] | [.name, .email] | @csv' users.json
+
+# Export as TSV
+jq -r '.[] | [.id, .name] | @tsv' users.json
+
+# String interpolation
+jq -r '.[] | "\(.name) <\(.email)>"' users.json
+
+# Use a shell variable safely
+jq --arg name "$USER" '.[] | select(.name == $name)' users.json
+
+# Change a value and save the file
+jq '.version = "2.0.0"' package.json > tmp.json && mv tmp.json package.json
+
+# Delete a field
+jq 'del(.password)' user.json
+
+# Default value when a field is missing
+jq '.timeout // 30' config.json
+
+# Deep-merge two JSON files (second wins)
+jq -s '.[0] * .[1]' defaults.json overrides.json
+
+# Build JSON from scratch
+jq -n --arg host "$HOSTNAME" '{host: $host, time: (now | todate)}'
+
+# Convert a JSON object to KEY=value lines
+jq -r 'to_entries[] | "\(.key)=\(.value)"' env.json
+
+# Filter JSON-lines logs (one object per line)
+jq -c 'select(.level == "error")' app.jsonl
+
+# Exit code for scripts: fails if false or null
+jq -e '.enabled' config.json > /dev/null && echo "enabled"
+
+# Container IP from docker inspect
+docker inspect web | jq -r '.[0].NetworkSettings.Networks[].IPAddress'
+
+# Kubernetes pods that are not running
+kubectl get pods -o json | jq -r '.items[] | select(.status.phase != "Running") | .metadata.name'

@@ -1,0 +1,95 @@
+## Inspect network sockets and connections (modern netstat)
+
+# Listening TCP ports with process names
+sudo ss -tlnp
+
+# Listening UDP ports with process names
+sudo ss -ulnp
+
+# Listening TCP and UDP ports
+sudo ss -tulnp
+
+# All sockets
+ss -a
+
+# Current TCP connections (non-listening)
+ss -t
+
+# Established TCP connections
+ss -t state established
+
+# Socket summary by type
+ss -s
+
+# Connections from local port 443
+ss -tn sport = :443
+
+# Connections to a remote port (e.g. PostgreSQL)
+ss -tn dport = :5432
+
+# Remote port 80 or 443
+ss -tn '( dport = :80 or dport = :443 )'
+
+# Remote port range
+ss -tn 'dport >= :8000 and dport <= :8100'
+
+# Connections to one host
+ss -tn dst 10.0.0.15
+
+# Connections to a subnet
+ss -tn dst 192.168.1.0/24
+
+# Who listens on port 8080
+sudo ss -ltnp 'sport = :8080'
+
+# Services listening on all interfaces
+ss -tln | grep "0.0.0.0"
+
+# IPv4 only / IPv6 only
+ss -4 -tln
+ss -6 -tln
+
+# Count connections per TCP state
+ss -tan | awk 'NR > 1 {print $1}' | sort | uniq -c
+
+# Number of TIME-WAIT sockets
+ss -tan state time-wait | wc -l
+
+# Many SYN-RECV sockets can mean a SYN flood
+ss -tan state syn-recv | wc -l
+
+# Top remote IPs by connection count
+ss -tn state established | awk 'NR > 1 {sub(/:[0-9]+$/, "", $4); print $4}' | sort | uniq -c | sort -rn | head
+
+# Connections of one program
+sudo ss -tnp | grep nginx
+
+# Timer info (keepalive, retransmit)
+ss -to
+
+# Extended info: user ID, inode
+ss -te
+
+# Socket memory usage
+ss -tm
+
+# TCP internals: RTT, congestion window, retransmits
+ss -ti
+
+# Unix domain sockets
+ss -x
+
+# Raw sockets
+ss -w
+
+# Resolve host names
+ss -tr
+
+# No header line (for scripts)
+ss -Htn
+
+# Kill connections to a host
+sudo ss -K dst 203.0.113.5
+
+# Refresh the summary every second
+watch -n 1 "ss -s"

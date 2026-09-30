@@ -1,0 +1,129 @@
+## Manage Kubernetes clusters: pods, deployments, services, logs and rollouts
+
+# Cluster endpoints
+kubectl cluster-info
+
+# List contexts (clusters) in your kubeconfig
+kubectl config get-contexts
+
+# Switch cluster
+kubectl config use-context prod-cluster
+
+# Set the default namespace for the current context
+kubectl config set-context --current --namespace=backend
+
+# Pods in the current namespace
+kubectl get pods
+
+# Pods in all namespaces
+kubectl get pods -A
+
+# Pods with IP and node
+kubectl get pods -o wide
+
+# Pods with a label
+kubectl get pods -l app=api
+
+# Watch pods change live
+kubectl get pods -w
+
+# Pods that are not Running
+kubectl get pods -A --field-selector=status.phase!=Running
+
+# Main resources in a namespace
+kubectl get all -n backend
+
+# Details and events of a pod (why is it failing?)
+kubectl describe pod api-7d4b9c-x2k8p
+
+# Recent events, oldest first
+kubectl get events --sort-by=.lastTimestamp
+
+# Follow logs of a deployment
+kubectl logs -f deploy/api
+
+# Logs of the previous (crashed) container
+kubectl logs api-7d4b9c-x2k8p --previous
+
+# Logs of one container in a multi-container pod
+kubectl logs api-7d4b9c-x2k8p -c sidecar
+
+# Logs of all pods with a label, last hour
+kubectl logs -l app=api --all-containers --since=1h
+
+# Shell inside a pod
+kubectl exec -it api-7d4b9c-x2k8p -- sh
+
+# Temporary debug pod, deleted on exit
+kubectl run debug -it --rm --image=busybox --restart=Never -- sh
+
+# Apply a manifest
+kubectl apply -f deployment.yaml
+
+# Apply a kustomize overlay
+kubectl apply -k overlays/prod/
+
+# Preview changes before applying
+kubectl diff -f deployment.yaml
+
+# Delete what a manifest created
+kubectl delete -f deployment.yaml
+
+# Generate YAML without creating anything
+kubectl create deployment web --image=nginx:1.27 --dry-run=client -o yaml > web.yaml
+
+# Expose a deployment as a service
+kubectl expose deployment web --port=80 --target-port=80 --type=ClusterIP
+
+# Scale a deployment
+kubectl scale deployment api --replicas=5
+
+# Autoscale on CPU usage
+kubectl autoscale deployment api --min=2 --max=10 --cpu-percent=70
+
+# Deploy a new image version
+kubectl set image deployment/api api=registry.example.com/api:1.4.2
+
+# Watch a rollout finish
+kubectl rollout status deployment/api
+
+# Rollout history and rollback
+kubectl rollout history deployment/api
+kubectl rollout undo deployment/api
+
+# Restart all pods of a deployment
+kubectl rollout restart deployment/api
+
+# Reach a service from your machine on localhost:8080
+kubectl port-forward svc/api 8080:80
+
+# Pods using the most memory
+kubectl top pods --sort-by=memory
+
+# Create a secret
+kubectl create secret generic db-creds --from-literal=username=app --from-literal=password=secret
+
+# Read a secret value
+kubectl get secret db-creds -o jsonpath='{.data.password}' | base64 -d
+
+# ConfigMap from a file
+kubectl create configmap nginx-conf --from-file=nginx.conf
+
+# Only pod names
+kubectl get pods -o jsonpath='{.items[*].metadata.name}'
+
+# Custom columns
+kubectl get pods -o custom-columns=NAME:.metadata.name,NODE:.spec.nodeName,STATUS:.status.phase
+
+# Copy a file out of a pod
+kubectl cp api-7d4b9c-x2k8p:/app/logs/app.log ./app.log
+
+# Take a node out for maintenance
+kubectl cordon node-2
+kubectl drain node-2 --ignore-daemonsets --delete-emptydir-data
+
+# Documentation for any field
+kubectl explain deployment.spec.strategy
+
+# Check your permissions
+kubectl auth can-i delete pods -n backend

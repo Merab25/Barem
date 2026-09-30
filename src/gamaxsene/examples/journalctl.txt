@@ -1,0 +1,100 @@
+## Read and filter systemd journal logs
+
+# All logs (oldest first, in a pager)
+journalctl
+
+# Follow new log lines live
+journalctl -f
+
+# Logs of one service
+journalctl -u nginx
+
+# Follow one service live
+journalctl -u nginx -f
+
+# Several services together
+journalctl -u nginx -u php8.3-fpm
+
+# Last 100 lines of a service
+journalctl -u myapp -n 100
+
+# Print without the pager (for scripts and pipes)
+journalctl -u myapp --no-pager
+
+# Newest first
+journalctl -r
+
+# Logs since the current boot
+journalctl -b
+
+# Logs from the previous boot (why did it crash?)
+journalctl -b -1
+
+# List all recorded boots
+journalctl --list-boots
+
+# Exact time range
+journalctl --since "2026-09-30 08:00" --until "2026-09-30 10:00"
+
+# Relative time
+journalctl --since "1 hour ago"
+
+# Yesterday only
+journalctl --since yesterday --until today
+
+# Only errors and worse in this boot
+journalctl -p err -b
+
+# Priority range: warnings to errors
+journalctl -p warning..err
+
+# Kernel messages (like dmesg)
+journalctl -k
+
+# Logs of one PID
+journalctl _PID=1234
+
+# Logs of one program by path
+journalctl /usr/sbin/sshd
+
+# Logs of one user ID
+journalctl _UID=1000
+
+# Logs by syslog identifier (e.g. cron jobs)
+journalctl -t CRON
+
+# Search with a pattern
+journalctl -u ssh -g "Failed password"
+
+# Count failed SSH logins today
+journalctl -u ssh --since today | grep -c "Failed password"
+
+# Jump to the end with explanations (after a failed start)
+journalctl -xe
+
+# Only the message text
+journalctl -u myapp -o cat
+
+# ISO timestamps
+journalctl -o short-iso
+
+# JSON output
+journalctl -u myapp -o json-pretty -n 5
+
+# All values a field has (e.g. all unit names)
+journalctl -F _SYSTEMD_UNIT
+
+# User service logs
+journalctl --user -u syncthing
+
+# How much disk the journal uses
+journalctl --disk-usage
+
+# Shrink the journal to 500 MB
+sudo journalctl --vacuum-size=500M
+
+# Delete entries older than 2 weeks
+sudo journalctl --vacuum-time=14d
+
+# Start a new journal file
+sudo journalctl --rotate

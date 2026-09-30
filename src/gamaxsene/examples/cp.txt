@@ -1,0 +1,91 @@
+## Copy files and directories, with backups, preserving attributes
+
+# Copy a file
+cp source.txt destination.txt
+
+# Copy a file into a directory
+cp report.pdf ~/Documents/
+
+# Copy several files into a directory
+cp file1.txt file2.txt file3.txt backup/
+
+# Copy a directory recursively
+cp -r project/ project-copy/
+
+# Copy the contents of a directory (including hidden files)
+cp -r project/. /srv/app/
+
+# Archive mode: keep permissions, owners, timestamps, links
+cp -a /var/www/ /backup/www/
+
+# Keep mode, ownership and timestamps of a file
+cp -p config.yaml config.yaml.orig
+
+# Keep only selected attributes
+cp --preserve=mode,timestamps file.txt /tmp/
+
+# Ask before overwriting
+cp -i new.conf /etc/app/app.conf
+
+# Never overwrite existing files
+cp -n *.jpg ~/Pictures/
+
+# Copy only when the source is newer
+cp -u *.txt backup/
+
+# Show every file being copied
+cp -v *.conf /etc/app/
+
+# Quick backup copy with brace expansion (config.yaml.bak)
+cp config.yaml{,.bak}
+
+# Backup copy with today's date
+cp nginx.conf "nginx.conf.$(date +%F)"
+
+# Keep numbered backups of files that get overwritten
+cp --backup=numbered app.conf /etc/app/
+
+# Backup overwritten files with a custom suffix
+cp -b -S .old app.conf /etc/app/
+
+# Target directory first (handy with xargs)
+find . -name "*.log" -print0 | xargs -0 cp -t /tmp/logs/
+
+# Recreate the source path inside the destination
+cp --parents src/app/config.py /tmp/snapshot/
+
+# Copy only .py files keeping the folder structure
+find src -name "*.py" -exec cp --parents {} /tmp/py-only/ \;
+
+# Create hard links instead of copies (instant, no extra space)
+cp -al snapshot-1/ snapshot-2/
+
+# Create symbolic links instead of copies
+cp -s /opt/app/bin/tool ~/bin/
+
+# Follow symlinks and copy the real file
+cp -L current-release.tar.gz /backup/
+
+# Copy a symlink as a symlink
+cp -P latest /tmp/
+
+# Stay on one filesystem while copying
+cp -ax / /mnt/newroot/
+
+# Copy-on-write clone on btrfs/xfs (instant)
+cp --reflink=auto disk.img disk-clone.img
+
+# Keep sparse files sparse
+cp --sparse=always vm-disk.img vm-disk-copy.img
+
+# Force: remove destination if it cannot be opened
+cp -f readonly.txt /tmp/
+
+# Replace a running binary safely
+sudo cp --remove-destination app /usr/local/bin/app
+
+# Copy one file into several directories
+echo dir1 dir2 dir3 | xargs -n 1 cp -v file.txt
+
+# cp has no progress bar: use rsync for big files
+rsync -ah --progress bigfile.iso /mnt/usb/

@@ -1,0 +1,106 @@
+## Terminal multiplexer: sessions that survive disconnects, windows and panes
+
+# Start a new session
+tmux
+
+# Start a named session
+tmux new -s work
+
+# Attach if it exists, otherwise create it
+tmux new -A -s work
+
+# Start a detached session running a command
+tmux new -d -s logs "tail -f /var/log/syslog"
+
+# List sessions
+tmux ls
+
+# Attach to a session
+tmux attach -t work
+
+# Detach (keys: Ctrl-b d)
+tmux detach
+
+# Rename a session (keys: Ctrl-b $)
+tmux rename-session -t 0 work
+
+# Kill a session
+tmux kill-session -t work
+
+# Kill all sessions except the current one
+tmux kill-session -a
+
+# Kill the tmux server and all sessions
+tmux kill-server
+
+# New window (keys: Ctrl-b c)
+tmux new-window -n editor
+
+# Go to window 2 (keys: Ctrl-b 2)
+tmux select-window -t 2
+
+# Rename the current window (keys: Ctrl-b ,)
+tmux rename-window logs
+
+# Swap two windows
+tmux swap-window -s 2 -t 1
+
+# Split side by side (keys: Ctrl-b %)
+tmux split-window -h
+
+# Split top and bottom (keys: Ctrl-b ")
+tmux split-window -v
+
+# Split with a size and a command
+tmux split-window -h -l 30% "htop"
+
+# Move to the left pane (keys: Ctrl-b arrow)
+tmux select-pane -L
+
+# Make the pane 10 lines taller downwards
+tmux resize-pane -D 10
+
+# Zoom a pane to full screen and back (keys: Ctrl-b z)
+tmux resize-pane -Z
+
+# Turn a pane into its own window (keys: Ctrl-b !)
+tmux break-pane
+
+# Pull window 2 into the current window as a pane
+tmux join-pane -s :2 -h
+
+# Rearrange panes into a grid (keys: Ctrl-b space cycles layouts)
+tmux select-layout tiled
+
+# Type into all panes at once (run on many servers)
+tmux setw synchronize-panes on
+
+# Send a command to another pane
+tmux send-keys -t work:0.1 "docker compose logs -f" Enter
+
+# Scroll and copy mode (keys: Ctrl-b [)
+tmux copy-mode
+
+# Save the last 3000 lines of a pane to a file
+tmux capture-pane -pS -3000 > pane.log
+
+# Log everything a pane prints
+tmux pipe-pane -o "cat >> ~/tmux-#W.log"
+
+# Enable the mouse
+tmux set -g mouse on
+
+# Bigger scrollback history
+tmux set -g history-limit 50000
+
+# Reload the config file
+tmux source-file ~/.tmux.conf
+
+# Show all key bindings
+tmux list-keys
+
+# Scripted dev layout: editor left, dev server right
+tmux new -d -s dev -n code && tmux split-window -h -t dev && tmux send-keys -t dev:0.1 "npm run dev" Enter && tmux attach -t dev
+
+# Persistent session on a server over SSH
+ssh -t user@server "tmux new -A -s main"

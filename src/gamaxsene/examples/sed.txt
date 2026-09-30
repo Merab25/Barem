@@ -1,0 +1,100 @@
+## Stream editor: find and replace, delete, insert and transform text
+
+# Replace the first match on each line
+sed 's/foo/bar/' file.txt
+
+# Replace all matches on each line
+sed 's/foo/bar/g' file.txt
+
+# Edit the file in place
+sed -i 's/http:/https:/g' config.yaml
+
+# Edit in place and keep a backup copy (.bak)
+sed -i.bak 's/DEBUG=true/DEBUG=false/' .env
+
+# Case-insensitive replace
+sed 's/error/ERROR/gI' app.log
+
+# Use another delimiter when the text contains slashes
+sed 's|/usr/local|/opt|g' paths.txt
+
+# Replace only on lines that match a pattern
+sed '/^server_name/s/example.com/mysite.com/' nginx.conf
+
+# Replace only on line 10
+sed '10s/old/new/' file.txt
+
+# Replace only in lines 5 to 20
+sed '5,20s/foo/bar/g' file.txt
+
+# Delete line 3
+sed '3d' file.txt
+
+# Delete the last line
+sed '$d' file.txt
+
+# Delete lines matching a pattern
+sed '/^#/d' app.conf
+
+# Delete empty lines
+sed '/^$/d' file.txt
+
+# Delete comments and blank lines
+sed -e '/^\s*#/d' -e '/^\s*$/d' /etc/ssh/sshd_config
+
+# Print only lines 10 to 20
+sed -n '10,20p' file.txt
+
+# Print only lines matching a pattern (like grep)
+sed -n '/ERROR/p' app.log
+
+# Print everything between two patterns
+sed -n '/BEGIN CERTIFICATE/,/END CERTIFICATE/p' bundle.pem
+
+# Print line numbers of matching lines
+sed -n '/ERROR/=' app.log
+
+# Append a line after a matching line
+sed '/^\[mysqld\]/a max_connections = 500' /etc/mysql/my.cnf
+
+# Insert a line at the top of a file
+sed -i '1i #!/bin/bash' script.sh
+
+# Replace the whole line that contains a pattern
+sed '/^PermitRootLogin/c PermitRootLogin no' /etc/ssh/sshd_config
+
+# Comment out a line
+sed -i '/^PasswordAuthentication/s/^/#/' /etc/ssh/sshd_config
+
+# Uncomment a line
+sed -i 's/^#\s*\(PasswordAuthentication\)/\1/' /etc/ssh/sshd_config
+
+# Capture groups: swap parts of the match
+sed -E 's/([a-z]+)@([a-z.]+)/\2 \1/' emails.txt
+
+# Use & to reuse the whole match
+sed 's/[0-9]\+/[&]/g' file.txt
+
+# Remove trailing whitespace
+sed -i 's/[ \t]*$//' script.py
+
+# Remove leading whitespace
+sed 's/^[ \t]*//' file.txt
+
+# Several edits in one run
+sed -e 's/foo/bar/g' -e 's/baz/qux/g' file.txt
+
+# Convert Windows line endings (CRLF) to Linux (LF)
+sed -i 's/\r$//' script.sh
+
+# Add a prefix to every line
+sed 's/^/  - /' list.txt
+
+# Use a shell variable (note the double quotes)
+sed -i "s/^VERSION=.*/VERSION=$NEW_VERSION/" .env
+
+# Replace in every file that contains a string
+sed -i 's/old.example.com/new.example.com/g' $(grep -rl "old.example.com" /etc/nginx)
+
+# Print the first 5 lines and quit (like head)
+sed 5q file.txt

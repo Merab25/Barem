@@ -1,0 +1,94 @@
+## Process text column by column: filter, sum, count and reformat
+
+# Print the first column
+awk '{print $1}' access.log
+
+# Print several columns
+awk '{print $1, $7}' access.log
+
+# Print the last column
+awk '{print $NF}' file.txt
+
+# Print the second-to-last column
+awk '{print $(NF-1)}' file.txt
+
+# Use a custom field separator
+awk -F: '{print $1}' /etc/passwd
+
+# Read a CSV column
+awk -F, '{print $2}' users.csv
+
+# Custom output separator
+awk -F: 'BEGIN {OFS="\t"} {print $1, $3, $7}' /etc/passwd
+
+# Filter rows by a condition (regular users)
+awk -F: '$3 >= 1000 {print $1}' /etc/passwd
+
+# Lines that match a regex
+awk '/ERROR/' app.log
+
+# Column matches a regex: HTTP 5xx responses
+awk '$9 ~ /^5/' access.log
+
+# Column does NOT match: non-2xx responses
+awk '$9 !~ /^2/' access.log
+
+# Sum a column
+awk '{sum += $10} END {print sum}' access.log
+
+# Average of a column
+awk '{sum += $2; n++} END {if (n) print sum / n}' latency.txt
+
+# Maximum value of a column
+awk 'max == "" || $2 > max {max = $2} END {print max}' data.txt
+
+# Count lines per key (group by), top 10
+awk '{count[$1]++} END {for (ip in count) print count[ip], ip}' access.log | sort -rn | head
+
+# Sum per key: bytes sent per IP
+awk '{bytes[$1] += $10} END {for (ip in bytes) print ip, bytes[ip]}' access.log
+
+# Print lines with line numbers
+awk '{print NR": "$0}' file.txt
+
+# Print lines 10 to 20
+awk 'NR >= 10 && NR <= 20' file.txt
+
+# Skip the header line
+awk 'NR > 1' data.csv
+
+# Count lines (like wc -l)
+awk 'END {print NR}' file.txt
+
+# Remove duplicate lines, keep the original order
+awk '!seen[$0]++' file.txt
+
+# Formatted output with printf
+awk -F: '{printf "%-20s %s\n", $1, $6}' /etc/passwd
+
+# Pass a shell value: disks more than 80% full
+df -h | awk -v limit=80 'NR > 1 && $5+0 > limit {print $6, $5}'
+
+# Print everything between two patterns
+awk '/BEGIN/,/END/' file.txt
+
+# Change a column and print the whole line
+awk '{$2 = "REDACTED"; print}' users.txt
+
+# Convert to uppercase
+awk '{print toupper($0)}' file.txt
+
+# Lines longer than 120 characters
+awk 'length($0) > 120' script.py
+
+# Split a column: requests per hour from an access log
+awk '{split($4, t, ":"); print t[2]}' access.log | sort | uniq -c
+
+# Memory used per program name
+ps aux | awk 'NR > 1 {mem[$11] += $6} END {for (p in mem) print int(mem[p]/1024) " MB", p}' | sort -rn | head
+
+# Join two files on the first column
+awk 'NR == FNR {name[$1] = $2; next} {print $0, name[$1]}' users.txt orders.txt
+
+# Rows where a CSV column is empty
+awk -F, '$3 == ""' users.csv

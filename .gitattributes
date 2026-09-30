@@ -1,0 +1,11 @@
+# gamaxsene ships shell examples that are read on Linux: keep LF in the
+# repository and in the working tree, so a checkout or wheel built on
+# Windows does not hand out CRLF example files.
+* text=auto eol=lf
+
+LICENSE text eol=lf
+*.py   text eol=lf
+*.txt  text eol=lf
+*.toml text eol=lf
+*.yml  text eol=lf
+*.md   text eol=lf

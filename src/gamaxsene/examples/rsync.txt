@@ -1,0 +1,94 @@
+## Fast incremental sync of files, locally or over SSH
+
+# Sync the contents of src into dest
+rsync -av src/ dest/
+
+# Without the trailing slash: copy the folder itself (dest/src/...)
+rsync -av src dest/
+
+# Upload to a server
+rsync -avz project/ user@server:/opt/project/
+
+# Download from a server
+rsync -avz user@server:/var/log/nginx/ ./nginx-logs/
+
+# Custom SSH port and key
+rsync -avz -e "ssh -p 2222 -i ~/.ssh/deploy_key" dist/ user@server:/var/www/app/
+
+# Dry run: show what would change
+rsync -avn --delete src/ dest/
+
+# Exact mirror: delete files in dest that are gone from src
+rsync -av --delete src/ dest/
+
+# Progress for each file
+rsync -ah --progress bigfile.iso /mnt/usb/
+
+# One overall progress line
+rsync -a --info=progress2 /data/ /backup/data/
+
+# Resume interrupted transfers (partial + progress)
+rsync -avP user@server:/data/big.tar.gz .
+
+# Exclude files and folders
+rsync -av --exclude="node_modules" --exclude=".git" project/ backup/
+
+# Exclude patterns listed in a file
+rsync -av --exclude-from="exclude.txt" project/ backup/
+
+# Copy only .jpg files, keep the folder structure
+rsync -av --include="*/" --include="*.jpg" --exclude="*" photos/ backup/
+
+# Also delete excluded files on the destination
+rsync -av --delete --delete-excluded --exclude="*.tmp" src/ dest/
+
+# Limit bandwidth (KB/s)
+rsync -avz --bwlimit=5000 backups/ user@server:/backups/
+
+# Only update files that already exist in dest
+rsync -av --existing src/ dest/
+
+# Skip files that already exist in dest
+rsync -av --ignore-existing src/ dest/
+
+# Skip files that are newer in dest
+rsync -avu src/ dest/
+
+# Compare by checksum instead of size and time
+rsync -avc src/ dest/
+
+# Skip files bigger than 100 MB
+rsync -av --max-size=100M src/ dest/
+
+# Move files: delete source files after transfer
+rsync -av --remove-source-files uploads/ archive/
+
+# Keep a dated backup of every overwritten or deleted file
+rsync -av --delete --backup --backup-dir="../changed-$(date +%F)" src/ dest/
+
+# Space-efficient daily snapshots with hard links
+rsync -a --delete --link-dest=/backups/latest /home/ /backups/2026-09-30/
+
+# Keep hard links, ACLs and extended attributes (full server copy)
+rsync -aHAX /srv/ /mnt/newdisk/srv/
+
+# Keep numeric user and group IDs when migrating servers
+rsync -a --numeric-ids root@old-server:/var/lib/app/ /var/lib/app/
+
+# Read root-owned files on the remote side with sudo
+rsync -av --rsync-path="sudo rsync" user@server:/etc/nginx/ ./nginx-conf/
+
+# Transfer only files listed in a file
+rsync -av --files-from=files.txt / user@server:/backup/
+
+# Do not cross into other mounted filesystems
+rsync -avx / /mnt/backup/
+
+# Show what changed for each file
+rsync -avi src/ dest/
+
+# Transfer statistics at the end
+rsync -a --stats src/ dest/
+
+# Write a log file
+rsync -av --log-file=/var/log/rsync-backup.log /data/ /backup/

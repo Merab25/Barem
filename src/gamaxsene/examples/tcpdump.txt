@@ -1,0 +1,97 @@
+## Capture and inspect network packets
+
+# List interfaces you can capture on
+sudo tcpdump -D
+
+# Capture on an interface
+sudo tcpdump -i eth0
+
+# Capture on all interfaces
+sudo tcpdump -i any
+
+# No DNS or port name lookups (faster, clearer)
+sudo tcpdump -nn -i eth0
+
+# Stop after 100 packets
+sudo tcpdump -c 100 -i eth0
+
+# Only one port
+sudo tcpdump -i eth0 port 443
+
+# Only one host
+sudo tcpdump -i eth0 host 192.168.1.50
+
+# Source host and destination port
+sudo tcpdump -i eth0 src 10.0.0.5 and dst port 5432
+
+# A whole network
+sudo tcpdump -i eth0 net 192.168.1.0/24
+
+# A port range
+sudo tcpdump -i eth0 portrange 8000-8100
+
+# Only ICMP (ping)
+sudo tcpdump -i eth0 icmp
+
+# Only ARP
+sudo tcpdump -i eth0 arp
+
+# Exclude your own SSH session
+sudo tcpdump -i eth0 not port 22
+
+# Combine conditions with parentheses
+sudo tcpdump -i eth0 'host 10.0.0.5 and (port 80 or port 443)'
+
+# Only incoming packets
+sudo tcpdump -i eth0 -Q in
+
+# Packets bigger than 1000 bytes
+sudo tcpdump -i eth0 greater 1000
+
+# DNS queries and answers
+sudo tcpdump -i any -nn udp port 53
+
+# Only SYN packets (new connections)
+sudo tcpdump -i eth0 'tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0'
+
+# Only RST packets (refused or reset connections)
+sudo tcpdump -i eth0 'tcp[tcpflags] & tcp-rst != 0'
+
+# Only HTTP GET requests
+sudo tcpdump -i eth0 -A -s 0 'tcp port 80 and tcp[((tcp[12:1] & 0xf0) >> 2):4] = 0x47455420'
+
+# Show payload as text
+sudo tcpdump -i eth0 -A port 80
+
+# Show payload as hex and text
+sudo tcpdump -i eth0 -X port 53
+
+# Show MAC addresses
+sudo tcpdump -i eth0 -e
+
+# Very verbose protocol details
+sudo tcpdump -i eth0 -vv
+
+# Readable date and time on each packet
+sudo tcpdump -i eth0 -tttt
+
+# Save packets to a file for Wireshark
+sudo tcpdump -i eth0 -s 0 -w capture.pcap
+
+# Read a saved capture
+tcpdump -nn -r capture.pcap
+
+# Read a capture with a filter
+tcpdump -nn -r capture.pcap 'port 443' | head
+
+# Ring buffer: 10 files of 100 MB each
+sudo tcpdump -i eth0 -w capture.pcap -C 100 -W 10
+
+# Line-buffered output for grep
+sudo tcpdump -i eth0 -l -A port 80 | grep "Host:"
+
+# Docker container traffic
+sudo tcpdump -i docker0 -nn
+
+# Capture on a remote server, view live in local Wireshark
+ssh user@server "sudo tcpdump -i eth0 -U -w - not port 22" | wireshark -k -i -

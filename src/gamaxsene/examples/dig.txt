@@ -1,0 +1,91 @@
+## DNS lookups: records, resolvers, propagation and debugging
+
+# Full DNS answer for a domain
+dig example.com
+
+# Only the IP address
+dig +short example.com
+
+# Only the answer section
+dig example.com +noall +answer
+
+# Mail servers (MX)
+dig +short example.com MX
+
+# IPv6 address (AAAA)
+dig +short example.com AAAA
+
+# Name servers (NS)
+dig +short example.com NS
+
+# TXT records (SPF, verification tokens)
+dig +short example.com TXT
+
+# CNAME (alias) record
+dig +short www.github.com CNAME
+
+# Start of authority (SOA)
+dig +short example.com SOA
+
+# Which CAs may issue certificates (CAA)
+dig +short example.com CAA
+
+# DMARC policy
+dig +short TXT _dmarc.example.com
+
+# DKIM key for a selector
+dig +short TXT selector1._domainkey.example.com
+
+# SRV record
+dig +short _sip._tcp.example.com SRV
+
+# Reverse lookup: IP to name
+dig -x 8.8.8.8 +short
+
+# Ask a specific resolver
+dig @1.1.1.1 example.com
+
+# Ask the authoritative server directly (no cache)
+dig @ns1.example.com example.com +norecurse
+
+# Follow the delegation from the root servers
+dig +trace example.com
+
+# Check propagation on several public resolvers
+for ns in 1.1.1.1 8.8.8.8 9.9.9.9; do echo "$ns: $(dig @$ns +short example.com)"; done
+
+# Show TTL in human units
+dig +noall +answer +ttlunits example.com
+
+# Which DNS server answered
+dig example.com | grep SERVER
+
+# Which server answered, in short mode
+dig +short +identify example.com
+
+# How long the query took
+dig example.com | grep "Query time"
+
+# Several queries in one command
+dig example.com A github.com MX +noall +answer
+
+# Many domains from a file
+dig -f domains.txt +short
+
+# Query over TCP
+dig +tcp example.com
+
+# Use IPv4 transport only
+dig -4 example.com
+
+# DNSSEC signatures
+dig example.com +dnssec
+
+# Short timeout, one try
+dig +time=2 +tries=1 example.com
+
+# Custom port (e.g. local DNS on 5353)
+dig -p 5353 @127.0.0.1 myservice.local
+
+# Zone transfer (test your own DNS server)
+dig axfr example.com @ns1.example.com

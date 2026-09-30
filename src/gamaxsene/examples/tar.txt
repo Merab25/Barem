@@ -1,0 +1,95 @@
+## Create, list and extract archives (.tar, .tar.gz, .tar.bz2, .tar.xz, .tar.zst)
+
+# Create a plain .tar archive
+tar -cvf backup.tar project/
+
+# Create a gzip-compressed archive (.tar.gz)
+tar -czvf backup.tar.gz project/
+
+# Create a bzip2-compressed archive (.tar.bz2)
+tar -cjvf backup.tar.bz2 project/
+
+# Create an xz-compressed archive (smallest, slowest)
+tar -cJvf backup.tar.xz project/
+
+# Create a zstd-compressed archive (fast and small)
+tar --zstd -cvf backup.tar.zst project/
+
+# Pick compression automatically from the file extension
+tar -caf backup.tar.xz project/
+
+# Extract an archive (compression is detected automatically)
+tar -xvf archive.tar.gz
+
+# Extract into a specific directory
+tar -xzf archive.tar.gz -C /opt/app
+
+# List contents without extracting
+tar -tvf archive.tar.gz
+
+# Extract a single file
+tar -xzf archive.tar.gz project/config.yaml
+
+# Extract files matching a wildcard
+tar -xzf archive.tar.gz --wildcards "*.conf"
+
+# Drop the top-level folder while extracting
+tar -xzf node-v22.tar.gz --strip-components=1 -C /usr/local/node
+
+# Do not overwrite existing files when extracting
+tar -xzkf archive.tar.gz
+
+# Exclude files and folders
+tar -czf backup.tar.gz --exclude="node_modules" --exclude="*.log" project/
+
+# Exclude .git and other version control folders
+tar -czf source.tar.gz --exclude-vcs project/
+
+# Exclude patterns listed in a file
+tar -czf backup.tar.gz -X exclude.txt project/
+
+# Archive only files listed in a file
+tar -czf selected.tar.gz -T files.txt
+
+# Append a file to an existing (uncompressed) archive
+tar -rvf backup.tar notes.txt
+
+# Add only files that are newer than in the archive
+tar -uvf backup.tar project/
+
+# Extract as root preserving permissions and owners
+sudo tar -xpzf rootfs.tar.gz -C /mnt/rootfs
+
+# Archive only files changed after a date
+tar -czf recent.tar.gz --newer-mtime="2026-09-01" project/
+
+# Backup with the date in the file name
+tar -czf "etc-backup-$(date +%F).tar.gz" /etc
+
+# Stream a backup directly to a remote server over SSH
+tar -czf - /var/www | ssh user@backup-server "cat > www-backup.tar.gz"
+
+# Copy a directory to a remote server and unpack it there
+tar -cf - project/ | ssh user@server "tar -xf - -C /opt"
+
+# Split a big archive into 1 GB parts
+tar -czf - bigdata/ | split -b 1G - bigdata.tar.gz.part-
+
+# Join the parts and extract
+cat bigdata.tar.gz.part-* | tar -xzf -
+
+# Show progress while archiving (needs pv)
+tar -cf - bigdir/ | pv | gzip > bigdir.tar.gz
+
+# Parallel compression with all CPU cores (needs pigz)
+tar -I pigz -cf backup.tar.gz project/
+
+# Check that an archive is readable
+tar -tzf backup.tar.gz > /dev/null && echo "archive OK"
+
+# Compare an archive with the files on disk
+tar -dvf backup.tar
+
+# Incremental backups: full first, then only changes
+tar -czf full.tar.gz -g snapshot.snar /data
+tar -czf incremental-1.tar.gz -g snapshot.snar /data

@@ -1,0 +1,97 @@
+## Show running processes with CPU, memory, owner and command
+
+# All processes (BSD style)
+ps aux
+
+# All processes (standard style, shows parent PID)
+ps -ef
+
+# Process tree
+ps -ef --forest
+
+# Full command lines, no truncation
+ps auxww
+
+# Your processes in the current terminal
+ps
+
+# Processes of a user
+ps -u www-data
+
+# Processes by program name
+ps -C nginx
+
+# One process by PID
+ps -p 1234
+
+# Choose your own columns
+ps -eo pid,ppid,user,%cpu,%mem,cmd
+
+# Top CPU consumers
+ps -eo pid,user,%cpu,cmd --sort=-%cpu | head
+
+# Top memory consumers
+ps -eo pid,user,%mem,rss,cmd --sort=-%mem | head
+
+# Output without a header line
+ps -o pid= -C sshd
+
+# When a process started
+ps -o lstart= -p 1234
+
+# How long a process has been running
+ps -o pid,etime,cmd -p 1234
+
+# Parent PID of a process
+ps -o ppid= -p 1234
+
+# Child processes of a PID
+ps --ppid 1234
+
+# Threads of a process
+ps -T -p 1234
+
+# Processes with the most threads
+ps -eo pid,nlwp,cmd --sort=-nlwp | head
+
+# Zombie processes
+ps aux | awk '$8 ~ /^Z/'
+
+# Processes stuck in disk wait (D state)
+ps -eo pid,stat,cmd | awk '$2 ~ /^D/'
+
+# Number of processes per user
+ps -eo user= | sort | uniq -c | sort -rn
+
+# Total memory of all php-fpm workers
+ps -C php-fpm -o rss= | awk '{sum += $1} END {print sum/1024 " MB"}'
+
+# Nice value and priority
+ps -eo pid,ni,pri,cmd --sort=ni
+
+# Which CPU core a process is running on
+ps -o pid,psr,cmd -p 1234
+
+# Process groups and sessions
+ps -eo pid,pgid,sid,cmd
+
+# Processes attached to a terminal
+ps -t pts/0
+
+# Environment variables of a process
+ps eww -p 1234
+
+# SELinux context of processes
+ps -eZ
+
+# Refresh the top CPU list every 2 seconds
+watch -n 2 "ps -eo pid,%cpu,cmd --sort=-%cpu | head"
+
+# grep a process without matching grep itself
+ps aux | grep "[p]ython"
+
+# Better: pgrep with full command lines
+pgrep -a python
+
+# PIDs of a program
+pidof nginx

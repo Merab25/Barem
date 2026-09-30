@@ -1,0 +1,114 @@
+## Search for files and directories by name, type, size, time and permissions
+
+# Find files by exact name in the current directory tree
+find . -name "config.yaml"
+
+# Case-insensitive name match
+find . -iname "readme*"
+
+# Only regular files with a given extension
+find /var/log -type f -name "*.log"
+
+# Only directories with a given name
+find . -type d -name "node_modules"
+
+# Only symbolic links
+find /usr/bin -type l
+
+# Broken symlinks (link target does not exist)
+find . -xtype l
+
+# Do not go deeper than the current directory
+find . -maxdepth 1 -type f
+
+# Skip the top level, search from depth 2
+find . -mindepth 2 -type f -name "*.py"
+
+# Files bigger than 100 MB anywhere, hide permission errors
+find / -type f -size +100M 2>/dev/null
+
+# Files between 10 MB and 50 MB
+find . -type f -size +10M -size -50M
+
+# Empty files and empty directories
+find . -empty
+
+# Files modified in the last 24 hours
+find . -type f -mtime -1
+
+# Files modified more than 30 days ago
+find /var/log -type f -mtime +30
+
+# Files modified in the last 15 minutes
+find /etc -type f -mmin -15
+
+# Files modified after a specific date
+find . -type f -newermt "2026-01-01"
+
+# Files newer than a reference file
+find . -type f -newer /tmp/last_deploy
+
+# Files owned by a user / by a group
+find /home -user merab
+find /srv -group www-data
+
+# Files with no valid owner (user was deleted)
+find / -nouser 2>/dev/null
+
+# Files with exact permissions 777
+find . -type f -perm 0777
+
+# World-writable files (security audit)
+find / -type f -perm -o+w -not -path "/proc/*" 2>/dev/null
+
+# SUID binaries (security audit)
+find / -type f -perm -4000 2>/dev/null
+
+# Several names at once (OR)
+find . -type f \( -name "*.jpg" -o -name "*.png" \)
+
+# Everything except a pattern (NOT)
+find . -type f ! -name "*.txt"
+
+# Exclude a directory from the search with -prune
+find . -path ./node_modules -prune -o -type f -name "*.js" -print
+
+# Match the full path with a regular expression
+find . -regextype posix-extended -regex ".*/(test|spec)_[a-z]+\.py"
+
+# Stay on one filesystem (skip /proc, mounted disks)
+find / -xdev -type f -size +500M 2>/dev/null
+
+# Delete matching files
+find /tmp -type f -name "*.tmp" -delete
+
+# Delete app logs older than 30 days
+find /var/log/myapp -name "*.log" -mtime +30 -delete
+
+# Run a command for each file
+find . -name "*.sh" -exec chmod +x {} \;
+
+# Run a command once with many files (faster than \;)
+find . -name "*.py" -exec wc -l {} +
+
+# Ask for confirmation before each action
+find . -name "*.bak" -ok rm {} \;
+
+# Pipe safely into xargs (handles spaces in names)
+find . -type f -name "*.log" -print0 | xargs -0 gzip
+
+# Web permissions: 755 for directories, 644 for files
+find /var/www -type d -exec chmod 755 {} +
+find /var/www -type f -exec chmod 644 {} +
+
+# Find files containing a text
+find /etc/nginx -name "*.conf" -exec grep -l "listen 443" {} +
+
+# 10 largest files with custom output format
+find . -type f -printf "%s\t%p\n" | sort -n | tail -10
+
+# Count files in a directory tree
+find . -type f | wc -l
+
+# Move all found files to another directory
+find ~/Downloads -name "*.pdf" -exec mv -t ~/Documents {} +

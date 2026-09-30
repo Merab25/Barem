@@ -1,0 +1,101 @@
+## Control systemd services, boot targets and timers
+
+# Status of a service (running? errors? last logs)
+systemctl status nginx
+
+# Start a service
+sudo systemctl start nginx
+
+# Stop a service
+sudo systemctl stop nginx
+
+# Restart a service
+sudo systemctl restart nginx
+
+# Reload configuration without dropping connections
+sudo systemctl reload nginx
+
+# Reload if supported, otherwise restart
+sudo systemctl reload-or-restart nginx
+
+# Start automatically at boot
+sudo systemctl enable nginx
+
+# Enable and start in one command
+sudo systemctl enable --now docker
+
+# Disable and stop in one command
+sudo systemctl disable --now apache2
+
+# Is it running? (for scripts)
+systemctl is-active --quiet nginx && echo "running"
+
+# Is it enabled at boot?
+systemctl is-enabled nginx
+
+# Did it fail?
+systemctl is-failed myapp
+
+# All running services
+systemctl list-units --type=service --state=running
+
+# All failed units
+systemctl --failed
+
+# All installed service files and their boot state
+systemctl list-unit-files --type=service
+
+# Clear the failed state
+sudo systemctl reset-failed
+
+# Reload systemd after creating or editing unit files
+sudo systemctl daemon-reload
+
+# Show the unit file (and overrides)
+systemctl cat nginx
+
+# Override settings safely (creates a drop-in file)
+sudo systemctl edit nginx
+
+# Edit the full unit file
+sudo systemctl edit --full myapp
+
+# Show specific properties
+systemctl show nginx -p MainPID,ActiveState,SubState,NRestarts
+
+# What a service depends on
+systemctl list-dependencies nginx
+
+# Block a service completely (cannot be started at all)
+sudo systemctl mask bluetooth
+
+# Undo mask
+sudo systemctl unmask bluetooth
+
+# Send a signal to the service processes
+sudo systemctl kill -s SIGHUP myapp
+
+# All timers (systemd's cron) and next run times
+systemctl list-timers --all
+
+# Listening sockets managed by systemd
+systemctl list-sockets
+
+# User-level services (no sudo)
+systemctl --user status syncthing
+
+# Default boot target (graphical or text mode)
+systemctl get-default
+
+# Boot into text mode by default
+sudo systemctl set-default multi-user.target
+
+# Reboot / power off
+sudo systemctl reboot
+sudo systemctl poweroff
+
+# Check a service on a remote host over SSH
+systemctl -H user@server status nginx
+
+# Which services slow down boot
+systemd-analyze blame | head

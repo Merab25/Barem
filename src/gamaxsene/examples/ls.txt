@@ -1,0 +1,97 @@
+## List directory contents with details, sorting and filtering
+
+# Long listing: permissions, owner, size, date
+ls -l
+
+# Include hidden files
+ls -la
+
+# Hidden files but without . and ..
+ls -lA
+
+# Human-readable sizes (K, M, G)
+ls -lh
+
+# Sort by modification time, newest first
+ls -lt
+
+# Sort by time, oldest first (newest at the bottom)
+ls -ltr
+
+# Sort by size, largest first
+ls -lhS
+
+# Sort by size, smallest first
+ls -lhSr
+
+# Sort by file extension
+ls -lX
+
+# Natural sort of version numbers (file2 before file10)
+ls -v
+
+# Sort by last access time
+ls -ltu
+
+# Sort by status change time (permissions, owner changes)
+ls -ltc
+
+# List subdirectories recursively
+ls -R /etc/nginx
+
+# One entry per line (good for scripts)
+ls -1
+
+# Only directories
+ls -d */
+
+# Info about the directory itself, not its contents
+ls -ld /var/www
+
+# Only hidden files
+ls -d .*
+
+# Add type indicators: / for dirs, * for executables, @ for links
+ls -F
+
+# Show inode numbers
+ls -li
+
+# Show numeric user and group IDs
+ls -ln
+
+# ISO date format
+ls -l --time-style=long-iso
+
+# Full timestamp with seconds and timezone
+ls -l --full-time
+
+# Directories first, then files
+ls -l --group-directories-first
+
+# Hide files matching a pattern
+ls --ignore="*.log"
+
+# Hide backup files ending with ~
+ls -B
+
+# Show SELinux security context
+ls -Z
+
+# Comma-separated list
+ls -m
+
+# Keep colors when paging
+ls -l --color=always | less -R
+
+# Quote names (useful with spaces)
+ls -Q
+
+# Newest file in a directory
+ls -t /var/backups | head -1
+
+# Count entries in a directory
+ls -1 | wc -l
+
+# List files matching a wildcard
+ls -lh /var/log/*.log

@@ -1,0 +1,112 @@
+## Install, update and manage packages on Debian and Ubuntu
+
+# Refresh the package lists
+sudo apt update
+
+# Upgrade installed packages
+sudo apt upgrade
+
+# Update and upgrade without questions
+sudo apt update && sudo apt upgrade -y
+
+# Upgrade and allow adding/removing packages (bigger upgrades)
+sudo apt full-upgrade
+
+# Install a package
+sudo apt install nginx
+
+# Install several packages without prompts
+sudo apt install -y git curl htop
+
+# Install a specific version
+sudo apt install nginx=1.24.0-2ubuntu7
+
+# Install without recommended extras (smaller)
+sudo apt install --no-install-recommends python3-pip
+
+# Install a local .deb file with its dependencies
+sudo apt install ./package.deb
+
+# Reinstall a package
+sudo apt install --reinstall nginx
+
+# Simulate an install (show what would happen)
+sudo apt install -s nginx
+
+# Remove a package, keep its config
+sudo apt remove nginx
+
+# Remove a package and its config files
+sudo apt purge nginx
+
+# Remove dependencies nobody needs anymore
+sudo apt autoremove
+
+# Clear the downloaded package cache
+sudo apt clean
+
+# Search packages
+apt search "json processor"
+
+# Package details
+apt show nginx
+
+# Installed packages
+apt list --installed
+
+# Packages that can be upgraded
+apt list --upgradable
+
+# Is a package installed?
+dpkg -l | grep nginx
+
+# Installed and available versions, and their repositories
+apt-cache policy nginx
+
+# Dependencies of a package
+apt-cache depends nginx
+
+# Packages that depend on a package
+apt-cache rdepends libssl3
+
+# Files installed by a package
+dpkg -L nginx
+
+# Which package a file belongs to
+dpkg -S /usr/bin/curl
+
+# Which package provides a file you don't have (needs apt-file)
+apt-file search bin/dig
+
+# Freeze a package at its current version
+sudo apt-mark hold linux-image-generic
+
+# Allow upgrades again
+sudo apt-mark unhold linux-image-generic
+
+# Show frozen packages
+apt-mark showhold
+
+# Fix broken dependencies
+sudo apt --fix-broken install
+
+# Finish interrupted installs
+sudo dpkg --configure -a
+
+# Download the .deb without installing
+apt-get download nginx
+
+# Read the changelog of a package
+apt-get changelog nginx
+
+# Add a PPA repository
+sudo add-apt-repository ppa:deadsnakes/ppa
+
+# Install history
+grep " install " /var/log/dpkg.log
+
+# Dockerfile pattern: install and keep the image small
+apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && rm -rf /var/lib/apt/lists/*
+
+# Fully non-interactive (CI, Docker, scripts)
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata

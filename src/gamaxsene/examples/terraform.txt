@@ -1,0 +1,117 @@
+## Infrastructure as code: plan, apply and manage cloud resources
+
+# Download providers and set up the backend
+terraform init
+
+# Upgrade providers to the newest allowed versions
+terraform init -upgrade
+
+# Move state to a new backend
+terraform init -migrate-state
+
+# Format all .tf files
+terraform fmt -recursive
+
+# Check formatting only (CI)
+terraform fmt -check -recursive
+
+# Check the configuration for errors
+terraform validate
+
+# Show what would change
+terraform plan
+
+# Save the plan to a file
+terraform plan -out=tfplan
+
+# Apply exactly the saved plan
+terraform apply tfplan
+
+# Apply without the confirmation prompt (CI)
+terraform apply -auto-approve
+
+# Exit code 2 when there are changes (drift detection in CI)
+terraform plan -detailed-exitcode
+
+# Set a variable on the command line
+terraform plan -var="instance_type=t3.small"
+
+# Use a variables file per environment
+terraform apply -var-file="prod.tfvars"
+
+# Set a variable through the environment
+export TF_VAR_db_password="secret"
+
+# Run in another directory
+terraform -chdir=environments/prod plan
+
+# Change only one resource
+terraform apply -target=aws_instance.web
+
+# Recreate one resource
+terraform apply -replace="aws_instance.web"
+
+# Update state from real infrastructure, change nothing
+terraform apply -refresh-only
+
+# Preview what destroy would delete
+terraform plan -destroy
+
+# Delete all managed infrastructure
+terraform destroy
+
+# Delete one resource
+terraform destroy -target=aws_s3_bucket.tmp
+
+# All outputs
+terraform output
+
+# One output as a plain value (for scripts)
+terraform output -raw public_ip
+
+# Outputs as JSON
+terraform output -json | jq .
+
+# Resources in the state
+terraform state list
+
+# Details of one resource in the state
+terraform state show aws_instance.web
+
+# Rename a resource without recreating it
+terraform state mv aws_instance.web aws_instance.app
+
+# Stop managing a resource (does not delete it)
+terraform state rm aws_s3_bucket.legacy
+
+# Bring an existing resource under Terraform
+terraform import aws_s3_bucket.logs my-existing-logs-bucket
+
+# Workspaces: separate state per environment
+terraform workspace new staging
+terraform workspace select staging
+terraform workspace list
+
+# Try expressions interactively
+terraform console
+
+# Summary of planned actions per resource
+terraform show -json tfplan | jq '.resource_changes[] | {address, actions: .change.actions}'
+
+# Dependency graph as an image (needs graphviz)
+terraform graph | dot -Tpng > graph.png
+
+# Providers used by the configuration
+terraform providers
+
+# Lock provider hashes for Linux and Mac
+terraform providers lock -platform=linux_amd64 -platform=darwin_arm64
+
+# Remove a stuck state lock
+terraform force-unlock LOCK_ID
+
+# Debug logging
+TF_LOG=DEBUG terraform plan 2> debug.log
+
+# More resources in parallel
+terraform apply -parallelism=20
