@@ -148,3 +148,104 @@ def test_version(capsys):
         cli.main(["--version"])
     assert exc.value.code == 0
     assert cli.__version__ in capsys.readouterr().out
+
+
+# --- shell completion ---------------------------------------------------------
+
+
+def complete(capsys, *words):
+    """Ask for candidates the way the completion scripts do, on every TAB."""
+    code = cli.main(["--complete", *words])
+    out, _ = capsys.readouterr()
+    return code, out.split()
+
+
+def test_complete_command_names(capsys):
+    code, got = complete(capsys, "doc")
+    assert code == 0
+    assert got == ["docker"]
+
+
+def test_complete_offers_every_command_when_no_word_is_typed_yet(capsys):
+    _, got = complete(capsys, "")
+    assert got == NAMES
+
+
+def test_complete_keywords_of_the_command_on_the_line(capsys):
+    _, got = complete(capsys, "tar", "extr")
+    assert "extract" in got
+    assert all(word.startswith("extr") for word in got)
+
+
+def test_complete_offers_subcommands(capsys):
+    """The word after the command name, e.g. `git rebase`, is worth offering."""
+    _, got = complete(capsys, "git", "reb")
+    assert "rebase" in got
+
+
+def test_complete_skips_keywords_already_on_the_line(capsys):
+    _, before = complete(capsys, "tar", "ex")
+    _, after = complete(capsys, "tar", "extract", "ex")
+    assert "extract" in before
+    assert "extract" not in after
+
+
+def test_complete_options(capsys):
+    _, got = complete(capsys, "--no")
+    assert got == ["--no-color"]
+
+
+def test_complete_offers_every_public_option(capsys):
+    """--complete itself stays hidden: it is plumbing, not for typing by hand."""
+    _, got = complete(capsys, "-")
+    assert got == [
+        "--completion",
+        "--help",
+        "--list",
+        "--no-color",
+        "--oneline",
+        "--search",
+        "--version",
+        "-1",
+        "-V",
+        "-h",
+        "-l",
+        "-s",
+    ]
+    assert "--complete" not in got
+
+
+def test_complete_search_looks_at_every_command(capsys):
+    _, got = complete(capsys, "-s", "certifi")
+    assert "certificate" in got  # from openssl.txt
+
+
+def test_complete_without_a_match_prints_nothing(capsys):
+    code, got = complete(capsys, "no-such-word-anywhere")
+    assert code == 0
+    assert got == []
+
+
+@pytest.mark.parametrize("shell", cli.COMPLETION_SHELLS)
+def test_completion_script_is_printed(capsys, shell):
+    code = cli.main(["--completion", shell])
+    out, _ = capsys.readouterr()
+    assert code == 0
+    assert "_gamaxsene" in out
+    assert "--complete" in out  # the script asks the CLI for its candidates
+
+
+def test_completion_rejects_an_unknown_shell():
+    with pytest.raises(SystemExit) as exc:
+        cli.main(["--completion", "csh"])
+    assert exc.value.code == 2
+
+
+@pytest.mark.parametrize("shell", cli.COMPLETION_SHELLS)
+def test_completion_script_is_valid_shell_syntax(capsys, shell):
+    if shutil.which(shell) is None:
+        pytest.skip(f"{shell} is not installed")
+    cli.main(["--completion", shell])
+    script = capsys.readouterr().out
+    result = subprocess.run([shell, "-n"], input=script.encode(), capture_output=True)
+    assert result.returncode == 0, result.stderr.decode(errors="replace")

@@ -34,6 +34,7 @@ It currently ships **37 commands** and **1,236 examples** — about 30 per comma
 - **Description first, command second**: every example is a `# description` line followed by the command, so it reads like a well-commented script.
 - **Keyword filtering**: `gamaxsene tar extract` shows only the examples that mention "extract".
 - **Search everything**: `gamaxsene -s port` searches the examples of every command at once.
+- **Tab completion**: bash and zsh completion for command names, keywords and options, built from the example files that are installed.
 - **Grep-friendly**: `--oneline` prints `command  # description` on one line, and colors switch off automatically when output goes to a pipe or file.
 - **Zero dependencies**: standard library only, Python 3.9+.
 - **Easy to extend**: adding a command means adding one plain text file.
@@ -74,6 +75,7 @@ pipx uninstall gamaxsene                                           # remove
 | `gamaxsene grep -1` | One example per line: `command  # description` |
 | `gamaxsene find --no-color` | Plain output (also `NO_COLOR=1`) |
 | `gamaxsene -V` | Show the version |
+| `gamaxsene --completion bash` | Print a completion script (also `zsh`) |
 | `python -m gamaxsene find` | Same as `gamaxsene find` |
 
 Keywords are case-insensitive and match the **start of a word**: `port` finds "port", "ports" and `--port`, but not "export" or "report".
@@ -91,6 +93,37 @@ gamaxsene curl json -1 > curl-json.sh  # save examples as a commented script
 ```
 
 Exit codes make it usable in scripts: `0` when examples were printed, `1` for an unknown command or no matches.
+
+## Shell completion
+
+`gamaxsene --completion bash` and `gamaxsene --completion zsh` print a completion script. Install it once:
+
+```bash
+# bash
+mkdir -p ~/.local/share/bash-completion/completions
+gamaxsene --completion bash > ~/.local/share/bash-completion/completions/gamaxsene
+
+# zsh, into any directory on your $fpath
+gamaxsene --completion zsh > "${fpath[1]}/_gamaxsene"
+rm -f ~/.zcompdump && compinit
+```
+
+Open a new terminal, and TAB completes command names, keywords and options:
+
+```console
+$ gamaxsene doc<TAB>        # docker
+$ gamaxsene git reb<TAB>    # rebase
+$ gamaxsene tar extr<TAB>   # extract  extracting
+$ gamaxsene --no<TAB>       # --no-color
+```
+
+Candidates come from the example files that are installed rather than from a list baked into the script, so a command or keyword you add is completed without regenerating anything. A keyword already on the line is not offered again.
+
+To try it in the current shell only, without installing:
+
+```bash
+source <(gamaxsene --completion bash)
+```
 
 ## Available commands
 
@@ -195,7 +228,7 @@ find /var/www -type f -exec chmod 644 {} +
 pytest
 ```
 
-The new command shows up automatically in `--list`, `--help` and `--search`; no code changes are needed.
+The new command shows up automatically in `--list`, `--help`, `--search` and tab completion; no code changes are needed.
 
 ## Project structure
 
@@ -205,7 +238,8 @@ gamaxsene/
 ├── src/gamaxsene/
 │   ├── __init__.py            # package version (single source of truth)
 │   ├── __main__.py            # enables `python -m gamaxsene`
-│   ├── cli.py                 # argument parsing, file parsing, filtering and output
+│   ├── cli.py                 # argument parsing, file parsing, filtering, output, completion
+│   ├── completions/           # the bash and zsh completion scripts, shipped too
 │   └── examples/              # one .txt file per command, shipped inside the package
 ├── tests/test_cli.py          # parser, example files and CLI behaviour tests
 ├── pyproject.toml             # package metadata, build backend, `gamaxsene` entry point
@@ -219,6 +253,7 @@ gamaxsene/
 - **Bundled data**: the example files live inside the package, so they are included in the wheel. At runtime `importlib.resources` finds them wherever the package was installed, instead of relying on hard-coded paths.
 - **Parsing**: each file is read line by line into `Example(description, commands)` objects; filtering is a case-insensitive word-start match against the description and the commands.
 - **Output**: colors are ANSI escape codes, enabled only when stdout is a terminal (`sys.stdout.isatty()`), so pipes, files and grep always get plain text.
+- **Completion**: the script printed by `--completion` is a real file in the package, not a string built in Python. On every TAB it calls the hidden `gamaxsene --complete <words>`, which prints one candidate per line. That call is handled before `argparse` runs, because the words arrive half-typed (`--no-c`, `-`) and `argparse` would try to read them as options.
 - **Isolation**: pipx installs the tool in its own virtual environment, so it never conflicts with system Python packages.
 - **Versioning**: the version is defined once in `src/gamaxsene/__init__.py` and read by the build backend (hatchling).
 
@@ -244,7 +279,6 @@ pipx install -e . --force
 
 ## Roadmap
 
-- Shell completion for bash and zsh
 - Publish to PyPI (`pipx install gamaxsene`)
 - More commands: `ufw`, `nginx`, `helm`, `ansible`, `strace`, `mount`, `useradd`
 - Georgian descriptions

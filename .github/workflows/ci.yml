@@ -17,6 +17,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      # zsh is not on the runner by default, and without it the test that
+      # syntax-checks the zsh completion script would quietly skip.
+      - name: Install zsh
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
       - name: Build wheel and sdist
         run: |
           python -m pip install --upgrade pip build pytest
@@ -34,3 +39,22 @@ jobs:
           gamaxsene --list
           gamaxsene find size
           gamaxsene -s port --oneline | head -5
+          gamaxsene --completion bash
+          gamaxsene --completion zsh
+
+      # Source the generated script and drive the completion function the way
+      # a TAB press would, so a broken script fails here and not on a user's
+      # machine, where completion just silently offers nothing.
+      - name: Smoke test bash completion
+        shell: bash
+        run: |
+          source <(gamaxsene --completion bash)
+          COMP_WORDS=(gamaxsene doc) COMP_CWORD=1 COMPREPLY=()
+          _gamaxsene
+          echo "gamaxsene doc -> ${COMPREPLY[*]}"
+          [[ "${COMPREPLY[*]}" == "docker" ]]
+
+          COMP_WORDS=(gamaxsene tar extr) COMP_CWORD=2 COMPREPLY=()
+          _gamaxsene
+          echo "gamaxsene tar extr -> ${COMPREPLY[*]}"
+          [[ "${COMPREPLY[*]}" == *extract* ]]

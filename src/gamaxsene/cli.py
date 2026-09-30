@@ -205,6 +205,67 @@ def emit(text: str) -> int:
     return 0
 
 
+COMPLETION_SHELLS = ("bash", "zsh")
+
+
+def completion_script(shell: str) -> str:
+    """The completion script for `shell`, shipped inside the package."""
+    path = resources.files("gamaxsene").joinpath("completions", f"gamaxsene.{shell}")
+    return path.read_text(encoding="utf-8").rstrip("\n")
+
+
+def option_names() -> list[str]:
+    """Every option the parser accepts, so completion never drifts from it."""
+    return sorted(
+        option for action in build_parser()._actions for option in action.option_strings
+    )
+
+
+def vocabulary(sheet: Sheet) -> list[str]:
+    """Keywords worth offering for one command.
+
+    Keywords match the start of a word, so the candidates that help are the
+    words someone would actually type: the words of the descriptions, the long
+    options of the commands (`--exclude`) and whatever follows the command
+    name (`git rebase`, `docker compose`). Paths and hosts are left out.
+    """
+    words: set[str] = set()
+    for example in sheet.examples:
+        words.update(re.findall(r"[a-z][a-z0-9-]{2,}", example.description.lower()))
+        for command in example.commands:
+            words.update(re.findall(r"--[a-z][a-z0-9-]+", command))
+            tokens = command.split()
+            for token, following in zip(tokens, tokens[1:]):
+                if token == sheet.name and re.fullmatch(r"[a-z][a-z0-9-]{2,}", following):
+                    words.add(following)
+    return sorted(words)
+
+
+def completion_candidates(words: list[str]) -> list[str]:
+    """Candidates for the last of `words`, the word currently being typed.
+
+    `words` is everything after the program name, so ["doc"] while typing a
+    command name and ["tar", "extr"] while typing a keyword for tar.
+    """
+    partial = words[-1] if words else ""
+    earlier = words[:-1]
+
+    if partial.startswith("-"):
+        return [option for option in option_names() if option.startswith(partial)]
+
+    names = available()
+    if any(word in ("-s", "--search") for word in earlier):
+        pool = {word for name in names for word in vocabulary(load(name))}
+    else:
+        command = next((word for word in earlier if word in names), None)
+        if command is None:
+            return [name for name in names if name.startswith(partial)]
+        pool = set(vocabulary(load(command)))
+
+    # Don't offer a keyword that is already on the line.
+    return sorted(word for word in pool - set(earlier) if word.startswith(partial))
+
+
 def build_parser() -> argparse.ArgumentParser:
     commands = textwrap.fill(
         " ".join(available()), width=72, initial_indent="  ", subsequent_indent="  "
@@ -232,17 +293,36 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--no-color", action="store_true", help="disable colors (also: NO_COLOR=1 env variable)"
     )
+    parser.add_argument(
+        "--completion",
+        choices=COMPLETION_SHELLS,
+        metavar="SHELL",
+        help=f"print a completion script for {' or '.join(COMPLETION_SHELLS)}",
+    )
     parser.add_argument("-V", "--version", action="version", version=f"%(prog)s {__version__}")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+
+    # The shell calls `--complete` on every TAB with raw, half-typed words
+    # ("--no-c", "-"), which argparse would try to read as options, so handle
+    # it before parsing. It stays out of --help on purpose: it is the plumbing
+    # behind `--completion`, not something to type by hand.
+    if argv and argv[0] == "--complete":
+        found = completion_candidates(argv[1:])
+        return emit("\n".join(found)) if found else 0
+
     parser = build_parser()
     args = parser.parse_intermixed_args(argv)
     style = Style(colors_enabled(args.no_color))
 
     if args.search and args.command:
         parser.error("use either a command or --search, not both")
+
+    if args.completion:
+        return emit(completion_script(args.completion))
 
     if args.list:
         return emit(render_list(style))
