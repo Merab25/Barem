@@ -26,8 +26,8 @@ classifiers = [
 dev = ["pytest", "build"]
 
 [project.urls]
-Homepage = "https://github.com/YOUR_USERNAME/gamaxsene"
-Issues = "https://github.com/YOUR_USERNAME/gamaxsene/issues"
+Homepage = "https://github.com/Merab25/Gamaxsene"
+Issues = "https://github.com/Merab25/Gamaxsene/issues"
 
 # Creates the `gamaxsene` terminal command -> runs main() in src/gamaxsene/cli.py
 [project.scripts]

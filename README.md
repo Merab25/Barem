@@ -1,6 +1,6 @@
 # gamaxsene
 
-[![CI](https://github.com/YOUR_USERNAME/gamaxsene/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/gamaxsene/actions/workflows/ci.yml)
+[![CI](https://github.com/Merab25/Gamaxsene/actions/workflows/ci.yml/badge.svg)](https://github.com/Merab25/Gamaxsene/actions/workflows/ci.yml)
 ![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 ![Dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen)
@@ -50,15 +50,15 @@ pipx ensurepath        # then open a new terminal
 Install straight from GitHub:
 
 ```bash
-pipx install git+https://github.com/YOUR_USERNAME/gamaxsene.git
+pipx install git+https://github.com/Merab25/Gamaxsene.git
 ```
 
 pipx creates an isolated virtual environment for the tool and puts the `gamaxsene` command on your `PATH`.
 
 ```bash
-pipx install git+https://github.com/YOUR_USERNAME/gamaxsene.git@v0.1.0   # a specific release
-pipx upgrade gamaxsene                                                     # update
-pipx uninstall gamaxsene                                                   # remove
+pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.1.0   # a specific release
+pipx upgrade gamaxsene                                             # update
+pipx uninstall gamaxsene                                           # remove
 ```
 
 ## Usage
@@ -225,7 +225,7 @@ gamaxsene/
 ## Development
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/gamaxsene.git
+git clone https://github.com/Merab25/Gamaxsene.git
 cd gamaxsene
 python3 -m venv .venv
 source .venv/bin/activate
