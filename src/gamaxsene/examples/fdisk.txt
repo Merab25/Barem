@@ -1,0 +1,100 @@
+## Inspect and edit partition tables
+
+# List every disk and its partitions
+sudo fdisk -l
+
+# One disk only
+sudo fdisk -l /dev/sdb
+
+# Sizes in sectors rather than human units
+sudo fdisk -l -u=sectors /dev/sdb
+
+# Open a disk for editing (interactive)
+sudo fdisk /dev/sdb
+
+# Inside fdisk: p prints the table, n creates, d deletes
+sudo fdisk /dev/sdb
+
+# Inside fdisk: t changes a partition type, l lists the types
+sudo fdisk /dev/sdb
+
+# Inside fdisk: w writes and exits, q quits without saving
+sudo fdisk /dev/sdb
+
+# Create a GPT label non-interactively
+echo 'label: gpt' | sudo sfdisk /dev/sdb
+
+# Create one partition filling the whole disk
+echo ',,L' | sudo sfdisk /dev/sdb
+
+# Create a partition table from a description
+printf 'label: gpt\n,512M,U\n,,L\n' | sudo sfdisk /dev/sdb
+
+# Dump a partition table as text
+sudo sfdisk -d /dev/sda > sda-layout.txt
+
+# Restore that layout onto another disk
+sudo sfdisk /dev/sdb < sda-layout.txt
+
+# Show the partition table with sfdisk
+sudo sfdisk -l /dev/sdb
+
+# Verify a partition table
+sudo sfdisk -V /dev/sdb
+
+# Free space on a disk
+sudo sfdisk -F /dev/sdb
+
+# The GPT-native tool, listing a disk
+sudo gdisk -l /dev/sdb
+
+# Repair a damaged GPT with gdisk
+sudo gdisk /dev/sdb
+
+# Wipe a partition table entirely
+sudo wipefs -a /dev/sdb
+
+# Wipe just the filesystem signature from a partition
+sudo wipefs -a /dev/sdb1
+
+# See what signatures are present
+sudo wipefs /dev/sdb
+
+# Tell the kernel to re-read the partition table
+sudo partprobe /dev/sdb
+
+# Re-read with partx
+sudo partx -u /dev/sdb
+
+# Block devices as the kernel now sees them
+lsblk /dev/sdb
+
+# Filesystems, labels and UUIDs
+lsblk -f /dev/sdb
+
+# UUIDs for an fstab entry
+sudo blkid /dev/sdb1
+
+# Sector size and alignment
+sudo fdisk -l /dev/sdb | grep -i 'sector size'
+
+# Disk model and serial before you touch anything
+lsblk -d -o NAME,SIZE,MODEL,SERIAL /dev/sdb
+
+# Confirm the disk is not mounted anywhere
+findmnt -S /dev/sdb1
+
+# Confirm nothing is using it
+sudo fuser -vm /dev/sdb1
+
+# After partitioning, create a filesystem
+sudo mkfs.ext4 -L data /dev/sdb1
+
+# Then mount it
+sudo mkdir -p /mnt/data && sudo mount /dev/sdb1 /mnt/data
+
+# parted handles disks over 2 TB and scripts more cleanly
+sudo parted -s /dev/sdb mklabel gpt
+
+# Back up the partition table before any change
+sudo sfdisk -d /dev/sdb > sdb-layout-$(date +%F).txt

@@ -1,0 +1,103 @@
+## Read disk health and run self-tests with SMART
+
+# Overall health, the one-line answer
+sudo smartctl -H /dev/sda
+
+# Device model, serial and firmware
+sudo smartctl -i /dev/sda
+
+# Everything SMART knows
+sudo smartctl -a /dev/sda
+
+# Everything, including vendor extras
+sudo smartctl -x /dev/sda
+
+# The attribute table, where the interesting numbers live
+sudo smartctl -A /dev/sda
+
+# Reallocated sectors, the classic warning sign
+sudo smartctl -A /dev/sda | grep -i reallocated
+
+# Pending sectors, which often become reallocated
+sudo smartctl -A /dev/sda | grep -i pending
+
+# Power-on hours
+sudo smartctl -A /dev/sda | grep -i power_on
+
+# Temperature
+sudo smartctl -A /dev/sda | grep -i temperature
+
+# SSD wear level and lifetime used
+sudo smartctl -A /dev/sda | grep -iE 'wear|percent'
+
+# Total bytes written, for SSD endurance
+sudo smartctl -A /dev/sda | grep -i 'total_lbas_written'
+
+# NVMe health, which uses a different page
+sudo smartctl -a /dev/nvme0
+
+# NVMe-specific log
+sudo nvme smart-log /dev/nvme0
+
+# Is SMART enabled on this device?
+sudo smartctl -i /dev/sda | grep -i 'SMART support'
+
+# Enable SMART
+sudo smartctl -s on /dev/sda
+
+# Run a short self-test, a couple of minutes
+sudo smartctl -t short /dev/sda
+
+# Run a long self-test, hours
+sudo smartctl -t long /dev/sda
+
+# Run a conveyance test
+sudo smartctl -t conveyance /dev/sda
+
+# Check how far a running test has got
+sudo smartctl -c /dev/sda | grep -i 'remaining'
+
+# Read the self-test results
+sudo smartctl -l selftest /dev/sda
+
+# Abort a running test
+sudo smartctl -X /dev/sda
+
+# The error log
+sudo smartctl -l error /dev/sda
+
+# Extended error log
+sudo smartctl -l xerror /dev/sda
+
+# Specify the device type for a disk behind a controller
+sudo smartctl -a -d sat /dev/sda
+
+# A disk behind a MegaRAID controller
+sudo smartctl -a -d megaraid,0 /dev/sda
+
+# A disk behind a 3ware controller
+sudo smartctl -a -d 3ware,0 /dev/twa0
+
+# A USB-attached disk
+sudo smartctl -a -d sat /dev/sdb
+
+# Scan for every device smartctl can talk to
+sudo smartctl --scan
+
+# Check every disk's health in one loop
+for d in /dev/sd?; do echo -n "$d: "; sudo smartctl -H "$d" | grep -i 'overall-health'; done
+
+# The exit status encodes the findings, useful for monitoring
+sudo smartctl -H /dev/sda > /dev/null; echo "exit=$?"
+
+# The daemon that watches disks and emails you
+sudo systemctl status smartd
+
+# Its configuration
+sudo cat /etc/smartd.conf
+
+# Kernel messages about the disk, which often come first
+sudo dmesg -T | grep -iE 'ata|sd[a-z]|i/o error'
+
+# Badblocks, a destructive read-write surface test
+sudo badblocks -svn /dev/sdb

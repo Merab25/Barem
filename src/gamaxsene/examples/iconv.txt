@@ -1,0 +1,97 @@
+## Convert text between character encodings
+
+# Convert a Windows Cyrillic file to UTF-8
+iconv -f WINDOWS-1251 -t UTF-8 legacy.txt > utf8.txt
+
+# Convert Latin-1 to UTF-8
+iconv -f ISO-8859-1 -t UTF-8 old.txt > new.txt
+
+# Convert UTF-8 to Latin-1
+iconv -f UTF-8 -t ISO-8859-1 utf8.txt > latin1.txt
+
+# Convert Georgian legacy encoding to UTF-8
+iconv -f GEORGIAN-PS -t UTF-8 old.txt > utf8.txt
+
+# Write the result to a file with -o instead of a redirect
+iconv -f WINDOWS-1252 -t UTF-8 -o new.txt old.txt
+
+# List every encoding iconv supports
+iconv -l
+
+# Find a specific encoding in that list
+iconv -l | tr ' ' '\n' | grep -i 1251
+
+# Drop characters that cannot be represented
+iconv -f UTF-8 -t ASCII//IGNORE utf8.txt
+
+# Transliterate instead of failing, turning é into e
+iconv -f UTF-8 -t ASCII//TRANSLIT utf8.txt
+
+# Strip accents from a file
+iconv -f UTF-8 -t ASCII//TRANSLIT names.txt > ascii-names.txt
+
+# Find out what encoding a file actually is
+file -i legacy.txt
+
+# Just the encoding
+file --mime-encoding legacy.txt
+
+# Guess more carefully with enca, when installed
+enca -L russian legacy.txt
+
+# Verify a file really is valid UTF-8
+iconv -f UTF-8 -t UTF-8 suspect.txt > /dev/null && echo "valid UTF-8"
+
+# Find the first invalid byte
+iconv -f UTF-8 -t UTF-8 suspect.txt > /dev/null
+
+# Convert from a pipe
+curl -s http://example.com/legacy.html | iconv -f WINDOWS-1251 -t UTF-8
+
+# Convert only part of a file
+head -n 100 legacy.txt | iconv -f WINDOWS-1251 -t UTF-8
+
+# Convert every file in a directory
+for f in *.txt; do iconv -f WINDOWS-1251 -t UTF-8 "$f" -o "utf8/$f"; done
+
+# Convert in place, via a temporary file
+iconv -f WINDOWS-1251 -t UTF-8 file.txt > file.tmp && mv file.tmp file.txt
+
+# Convert a CSV before importing it into a database
+iconv -f WINDOWS-1251 -t UTF-8 export.csv | psql -d mydb -c "\copy users FROM STDIN CSV HEADER"
+
+# Convert a MySQL dump's encoding
+iconv -f LATIN1 -t UTF-8 dump.sql > dump-utf8.sql
+
+# Remove a UTF-8 byte order mark
+sed '1s/^\xEF\xBB\xBF//' with-bom.txt > without-bom.txt
+
+# Add a byte order mark, for tools that expect one
+iconv -f UTF-8 -t UTF-8 file.txt | sed '1s/^/\xEF\xBB\xBF/' > with-bom.txt
+
+# Convert to UTF-16, which some Windows tools want
+iconv -f UTF-8 -t UTF-16LE file.txt > utf16.txt
+
+# Convert back from UTF-16
+iconv -f UTF-16 -t UTF-8 utf16.txt > utf8.txt
+
+# Fix line endings as well as the encoding
+iconv -f WINDOWS-1251 -t UTF-8 legacy.txt | tr -d '\r' > clean.txt
+
+# The dedicated tool for line endings
+dos2unix file.txt
+
+# And the other direction
+unix2dos file.txt
+
+# Show the raw bytes, to see what is actually there
+xxd legacy.txt | head
+
+# Find non-ASCII characters in a file
+grep -P '[^\x00-\x7F]' file.txt | head
+
+# Count lines with non-ASCII characters
+grep -cP '[^\x00-\x7F]' file.txt
+
+# Check the locale, which decides how your terminal renders it
+locale

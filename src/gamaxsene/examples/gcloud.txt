@@ -1,0 +1,139 @@
+## Manage Google Cloud from the terminal
+
+# Log in
+gcloud auth login
+
+# Log in for application code, not just the CLI
+gcloud auth application-default login
+
+# Log in as a service account
+gcloud auth activate-service-account --key-file=key.json
+
+# Which accounts are authenticated
+gcloud auth list
+
+# Print an access token, for a raw API call
+gcloud auth print-access-token
+
+# Show the current configuration
+gcloud config list
+
+# Set the project
+gcloud config set project my-project
+
+# Set the default region
+gcloud config set compute/region europe-west1
+
+# Set the default zone
+gcloud config set compute/zone europe-west1-b
+
+# List projects you can see
+gcloud projects list
+
+# Named configurations, for switching between environments
+gcloud config configurations list
+
+# Create one
+gcloud config configurations create staging
+
+# Switch between them
+gcloud config configurations activate staging
+
+# List compute instances
+gcloud compute instances list
+
+# Filter instances
+gcloud compute instances list --filter='status=RUNNING'
+
+# Create an instance
+gcloud compute instances create web1 --machine-type=e2-medium --image-family=debian-12 --image-project=debian-cloud
+
+# Stop an instance
+gcloud compute instances stop web1
+
+# Start it again
+gcloud compute instances start web1
+
+# SSH into an instance
+gcloud compute ssh web1
+
+# SSH through Identity-Aware Proxy, with no public IP
+gcloud compute ssh web1 --tunnel-through-iap
+
+# Copy a file to an instance
+gcloud compute scp report.pdf web1:/tmp/
+
+# Read the serial console, for boot problems
+gcloud compute instances get-serial-port-output web1
+
+# List firewall rules
+gcloud compute firewall-rules list
+
+# Open a port
+gcloud compute firewall-rules create allow-8080 --allow=tcp:8080 --source-ranges=0.0.0.0/0
+
+# List disks
+gcloud compute disks list
+
+# Snapshot a disk
+gcloud compute disks snapshot web1 --snapshot-names=web1-$(date +%F)
+
+# List storage buckets
+gcloud storage ls
+
+# List objects in a bucket
+gcloud storage ls gs://my-bucket/
+
+# Copy a file up
+gcloud storage cp report.pdf gs://my-bucket/
+
+# Copy a directory recursively
+gcloud storage cp -r ./public_html gs://my-bucket/site/
+
+# Sync a directory to a bucket
+gcloud storage rsync -r ./public_html gs://my-bucket/site/
+
+# List GKE clusters
+gcloud container clusters list
+
+# Fetch kubectl credentials for a cluster
+gcloud container clusters get-credentials prod --region europe-west1
+
+# List Cloud Run services
+gcloud run services list
+
+# Deploy a container to Cloud Run
+gcloud run deploy myapp --image gcr.io/my-project/myapp:1.0 --region europe-west1 --allow-unauthenticated
+
+# Tail Cloud Run logs
+gcloud run services logs tail myapp --region europe-west1
+
+# Read logs with a filter
+gcloud logging read 'severity>=ERROR' --limit 20 --format=json
+
+# Logs for one resource type
+gcloud logging read 'resource.type="gce_instance"' --limit 10 --freshness=1h
+
+# List service accounts
+gcloud iam service-accounts list
+
+# Grant a role on a project
+gcloud projects add-iam-policy-binding my-project --member='serviceAccount:ci@my-project.iam.gserviceaccount.com' --role='roles/storage.objectViewer'
+
+# Who has what on this project
+gcloud projects get-iam-policy my-project
+
+# List enabled APIs
+gcloud services list --enabled
+
+# Enable an API
+gcloud services enable run.googleapis.com
+
+# JSON output for scripting
+gcloud compute instances list --format=json
+
+# Just one field, as plain text
+gcloud compute instances list --format='value(name)'
+
+# Update the SDK
+gcloud components update

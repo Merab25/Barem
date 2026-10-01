@@ -1,0 +1,115 @@
+## Manage network connections with NetworkManager
+
+# Overall status
+nmcli general status
+
+# Devices and their state
+nmcli device status
+
+# Detailed information about one device
+nmcli device show eth0
+
+# List saved connections
+nmcli connection show
+
+# Only active connections
+nmcli connection show --active
+
+# Details of one connection
+nmcli connection show 'Wired connection 1'
+
+# Bring a connection up
+sudo nmcli connection up 'Wired connection 1'
+
+# Take it down
+sudo nmcli connection down 'Wired connection 1'
+
+# Reload a connection after editing its file
+sudo nmcli connection reload
+
+# Restart a connection so changes take effect
+sudo nmcli connection down eth0 && sudo nmcli connection up eth0
+
+# Create a DHCP connection
+sudo nmcli connection add type ethernet ifname eth0 con-name dhcp-eth0
+
+# Create a static IPv4 connection
+sudo nmcli connection add type ethernet ifname eth0 con-name static-eth0 ipv4.method manual ipv4.addresses 192.168.1.10/24 ipv4.gateway 192.168.1.1 ipv4.dns '1.1.1.1,8.8.8.8'
+
+# Change an existing connection to a static address
+sudo nmcli connection modify static-eth0 ipv4.addresses 192.168.1.20/24
+
+# Switch a connection back to DHCP
+sudo nmcli connection modify static-eth0 ipv4.method auto
+
+# Set the gateway
+sudo nmcli connection modify static-eth0 ipv4.gateway 192.168.1.1
+
+# Set DNS servers
+sudo nmcli connection modify static-eth0 ipv4.dns '1.1.1.1 9.9.9.9'
+
+# Add a DNS server without replacing the list
+sudo nmcli connection modify static-eth0 +ipv4.dns 8.8.4.4
+
+# Remove one DNS server
+sudo nmcli connection modify static-eth0 -ipv4.dns 8.8.4.4
+
+# Set a DNS search domain
+sudo nmcli connection modify static-eth0 ipv4.dns-search example.com
+
+# Add a static route
+sudo nmcli connection modify static-eth0 +ipv4.routes '10.0.0.0/8 192.168.1.254'
+
+# Start the connection automatically at boot
+sudo nmcli connection modify static-eth0 connection.autoconnect yes
+
+# Disable IPv6 on a connection
+sudo nmcli connection modify static-eth0 ipv6.method disabled
+
+# Delete a connection
+sudo nmcli connection delete static-eth0
+
+# List available wifi networks
+nmcli device wifi list
+
+# Rescan for networks
+nmcli device wifi rescan
+
+# Connect to a wifi network
+sudo nmcli device wifi connect 'MyNetwork' password 'secret'
+
+# Connect to a hidden network
+sudo nmcli device wifi connect 'Hidden' password 'secret' hidden yes
+
+# Show a saved wifi password
+sudo nmcli -s connection show 'MyNetwork' | grep psk
+
+# Turn wifi off and on
+nmcli radio wifi off
+
+# Radio status
+nmcli radio
+
+# Create a bridge
+sudo nmcli connection add type bridge ifname br0 con-name br0
+
+# Add an interface to that bridge
+sudo nmcli connection add type ethernet ifname eth1 master br0
+
+# Create a VLAN interface
+sudo nmcli connection add type vlan ifname eth0.100 dev eth0 id 100
+
+# Terse, machine-readable output
+nmcli -t -f NAME,DEVICE,STATE connection show
+
+# One field only, for a script
+nmcli -t -f IP4.ADDRESS device show eth0
+
+# Watch NetworkManager events as they happen
+nmcli monitor
+
+# The interactive text interface, which is easier for complex setups
+nmtui
+
+# Confirm the result with the kernel's own view
+ip -br addr

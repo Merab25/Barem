@@ -1,0 +1,104 @@
+## Transfer files interactively over SSH
+
+# Connect to a host
+sftp merab@server
+
+# Connect on a non-standard port
+sftp -P 2222 merab@server
+
+# Connect with a specific key
+sftp -i ~/.ssh/deploy_ed25519 deploy@server
+
+# Use a host defined in ~/.ssh/config
+sftp production
+
+# Connect and start in a directory
+sftp merab@server:/srv/uploads
+
+# Connect and download one file immediately
+sftp merab@server:/var/log/app.log
+
+# Jump through a bastion host
+sftp -J bastion.example.com merab@internal
+
+# Pass any ssh option through
+sftp -o StrictHostKeyChecking=accept-new merab@server
+
+# Inside sftp: get downloads a file
+sftp merab@server
+
+# Inside sftp: put uploads a file
+sftp merab@server
+
+# Inside sftp: ls and cd work on the remote side
+sftp merab@server
+
+# Inside sftp: lls and lcd work on the local side
+sftp merab@server
+
+# Inside sftp: get -r downloads a directory
+sftp merab@server
+
+# Inside sftp: bye or quit exits
+sftp merab@server
+
+# Run a batch of commands from a file
+sftp -b commands.txt merab@server
+
+# Write that batch file
+printf 'cd /srv/uploads\nput report.pdf\nbye\n' > commands.txt
+
+# Batch from standard input, for a script
+sftp -b - merab@server <<'EOF'
+cd /srv/uploads
+put report.pdf
+bye
+EOF
+
+# Download a file non-interactively
+echo 'get /var/log/app.log' | sftp -b - merab@server
+
+# Upload a file non-interactively
+echo 'put report.pdf /srv/uploads/' | sftp -b - merab@server
+
+# Download a whole directory
+echo 'get -r /srv/data' | sftp -b - merab@server
+
+# Upload a whole directory
+echo 'put -r ./public_html /var/www/' | sftp -b - merab@server
+
+# Preserve timestamps and permissions
+echo 'put -p report.pdf /srv/' | sftp -b - merab@server
+
+# Keep going after an error in batch mode
+sftp -b commands.txt merab@server || true
+
+# Quiet mode, no progress meter
+sftp -q -b commands.txt merab@server
+
+# Verbose, for debugging a failing connection
+sftp -v merab@server
+
+# Limit bandwidth
+sftp -l 1000 merab@server
+
+# Use compression
+sftp -C merab@server
+
+# Resume a partial download
+echo 'reget /srv/bigfile.iso' | sftp -b - merab@server
+
+# Resume a partial upload
+echo 'reput bigfile.iso /srv/' | sftp -b - merab@server
+
+# For scripted transfers, scp is simpler
+scp report.pdf merab@server:/srv/uploads/
+
+# For syncing directories, rsync is better
+rsync -avP ./public_html/ merab@server:/var/www/html/
+
+# Restrict a user to SFTP only, in sshd_config
+sudo grep -A3 'Subsystem sftp' /etc/ssh/sshd_config
+
+# Set up a chrooted SFTP-only user
+sudo usermod -s /usr/sbin/nologin sftpuser

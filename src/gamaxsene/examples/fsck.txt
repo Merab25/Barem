@@ -1,0 +1,106 @@
+## Check and repair filesystems
+
+# Check a filesystem (it must not be mounted)
+sudo fsck /dev/sdb1
+
+# Force a check even if the filesystem looks clean
+sudo fsck -f /dev/sdb1
+
+# Answer yes to every repair prompt
+sudo fsck -y /dev/sdb1
+
+# Answer no, so it only reports
+sudo fsck -n /dev/sdb1
+
+# Report without repairing, the safe first look
+sudo fsck -fn /dev/sdb1
+
+# Show progress
+sudo fsck -C 0 /dev/sdb1
+
+# Verbose
+sudo fsck -v /dev/sdb1
+
+# Check every filesystem in fstab
+sudo fsck -A
+
+# Check all, in parallel where possible
+sudo fsck -A -P
+
+# Skip the root filesystem when checking all
+sudo fsck -A -R
+
+# Only filesystems of one type
+sudo fsck -A -t ext4
+
+# Skip a type
+sudo fsck -A -t noext4
+
+# Explicit filesystem type
+sudo fsck -t ext4 -f /dev/sdb1
+
+# The ext-specific tool, which fsck calls anyway
+sudo e2fsck -f /dev/sdb1
+
+# Optimise directories while checking
+sudo e2fsck -fD /dev/sdb1
+
+# Rebuild from a backup superblock, when the primary is damaged
+sudo e2fsck -b 32768 /dev/sdb1
+
+# Find where the backup superblocks are
+sudo mke2fs -n /dev/sdb1
+
+# Check XFS (xfs_repair, not fsck)
+sudo xfs_repair /dev/sdb1
+
+# XFS dry run
+sudo xfs_repair -n /dev/sdb1
+
+# XFS, replaying the log first
+sudo xfs_repair -L /dev/sdb1
+
+# Check btrfs
+sudo btrfs check /dev/sdb1
+
+# Repair btrfs (last resort)
+sudo btrfs check --repair /dev/sdb1
+
+# Check a FAT filesystem
+sudo fsck.vfat -a /dev/sdb1
+
+# Unmount before checking
+sudo umount /dev/sdb1
+
+# Find what is keeping it mounted
+sudo fuser -vm /mnt/data
+
+# Remount the root filesystem read-only, to check it live
+sudo mount -o remount,ro /
+
+# Schedule a check of the root filesystem at the next boot
+sudo touch /forcefsck
+
+# The systemd way to force a check at boot
+sudo fsck.mode=force
+
+# How many mounts until ext4 checks itself
+sudo tune2fs -l /dev/sdb1 | grep -i 'mount count'
+
+# Force a check every 30 mounts
+sudo tune2fs -c 30 /dev/sdb1
+
+# Disable the automatic interval checks
+sudo tune2fs -c 0 -i 0 /dev/sdb1
+
+# Where did the recovered fragments go?
+sudo ls -l /mnt/data/lost+found
+
+# Read the kernel's view of the errors first
+sudo dmesg -T | grep -iE 'ext4|xfs|i/o error'
+
+# Check the disk hardware before trusting a repair
+sudo smartctl -H /dev/sdb
+
+# Back up the whole device before repairing anything valuable
+sudo dd if=/dev/sdb1 of=/mnt/backup/sdb1.img bs=64M status=progress

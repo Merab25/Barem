@@ -26,7 +26,7 @@ find . -type f -size +10M -size -50M
 find / -xdev -type f -size +500M 2>/dev/null
 ```
 
-It currently ships **117 commands** and **3,918 examples** — about 30 per command, covering the options and flags you actually use at work.
+It currently ships **157 commands** and **5,314 examples** — about 30 per command, covering the options and flags you actually use at work.
 
 ## Features
 
@@ -57,7 +57,7 @@ pipx install git+https://github.com/Merab25/Gamaxsene.git
 pipx creates an isolated virtual environment for the tool and puts the `gamaxsene` command on your `PATH`.
 
 ```bash
-pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.4.0   # a specific release
+pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.5.0   # a specific release
 pipx upgrade gamaxsene                                             # update
 pipx uninstall gamaxsene                                           # remove
 ```
@@ -147,6 +147,7 @@ source <(gamaxsene --completion bash)
 | `df` | 32 | Show free and used disk space per filesystem |
 | `chmod` | 30 | Change file and directory permissions |
 | `chown` | 31 | Change file ownership and group |
+| `chattr` | 33 | Set filesystem attributes, including making a file immutable |
 | `tar` | 31 | Create, list and extract archives (.tar, .tar.gz, .tar.bz2, .tar.xz, .tar.zst) |
 
 ### Text processing
@@ -167,8 +168,15 @@ source <(gamaxsene --completion bash)
 | `tail` | 30 | Show the last lines of a file, and follow a growing log |
 | `wc` | 31 | Count lines, words, characters and bytes |
 | `diff` | 33 | Compare files and directories line by line |
+| `comm` | 32 | Compare two sorted files line by line |
+| `join` | 31 | Join two files on a shared key column, like an SQL join |
 | `column` | 32 | Line up text into readable columns |
 | `paste` | 31 | Merge lines from files side by side, or fold a list into one line |
+| `nl` | 33 | Number the lines of a file |
+| `split` | 31 | Split a large file into smaller pieces |
+| `iconv` | 32 | Convert text between character encodings |
+| `strings` | 33 | Pull readable text out of binary files |
+| `xxd` | 33 | Dump and patch files in hexadecimal |
 | `tee` | 30 | Write standard input to a file and pass it on |
 | `xargs` | 30 | Build and run commands from standard input |
 | `jq` | 35 | Query, filter and transform JSON on the command line |
@@ -182,6 +190,7 @@ source <(gamaxsene --completion bash)
 | `zip` | 31 | Create and update .zip archives |
 | `unzip` | 32 | List, test and extract .zip archives |
 | `gzip` | 32 | Compress and decompress single files with gzip |
+| `xz` | 33 | Compress and decompress with xz, for the smallest archives |
 
 ### Processes and system
 
@@ -199,15 +208,21 @@ source <(gamaxsene --completion bash)
 | `free` | 33 | Show memory and swap usage |
 | `vmstat` | 32 | Sample CPU, memory, swap and IO activity over time |
 | `iostat` | 33 | Measure disk throughput, latency and utilisation |
+| `sar` | 36 | Read historical and live system activity from sysstat |
 | `uname` | 36 | Show kernel, architecture and system information |
-| `lsblk` | 33 | List block devices, partitions and what they hold |
+| `lscpu` | 35 | Show CPU architecture, cores, cache and flags |
+| `lsmod` | 35 | List and manage kernel modules |
+| `sysctl` | 36 | Read and set kernel parameters at runtime and at boot |
 | `mount` | 32 | Mount and unmount filesystems, and inspect what is mounted |
 | `dmesg` | 33 | Read the kernel ring buffer: boot, hardware and driver messages |
 | `watch` | 31 | Re-run a command periodically and watch the output change |
 | `systemctl` | 33 | Control systemd services, boot targets and timers |
 | `journalctl` | 33 | Read and filter systemd journal logs |
 | `logrotate` | 30 | Rotate, compress and expire log files |
+| `hostnamectl` | 34 | Read and change the system hostname and machine metadata |
+| `timedatectl` | 34 | Set the time, timezone and clock synchronisation |
 | `crontab` | 32 | Schedule recurring jobs with cron (fields: minute hour day month weekday) |
+| `at` | 35 | Schedule a command to run once, at a given time |
 | `date` | 33 | Show, format and calculate dates and times |
 | `tmux` | 35 | Terminal multiplexer: sessions that survive disconnects, windows and panes |
 | `screen` | 34 | Terminal sessions that survive a dropped connection |
@@ -217,6 +232,9 @@ source <(gamaxsene --completion bash)
 | Command | Examples | What it covers |
 | --- | ---: | --- |
 | `echo` | 33 | Print text, and the pitfalls worth knowing |
+| `printf` | 35 | Print formatted text, portably and predictably |
+| `seq` | 34 | Generate sequences of numbers |
+| `shuf` | 32 | Shuffle lines and pick random samples |
 | `env` | 34 | Show and set environment variables for a command |
 | `which` | 34 | Find out which command will run, and where it lives |
 | `time` | 31 | Measure how long a command takes |
@@ -247,21 +265,41 @@ source <(gamaxsene --completion bash)
 | `vim` | 35 | Open, find and edit files with vim from the command line |
 | `nano` | 37 | Edit files with nano, the editor that tells you its own shortcuts |
 
+### Disks and filesystems
+
+| Command | Examples | What it covers |
+| --- | ---: | --- |
+| `dd` | 32 | Copy and convert data block by block, for disks and images |
+| `lsblk` | 33 | List block devices, partitions and what they hold |
+| `fdisk` | 33 | Inspect and edit partition tables |
+| `parted` | 34 | Partition disks, including those larger than 2 TB |
+| `mkfs` | 33 | Create filesystems on partitions and images |
+| `fsck` | 35 | Check and repair filesystems |
+| `blkid` | 34 | Find filesystem UUIDs, labels and types |
+| `ncdu` | 33 | Explore disk usage interactively and find what is filling a disk |
+| `smartctl` | 34 | Read disk health and run self-tests with SMART |
+
 ### Networking
 
 | Command | Examples | What it covers |
 | --- | ---: | --- |
 | `ip` | 32 | Show and manage network interfaces, IP addresses, routes and ARP |
+| `nmcli` | 38 | Manage network connections with NetworkManager |
 | `ss` | 31 | Inspect network sockets and connections (modern netstat) |
+| `netstat` | 35 | Inspect sockets, routes and interface counters (legacy; prefer ss) |
 | `ping` | 31 | Test whether a host answers, and measure round-trip time |
 | `traceroute` | 32 | Show the network path packets take to a host |
+| `mtr` | 34 | Trace the route to a host and watch latency and loss per hop |
 | `dig` | 30 | DNS lookups: records, resolvers, propagation and debugging |
 | `host` | 35 | Quick DNS lookups: names, addresses and mail servers |
+| `whois` | 33 | Look up domain and IP registration details |
 | `nc` | 30 | Netcat: test ports, send raw TCP/UDP data, move files (OpenBSD netcat) |
+| `socat` | 34 | Relay data between almost any two endpoints |
 | `curl` | 35 | Transfer data with URLs: HTTP requests, REST APIs and downloads |
 | `wget` | 31 | Non-interactive downloader: files, resumable downloads, website mirrors |
 | `ssh` | 34 | Secure shell: remote login, remote commands, keys and tunnels |
 | `scp` | 31 | Copy files to and from remote hosts over SSH |
+| `sftp` | 33 | Transfer files interactively over SSH |
 | `rsync` | 31 | Fast incremental sync of files, locally or over SSH |
 | `nmap` | 30 | Network scanner: hosts, ports, services (scan only networks you own or may test) |
 | `tcpdump` | 32 | Capture and inspect network packets |
@@ -276,7 +314,11 @@ source <(gamaxsene --completion bash)
 | `gpg` | 35 | Encrypt, decrypt, sign and verify with GnuPG |
 | `sha256sum` | 31 | Compute and verify checksums |
 | `certbot` | 33 | Get and renew Let's Encrypt TLS certificates |
+| `setfacl` | 33 | Grant fine-grained permissions with access control lists |
 | `ufw` | 36 | Manage the uncomplicated firewall on Ubuntu and Debian |
+| `nft` | 41 | Configure the nftables firewall, the successor to iptables |
+| `firewall-cmd` | 39 | Manage firewalld on Fedora, RHEL and Rocky |
+| `fail2ban-client` | 37 | Inspect and control fail2ban bans |
 
 ### DevOps and cloud
 
@@ -286,11 +328,13 @@ source <(gamaxsene --completion bash)
 | `gh` | 43 | GitHub from the terminal: repos, pull requests, issues and runs |
 | `make` | 36 | Build targets and run project tasks from a Makefile |
 | `docker` | 42 | Build, run and manage containers, images, volumes and Compose stacks |
+| `podman` | 46 | Run containers without a daemon, rootless by default |
 | `kubectl` | 42 | Manage Kubernetes clusters: pods, deployments, services, logs and rollouts |
 | `helm` | 41 | Install and manage Kubernetes applications with charts |
 | `terraform` | 38 | Infrastructure as code: plan, apply and manage cloud resources |
 | `ansible` | 37 | Run ad-hoc tasks and playbooks against your inventory |
 | `aws` | 38 | AWS CLI: S3, EC2, IAM, CloudWatch Logs, ECR, EKS and more |
+| `gcloud` | 46 | Manage Google Cloud from the terminal |
 | `nginx` | 34 | Test, reload and inspect the nginx web server |
 
 ### Languages and package tools
@@ -308,6 +352,7 @@ source <(gamaxsene --completion bash)
 | `psql` | 44 | Query and administer PostgreSQL from the terminal |
 | `mysql` | 41 | Query and administer MySQL and MariaDB from the terminal |
 | `redis-cli` | 50 | Inspect and operate a Redis server from the terminal |
+| `sqlite3` | 42 | Query and manage SQLite database files |
 
 Run `gamaxsene -l` for the live list.
 
@@ -411,7 +456,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request, and
 ## Roadmap
 
 - Publish to PyPI (`pipx install gamaxsene`)
-- More commands: `nft`, `podman`, `socat`, `mtr`, `setfacl`, `sqlite3`, `firewall-cmd`, `nmcli`
+- More commands: `go`, `cargo`, `node`, `gdb`, `lvm`, `iperf3`, `ethtool`, `az`
 - Georgian descriptions
 
 ## Safety note

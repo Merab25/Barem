@@ -1,0 +1,100 @@
+## Explore disk usage interactively and find what is filling a disk
+
+# Scan the current directory
+ncdu
+
+# Scan a specific directory
+ncdu /var
+
+# Scan the whole filesystem, staying on one device
+ncdu -x /
+
+# Exclude a pattern
+ncdu --exclude '*.iso' /srv
+
+# Exclude several patterns
+ncdu --exclude node_modules --exclude .git /srv/projects
+
+# Exclude paths listed in a file
+ncdu --exclude-from ignore.txt /srv
+
+# Exclude directories marked with CACHEDIR.TAG
+ncdu --exclude-caches /home
+
+# Count apparent size rather than disk usage
+ncdu --apparent-size /var/log
+
+# Do not cross filesystem boundaries
+ncdu -x /home
+
+# Follow symlinks to directories
+ncdu -L /srv
+
+# Read-only mode, so nothing can be deleted by accident
+ncdu -r /var
+
+# Extra read-only: no shell, no delete
+ncdu -rr /var
+
+# Save a scan to a file, to browse later without rescanning
+ncdu -o scan.json /var
+
+# Browse that saved scan
+ncdu -f scan.json
+
+# Scan a remote host and browse the result locally
+ssh merab@server 'ncdu -o- -x /' > server-scan.json
+
+# Browse the remote scan
+ncdu -f server-scan.json
+
+# Compress the scan while producing it
+ssh merab@server 'ncdu -o- -x / | gzip' | gzip -d | ncdu -f-
+
+# Inside ncdu: arrows navigate, Enter descends, Left goes up
+ncdu /var
+
+# Inside ncdu: d deletes the selected item (with confirmation)
+ncdu /var
+
+# Inside ncdu: n sorts by name, s by size, C by item count
+ncdu /var
+
+# Inside ncdu: g toggles the graph and percentage display
+ncdu /var
+
+# Inside ncdu: a toggles apparent size versus disk usage
+ncdu /var
+
+# Inside ncdu: i shows information about the selected item
+ncdu /var
+
+# Inside ncdu: t groups directories before files
+ncdu /var
+
+# Inside ncdu: e toggles showing hidden files
+ncdu /var
+
+# Inside ncdu: q quits, and ? shows the help
+ncdu /var
+
+# The non-interactive equivalent: biggest directories
+du -h --max-depth=1 /var | sort -rh | head
+
+# Biggest files anywhere on the root filesystem
+sudo find / -xdev -type f -size +500M -exec ls -lh {} + 2>/dev/null | sort -k5 -rh | head
+
+# Total size of a directory
+du -sh /var/log
+
+# Free space per filesystem, the starting point
+df -h
+
+# Inode usage, when df shows space but writes still fail
+df -i
+
+# Find directories with huge numbers of files
+sudo find /var -xdev -type d -exec sh -c 'echo "$(ls -A "$1" | wc -l) $1"' _ {} \; 2>/dev/null | sort -rn | head
+
+# Space held by deleted-but-open files
+sudo lsof -nP | awk '/deleted/ {print $7, $9}' | sort -rn | head

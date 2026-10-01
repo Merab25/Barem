@@ -1,0 +1,106 @@
+## Print formatted text, portably and predictably
+
+# Print a string with a newline
+printf '%s\n' "hello"
+
+# Print several strings, the format repeating for each
+printf '%s\n' one two three
+
+# No trailing newline
+printf '%s' "no newline"
+
+# A tab-separated line
+printf '%s\t%s\n' name value
+
+# Left-align a string in a 20-character field
+printf '%-20s %s\n' "cpu" "42%"
+
+# Right-align
+printf '%20s\n' "right"
+
+# Pad a number with spaces
+printf '%5d\n' 42
+
+# Pad a number with zeros
+printf '%05d\n' 42
+
+# Two decimal places
+printf '%.2f\n' 3.14159
+
+# Thousands separator, when the locale supports it
+printf "%'d\n" 1234567
+
+# Hexadecimal
+printf '%x\n' 255
+
+# Uppercase hexadecimal with a prefix
+printf '0x%X\n' 255
+
+# Octal
+printf '%o\n' 8
+
+# Scientific notation
+printf '%e\n' 123456.789
+
+# A literal percent sign
+printf '100%%\n'
+
+# Field width taken from an argument
+printf '%*s\n' 10 "right"
+
+# Build a table header and rows
+printf '%-12s %8s %s\n' HOST LOAD STATE
+
+# A row using variables
+printf '%-12s %8.2f %s\n' "$host" "$load" "$state"
+
+# Print a separator line of 40 dashes
+printf '%.0s-' {1..40}; printf '\n'
+
+# Repeat a character a variable number of times
+printf '=%.0s' $(seq 1 "$width"); printf '\n'
+
+# Print colours, when the terminal supports them
+printf '\033[1;32m%s\033[0m\n' "OK"
+
+# Print a tab and a newline explicitly
+printf 'a\tb\nc\td\n'
+
+# Print a carriage return, for a progress line
+printf '\rprogress: %d%%' 42
+
+# Print a NUL-separated list, safe for xargs -0
+printf '%s\0' *.log | xargs -0 ls -l
+
+# Build a JSON line without a JSON tool
+printf '{"host":"%s","load":%.2f}\n' "$(hostname)" "$load"
+
+# Safer JSON, letting jq do the escaping
+jq -n --arg h "$(hostname)" '{host: $h}'
+
+# Print a date-stamped log line
+printf '[%s] %s\n' "$(date +%F' '%T)" "deploy finished"
+
+# Convert a decimal to a character
+printf '\x41\n'
+
+# Print a Unicode code point
+printf 'é\n'
+
+# Write formatted output to a file
+printf '%s=%s\n' PORT 8080 > app.env
+
+# Append several settings
+printf '%s=%s\n' DEBUG false LOG_LEVEL info >> app.env
+
+# Format a whole array, one line each
+printf '%s\n' "${hosts[@]}"
+
+# Assign formatted text to a variable
+line=$(printf '%-10s %5d' cpu 42)
+
+# printf is preferred over echo -e, which is not portable
+printf 'col1\tcol2\n'
+
+# Print the shell's own printf rather than /usr/bin/printf
+type printf

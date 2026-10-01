@@ -1,0 +1,106 @@
+## Schedule a command to run once, at a given time
+
+# Run a command at a specific time, typing it then Ctrl-D
+at 23:30
+
+# Schedule a command from a file
+at 23:30 -f ./backup.sh
+
+# Schedule by piping the command in
+echo '/usr/local/bin/backup.sh' | at 23:30
+
+# Tomorrow at a given time
+echo './report.sh' | at 09:00 tomorrow
+
+# In ten minutes
+echo './deploy.sh' | at now + 10 minutes
+
+# In two hours
+echo './cleanup.sh' | at now + 2 hours
+
+# In three days
+echo './followup.sh' | at now + 3 days
+
+# Next week
+echo './weekly.sh' | at now + 1 week
+
+# Right now, in the background through the at queue
+echo './task.sh' | at now
+
+# On a specific date
+echo './yearend.sh' | at 23:59 2026-12-31
+
+# Date in the other accepted format
+echo './task.sh' | at 10:00 Oct 15
+
+# Midnight, noon and teatime are understood
+echo './task.sh' | at teatime
+
+# Combine a time and an offset
+echo './task.sh' | at 09:00 + 1 week
+
+# Do not send mail even if the job produces output
+echo './quiet.sh' | at -M 23:30
+
+# Send mail when it finishes, even with no output
+echo './task.sh' | at -m 23:30
+
+# Choose a queue letter, which affects niceness
+echo './heavy.sh' | at -q z now + 5 minutes
+
+# List pending jobs
+atq
+
+# List jobs in one queue
+atq -q z
+
+# Show what a job will actually run
+at -c 3
+
+# Just the command, stripping the environment preamble
+at -c 3 | tail -n 5
+
+# Remove a pending job
+atrm 3
+
+# Remove several
+atrm 3 4 5
+
+# Remove every pending job
+atq | awk '{print $1}' | xargs -r atrm
+
+# Run a job only when the load is low, rather than at a set time
+echo './heavy.sh' | batch
+
+# batch with an explicit load threshold set on atd
+systemctl cat atd
+
+# The service must be running for jobs to fire
+systemctl status atd
+
+# Enable it at boot
+sudo systemctl enable --now atd
+
+# Who is allowed to use at
+sudo cat /etc/at.allow
+
+# Who is denied
+sudo cat /etc/at.deny
+
+# Where the spooled jobs live
+sudo ls -l /var/spool/cron/atjobs
+
+# Output is mailed, so capture it yourself instead
+echo './task.sh > /var/log/task.log 2>&1' | at now + 5 minutes
+
+# Check the journal for what happened
+journalctl -u atd --since today
+
+# For anything recurring, use cron or a systemd timer instead
+crontab -e
+
+# A one-off systemd timer, which logs properly
+sudo systemd-run --on-active=10m --unit=oneshot-task ./task.sh
+
+# Cancel that transient timer
+sudo systemctl stop oneshot-task.timer

@@ -1,0 +1,100 @@
+## Pull readable text out of binary files
+
+# Print the printable strings in a binary
+strings /usr/bin/ls
+
+# Only strings of at least 8 characters, cutting the noise
+strings -n 8 /usr/bin/ls
+
+# Show the byte offset of each string
+strings -t d firmware.bin
+
+# Offsets in hexadecimal
+strings -t x firmware.bin
+
+# Offsets in octal
+strings -t o firmware.bin
+
+# Scan the whole file, not just the loadable sections
+strings -a /usr/bin/ls
+
+# Only the initialised, loaded data (the default for object files)
+strings -d /usr/bin/ls
+
+# Treat the encoding as 16-bit little-endian, for Windows binaries
+strings -e l program.exe
+
+# 16-bit big-endian
+strings -e b firmware.bin
+
+# Single-byte encoding, the default
+strings -e s /usr/bin/ls
+
+# Separate strings by a null byte, for safe parsing
+strings -z firmware.bin
+
+# What version does this binary report?
+strings -n 6 /usr/sbin/nginx | grep -i 'nginx/'
+
+# Which libraries does it mention?
+strings /usr/bin/curl | grep -i '\.so'
+
+# Find URLs baked into a binary
+strings -n 10 ./myapp | grep -Eo 'https?://[^ ]+'
+
+# Find IP addresses in a binary
+strings ./myapp | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}'
+
+# Find email addresses
+strings ./myapp | grep -Eo '[[:alnum:]._%+-]+@[[:alnum:].-]+'
+
+# Look for hardcoded credentials during a review
+strings -n 8 ./myapp | grep -iE 'password|secret|api[_-]?key|token'
+
+# Find file paths a program references
+strings ./myapp | grep -E '^/(etc|var|usr|opt)/'
+
+# Find SQL statements in a compiled program
+strings -n 12 ./myapp | grep -iE '^(select|insert|update|delete) '
+
+# Recover text from a corrupted document
+strings -n 4 corrupted.docx | less
+
+# Recover text from a deleted file still in a disk image
+sudo strings -n 8 /dev/sdb1 | grep -i 'important phrase'
+
+# Look inside a core dump
+strings -n 8 core.4821 | tail -n 50
+
+# Inspect a .pyc file
+strings -n 6 __pycache__/module.cpython-312.pyc
+
+# Inspect a Java class file
+strings -n 6 Main.class
+
+# Check what a suspicious download contains, without running it
+strings -n 8 suspicious.bin | head -n 40
+
+# Count how many strings a file has
+strings suspicious.bin | wc -l
+
+# Scan every binary in a directory
+find /usr/local/bin -type f -exec strings -n 10 {} + | sort -u | head
+
+# Compare the strings of two builds
+diff <(strings -n 8 old.bin | sort -u) <(strings -n 8 new.bin | sort -u)
+
+# Combine with file, to know what you are looking at first
+file suspicious.bin && strings -n 8 suspicious.bin | head
+
+# Raw bytes when strings finds nothing useful
+xxd -l 256 suspicious.bin
+
+# Symbols rather than strings, for a real binary
+nm -D ./myapp | head
+
+# Which shared libraries it actually links against
+ldd ./myapp
+
+# Disassemble, when strings is not enough
+objdump -d ./myapp | head -n 40

@@ -1,0 +1,103 @@
+## Partition disks, including those larger than 2 TB
+
+# List every disk and its partitions
+sudo parted -l
+
+# One disk
+sudo parted /dev/sdb print
+
+# Print with free space shown
+sudo parted /dev/sdb print free
+
+# Print all disks, with units in sectors
+sudo parted -l unit s print
+
+# Show sizes in megabytes
+sudo parted /dev/sdb unit MB print
+
+# Open an interactive session
+sudo parted /dev/sdb
+
+# Create a GPT label (this discards the existing table)
+sudo parted -s /dev/sdb mklabel gpt
+
+# Create an MBR label, for legacy boot
+sudo parted -s /dev/sdb mklabel msdos
+
+# Create one partition using the whole disk
+sudo parted -s -a optimal /dev/sdb mkpart primary ext4 0% 100%
+
+# Create a partition with explicit boundaries
+sudo parted -s -a optimal /dev/sdb mkpart data ext4 1MiB 100GiB
+
+# Create an EFI system partition
+sudo parted -s /dev/sdb mkpart ESP fat32 1MiB 513MiB
+
+# Flag it as an EFI partition
+sudo parted -s /dev/sdb set 1 esp on
+
+# Create a swap partition
+sudo parted -s -a optimal /dev/sdb mkpart swap linux-swap 513MiB 8705MiB
+
+# Create the rest as one data partition
+sudo parted -s -a optimal /dev/sdb mkpart data ext4 8705MiB 100%
+
+# Several commands in one invocation
+sudo parted -s -a optimal /dev/sdb mklabel gpt mkpart ESP fat32 1MiB 513MiB set 1 esp on mkpart data ext4 513MiB 100%
+
+# Name a GPT partition
+sudo parted -s /dev/sdb name 2 data
+
+# Set the boot flag
+sudo parted -s /dev/sdb set 1 boot on
+
+# Set the LVM flag
+sudo parted -s /dev/sdb set 1 lvm on
+
+# Remove a partition
+sudo parted -s /dev/sdb rm 2
+
+# Resize a partition to fill the disk
+sudo parted -s /dev/sdb resizepart 1 100%
+
+# Then grow the filesystem inside it
+sudo resize2fs /dev/sdb1
+
+# Grow an XFS filesystem instead
+sudo xfs_growfs /mnt/data
+
+# Align check, to confirm the partition starts on a good boundary
+sudo parted /dev/sdb align-check optimal 1
+
+# Machine-readable output, for scripts
+sudo parted -m /dev/sdb print
+
+# Parse the size of a partition from that
+sudo parted -m /dev/sdb print | awk -F: '/^1:/ {print $4}'
+
+# Rescue a lost partition, when parted can find it
+sudo parted /dev/sdb rescue 1MiB 100GiB
+
+# Confirm the disk is not in use first
+findmnt -S /dev/sdb1
+
+# Tell the kernel to re-read the table
+sudo partprobe /dev/sdb
+
+# See the result
+lsblk -f /dev/sdb
+
+# Create a filesystem on the new partition
+sudo mkfs.ext4 -L data /dev/sdb2
+
+# Get its UUID for fstab
+sudo blkid -s UUID -o value /dev/sdb2
+
+# Back up the partition layout before changing anything
+sudo sfdisk -d /dev/sdb > sdb-layout-$(date +%F).txt
+
+# The interactive alternative for MBR and small disks
+sudo fdisk /dev/sdb
+
+# The GPT-focused alternative
+sudo gdisk /dev/sdb

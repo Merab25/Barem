@@ -1,0 +1,106 @@
+## Inspect sockets, routes and interface counters (legacy; prefer ss)
+
+# Every listening TCP socket, with the owning process
+sudo netstat -tlnp
+
+# Listening TCP and UDP
+sudo netstat -tulnp
+
+# All connections, listening and established
+sudo netstat -antp
+
+# Established connections only
+netstat -ant | grep ESTABLISHED
+
+# Numeric output, no name resolution (much faster)
+netstat -an
+
+# Only TCP
+netstat -at
+
+# Only UDP
+netstat -au
+
+# Only Unix domain sockets
+netstat -ax
+
+# Which process listens on port 8080?
+sudo netstat -tlnp | grep ':8080'
+
+# Count connections per state
+netstat -ant | awk 'NR>2 {print $6}' | sort | uniq -c | sort -rn
+
+# Count connections per remote address
+netstat -ant | awk 'NR>2 {print $5}' | cut -d: -f1 | sort | uniq -c | sort -rn | head
+
+# How many connections to port 443
+netstat -ant | grep -c ':443.*ESTABLISHED'
+
+# Sockets in TIME_WAIT, which can pile up on a busy proxy
+netstat -ant | grep -c TIME_WAIT
+
+# Continuous output, refreshing every second
+netstat -ant -c
+
+# The routing table
+netstat -rn
+
+# The default gateway
+netstat -rn | awk '$1 == "0.0.0.0" {print $2}'
+
+# Interface statistics
+netstat -i
+
+# Interface statistics, continuously
+netstat -ic
+
+# Per-protocol summary statistics
+netstat -s
+
+# TCP statistics only
+netstat -st
+
+# Retransmission counts, a sign of a lossy path
+netstat -st | grep -i retrans
+
+# Multicast group membership
+netstat -g
+
+# Masquerade connections, on an old NAT box
+netstat -M
+
+# Show the timer state of each socket
+netstat -anto
+
+# Extended information, with users
+sudo netstat -antpe
+
+# netstat is deprecated: the ss equivalents follow
+ss -tlnp
+
+# All TCP sockets with processes
+sudo ss -antp
+
+# Filter by state
+ss -tn state established
+
+# Filter by port
+ss -ltn 'sport = :8080'
+
+# Filter by destination
+ss -tn 'dst 10.0.0.5'
+
+# Summary statistics with ss
+ss -s
+
+# The routing table, the modern way
+ip route show
+
+# Interface statistics, the modern way
+ip -s link
+
+# Which process holds a port, without netstat or ss
+sudo lsof -i :8080
+
+# Install netstat if a runbook still calls for it
+sudo apt install net-tools

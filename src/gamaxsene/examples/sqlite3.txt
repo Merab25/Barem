@@ -1,0 +1,127 @@
+## Query and manage SQLite database files
+
+# Open a database (it is created if missing)
+sqlite3 app.db
+
+# Run one query and exit
+sqlite3 app.db 'SELECT count(*) FROM users'
+
+# Run a script file
+sqlite3 app.db < schema.sql
+
+# Run several statements
+sqlite3 app.db 'BEGIN; DELETE FROM sessions WHERE expired; COMMIT;'
+
+# Open read-only, so a live database cannot be damaged
+sqlite3 -readonly app.db 'SELECT count(*) FROM users'
+
+# Open an in-memory database
+sqlite3 :memory: 'SELECT sqlite_version()'
+
+# List tables
+sqlite3 app.db '.tables'
+
+# Describe a table
+sqlite3 app.db '.schema users'
+
+# The whole schema
+sqlite3 app.db '.schema'
+
+# List indexes on a table
+sqlite3 app.db '.indexes users'
+
+# Column details for a table
+sqlite3 app.db 'PRAGMA table_info(users)'
+
+# Column headers in the output
+sqlite3 -header app.db 'SELECT id, email FROM users LIMIT 5'
+
+# Aligned columns, readable in a terminal
+sqlite3 -header -column app.db 'SELECT id, email FROM users LIMIT 5'
+
+# A box-drawn table
+sqlite3 -box app.db 'SELECT id, email FROM users LIMIT 5'
+
+# Markdown table, for pasting into a document
+sqlite3 -markdown app.db 'SELECT id, email FROM users LIMIT 5'
+
+# One field per line, for wide rows
+sqlite3 -line app.db 'SELECT * FROM users LIMIT 1'
+
+# JSON output
+sqlite3 -json app.db 'SELECT id, email FROM users LIMIT 5'
+
+# CSV output
+sqlite3 -csv -header app.db 'SELECT * FROM users' > users.csv
+
+# Custom separator
+sqlite3 -separator '|' app.db 'SELECT id, email FROM users'
+
+# Export a query to a file
+sqlite3 app.db '.output users.txt' 'SELECT * FROM users' '.quit'
+
+# Import a CSV into a table
+sqlite3 app.db '.mode csv' '.import --skip 1 users.csv users'
+
+# Import creating the table from the header
+sqlite3 app.db '.mode csv' '.import users.csv users'
+
+# Dump the whole database as SQL
+sqlite3 app.db .dump > app.sql
+
+# Dump one table
+sqlite3 app.db '.dump users' > users.sql
+
+# Restore from a dump
+sqlite3 restored.db < app.sql
+
+# Back up a live database safely
+sqlite3 app.db ".backup 'app-$(date +%F).db'"
+
+# Explain a query plan
+sqlite3 app.db 'EXPLAIN QUERY PLAN SELECT * FROM users WHERE email = ?'
+
+# Time the queries in a session
+sqlite3 app.db '.timer on' 'SELECT count(*) FROM users'
+
+# Database size and page count
+sqlite3 app.db 'PRAGMA page_count; PRAGMA page_size;'
+
+# Reclaim space after large deletes
+sqlite3 app.db 'VACUUM'
+
+# Update the query planner's statistics
+sqlite3 app.db 'ANALYZE'
+
+# Check the file for corruption
+sqlite3 app.db 'PRAGMA integrity_check'
+
+# A faster, shallower check
+sqlite3 app.db 'PRAGMA quick_check'
+
+# Enable foreign key enforcement, which is off by default
+sqlite3 app.db 'PRAGMA foreign_keys = ON; PRAGMA foreign_key_check;'
+
+# Switch to write-ahead logging, better for concurrent readers
+sqlite3 app.db 'PRAGMA journal_mode = WAL'
+
+# Current journal mode
+sqlite3 app.db 'PRAGMA journal_mode'
+
+# Set a busy timeout so writers wait instead of failing
+sqlite3 app.db 'PRAGMA busy_timeout = 5000'
+
+# Query two databases at once
+sqlite3 a.db ".open a.db" "ATTACH 'b.db' AS b" 'SELECT count(*) FROM b.users'
+
+# Query CSV files as if they were tables
+sqlite3 -csv ':memory:' '.import users.csv u' 'SELECT count(*) FROM u'
+
+# Join two CSV files with SQL
+sqlite3 -csv ':memory:' '.import a.csv a' '.import b.csv b' 'SELECT * FROM a JOIN b USING(id)'
+
+# Is this file actually a SQLite database?
+file app.db
+
+# Which SQLite version is installed
+sqlite3 --version

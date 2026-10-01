@@ -1,0 +1,100 @@
+## Grant fine-grained permissions with access control lists
+
+# Show a file's ACL
+getfacl report.pdf
+
+# Show ACLs for a whole tree
+getfacl -R /srv/shared
+
+# Skip the header comments, for scripting
+getfacl --omit-header report.pdf
+
+# Show only files that actually have an extended ACL
+getfacl -s -R /srv/shared
+
+# Give one user read and write on a file
+sudo setfacl -m u:merab:rw report.pdf
+
+# Give a user full access
+sudo setfacl -m u:merab:rwx /srv/shared
+
+# Give a group read and execute
+sudo setfacl -m g:developers:rx /srv/app
+
+# Give several entries at once
+sudo setfacl -m u:merab:rwx,g:developers:rx /srv/shared
+
+# Read-only for everyone else
+sudo setfacl -m o::r report.pdf
+
+# Apply recursively to an existing tree
+sudo setfacl -R -m g:developers:rx /srv/app
+
+# Set a default ACL, so new files inherit it
+sudo setfacl -d -m g:developers:rwx /srv/shared
+
+# Recursive, with defaults, the usual combination for a shared directory
+sudo setfacl -R -m g:developers:rwx -m d:g:developers:rwx /srv/shared
+
+# Default ACL for a user
+sudo setfacl -d -m u:deploy:rwx /srv/releases
+
+# Remove one entry
+sudo setfacl -x u:merab report.pdf
+
+# Remove a group entry
+sudo setfacl -x g:developers /srv/app
+
+# Remove every extended ACL, leaving normal permissions
+sudo setfacl -b report.pdf
+
+# Remove only the default ACLs
+sudo setfacl -k /srv/shared
+
+# Remove defaults recursively
+sudo setfacl -R -k /srv/shared
+
+# Recalculate the effective rights mask
+sudo setfacl -m m::rwx /srv/shared
+
+# Set the mask explicitly, which caps the effective permissions
+sudo setfacl -m mask::rx /srv/app
+
+# Copy an ACL from one file to another
+getfacl source.txt | sudo setfacl --set-file=- target.txt
+
+# Save a tree's ACLs to a file
+getfacl -R /srv/shared > shared.acl
+
+# Restore them later
+sudo setfacl --restore=shared.acl
+
+# Replace the whole ACL rather than merging
+sudo setfacl --set u::rw,g::r,o::- report.pdf
+
+# Apply only to directories
+sudo find /srv/shared -type d -exec setfacl -m g:developers:rwx {} +
+
+# Apply only to files
+sudo find /srv/shared -type f -exec setfacl -m g:developers:rw {} +
+
+# The plus sign in ls means an extended ACL is present
+ls -l report.pdf
+
+# Find every file with an ACL
+sudo find /srv -exec sh -c 'getfacl -s "$1" 2>/dev/null | grep -q . && echo "$1"' _ {} \;
+
+# The filesystem must be mounted with ACL support (usually the default)
+findmnt -n -o OPTIONS /srv
+
+# Enable ACLs explicitly on an ext4 mount
+sudo mount -o remount,acl /srv
+
+# Give a web server access without changing ownership
+sudo setfacl -R -m u:www-data:rX /srv/site
+
+# Let a deploy user write into a directory owned by another user
+sudo setfacl -R -m u:deploy:rwx -m d:u:deploy:rwx /var/www/html
+
+# When ACLs get complicated, plain group ownership is often clearer
+sudo chgrp -R developers /srv/app && sudo chmod -R 2775 /srv/app

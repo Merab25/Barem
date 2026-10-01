@@ -1,0 +1,97 @@
+## Copy and convert data block by block, for disks and images
+
+# Write an ISO to a USB stick (check the device first)
+sudo dd if=ubuntu.iso of=/dev/sdb bs=4M status=progress conv=fsync
+
+# Confirm which device is the stick before writing
+lsblk -o NAME,SIZE,MODEL,TRAN
+
+# Show progress on a long copy
+sudo dd if=/dev/sda of=/mnt/backup/sda.img bs=64M status=progress
+
+# Clone one disk to another
+sudo dd if=/dev/sda of=/dev/sdb bs=64M status=progress conv=noerror,sync
+
+# Image a disk, compressed
+sudo dd if=/dev/sda bs=64M status=progress | gzip > sda.img.gz
+
+# Restore that compressed image
+zcat sda.img.gz | sudo dd of=/dev/sda bs=64M status=progress
+
+# Back up only the partition table and bootloader
+sudo dd if=/dev/sda of=mbr.img bs=512 count=1
+
+# Restore the bootloader but not the partition table
+sudo dd if=mbr.img of=/dev/sda bs=446 count=1
+
+# Back up a GPT header
+sudo dd if=/dev/sda of=gpt.img bs=512 count=34
+
+# Create an empty file of a fixed size
+dd if=/dev/zero of=disk.img bs=1M count=1024
+
+# Create a sparse file instantly (truncate is better for this)
+truncate -s 1G sparse.img
+
+# Create a swap file
+sudo dd if=/dev/zero of=/swapfile bs=1M count=2048 status=progress
+
+# Generate random data
+dd if=/dev/urandom of=random.bin bs=1M count=10
+
+# Wipe the start of a disk, destroying its partition table
+sudo dd if=/dev/zero of=/dev/sdb bs=1M count=10
+
+# Overwrite a whole disk with zeros
+sudo dd if=/dev/zero of=/dev/sdb bs=64M status=progress
+
+# Overwrite with random data, slower but harder to recover
+sudo dd if=/dev/urandom of=/dev/sdb bs=64M status=progress
+
+# Test sequential write speed
+dd if=/dev/zero of=testfile bs=1M count=1024 oflag=direct
+
+# Test sequential read speed, bypassing the cache
+dd if=testfile of=/dev/null bs=1M iflag=direct
+
+# Skip the page cache on both sides
+dd if=/dev/zero of=testfile bs=1M count=512 oflag=direct conv=fsync
+
+# Copy only part of a file, starting at an offset
+dd if=big.bin of=part.bin bs=1M skip=100 count=10
+
+# Skip bytes rather than blocks
+dd if=big.bin of=part.bin bs=1 skip=1024 count=512
+
+# Extract a file embedded in an image at a known offset
+dd if=disk.img of=extracted.bin bs=512 skip=2048 count=1024
+
+# Write into the middle of a file without truncating it
+dd if=patch.bin of=target.bin bs=1 seek=4096 conv=notrunc
+
+# Convert a file to uppercase
+dd if=input.txt of=output.txt conv=ucase
+
+# Keep going past read errors on a failing disk
+sudo dd if=/dev/sda of=rescue.img bs=4096 conv=noerror,sync status=progress
+
+# For a failing disk, ddrescue is the right tool
+sudo ddrescue -d -r3 /dev/sda rescue.img rescue.log
+
+# Send progress updates to a running dd
+sudo kill -USR1 "$(pgrep -x dd)"
+
+# Flush to disk before the command returns
+sudo dd if=ubuntu.iso of=/dev/sdb bs=4M conv=fsync status=progress && sync
+
+# Verify the write by comparing checksums
+sudo dd if=/dev/sdb bs=4M count=$(( $(stat -c %s ubuntu.iso) / 4194304 + 1 )) | sha256sum
+
+# Checksum the source for comparison
+sha256sum ubuntu.iso
+
+# Safely eject when done
+sudo eject /dev/sdb
+
+# For plain file copies, cp is faster and safer than dd
+cp -a source.bin dest.bin

@@ -1,0 +1,103 @@
+## Relay data between almost any two endpoints
+
+# Listen on a port and print what arrives
+socat -v TCP-LISTEN:8080,reuseaddr,fork -
+
+# Connect to a port and talk to it
+socat - TCP:example.com:80
+
+# A minimal HTTP request by hand
+printf 'GET / HTTP/1.0\r\n\r\n' | socat - TCP:example.com:80
+
+# Port forward: local 8080 to a remote service
+socat TCP-LISTEN:8080,reuseaddr,fork TCP:10.0.0.5:80
+
+# Forward and keep serving after each client disconnects
+socat TCP-LISTEN:5432,reuseaddr,fork TCP:db.internal:5432
+
+# Bind the listener to one address only
+socat TCP-LISTEN:8080,bind=127.0.0.1,reuseaddr,fork TCP:10.0.0.5:80
+
+# Expose a Unix socket over TCP
+socat TCP-LISTEN:8080,reuseaddr,fork UNIX-CONNECT:/var/run/app.sock
+
+# Expose a TCP service as a Unix socket
+socat UNIX-LISTEN:/tmp/db.sock,reuseaddr,fork TCP:db.internal:5432
+
+# Talk to the Docker daemon socket
+socat - UNIX-CONNECT:/var/run/docker.sock
+
+# Send an HTTP request over that socket
+printf 'GET /version HTTP/1.0\r\n\r\n' | socat - UNIX-CONNECT:/var/run/docker.sock
+
+# UDP relay
+socat UDP-LISTEN:514,reuseaddr,fork UDP:logserver:514
+
+# UDP to TCP conversion
+socat UDP-LISTEN:514,reuseaddr,fork TCP:logserver:601
+
+# Send a syslog message over UDP
+echo '<14>test message' | socat - UDP:logserver:514
+
+# TLS client, verifying the certificate
+socat - OPENSSL:example.com:443,verify=1
+
+# TLS client without verification, for testing
+socat - OPENSSL:example.com:443,verify=0
+
+# Terminate TLS in front of a plain backend
+socat OPENSSL-LISTEN:443,reuseaddr,fork,cert=server.pem,verify=0 TCP:127.0.0.1:8080
+
+# Add TLS to an outgoing connection
+socat TCP-LISTEN:8080,reuseaddr,fork OPENSSL:api.example.com:443,verify=1
+
+# Transfer a file: receiver first
+socat -u TCP-LISTEN:9000,reuseaddr OPEN:received.tar.gz,creat
+
+# Then the sender
+socat -u FILE:backup.tar.gz TCP:receiver:9000
+
+# Serve one file to whoever connects
+socat TCP-LISTEN:8080,reuseaddr,fork FILE:index.html
+
+# Run a command for each connection
+socat TCP-LISTEN:8080,reuseaddr,fork EXEC:'date'
+
+# A very small shell service, for a lab only
+socat TCP-LISTEN:4444,reuseaddr,fork EXEC:/bin/bash,pty,stderr
+
+# Connect to a serial port
+sudo socat - /dev/ttyUSB0,raw,echo=0,b115200
+
+# Expose a serial port over the network
+sudo socat TCP-LISTEN:5000,reuseaddr,fork /dev/ttyUSB0,raw,echo=0,b115200
+
+# Create a pair of connected virtual serial ports
+socat -d -d PTY,raw,echo=0,link=/tmp/ttyA PTY,raw,echo=0,link=/tmp/ttyB
+
+# Log the traffic passing through, in hex
+socat -x -v TCP-LISTEN:8080,reuseaddr,fork TCP:10.0.0.5:80
+
+# Log to a file rather than the terminal
+socat -v TCP-LISTEN:8080,reuseaddr,fork TCP:10.0.0.5:80 2> traffic.log
+
+# Limit to a single connection, then exit
+socat TCP-LISTEN:8080 TCP:10.0.0.5:80
+
+# Add a connection timeout
+socat -T 30 TCP-LISTEN:8080,reuseaddr,fork TCP:10.0.0.5:80
+
+# Force IPv4
+socat - TCP4:example.com:80
+
+# Force IPv6
+socat - TCP6:[2606:4700:4700::1111]:443
+
+# Increase verbosity for debugging
+socat -d -d -d - TCP:example.com:80
+
+# The simpler tool when you only need a quick port test
+nc -zv example.com 443
+
+# An SSH tunnel is usually simpler for forwarding through a bastion
+ssh -L 8080:10.0.0.5:80 merab@bastion

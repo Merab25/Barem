@@ -1,0 +1,100 @@
+## Compress and decompress with xz, for the smallest archives
+
+# Compress a file, replacing it with file.xz
+xz big.log
+
+# Decompress
+unxz big.log.xz
+
+# Same as unxz
+xz -d big.log.xz
+
+# Keep the original file
+xz -k big.log
+
+# Compress to standard output
+xz -c big.log > big.log.xz
+
+# Maximum compression
+xz -9 big.log
+
+# Maximum compression with more memory, for very large files
+xz -9e big.log
+
+# Fastest, least compression
+xz -0 big.log
+
+# Show progress and the ratio achieved
+xz -v big.log
+
+# Very verbose, with a progress bar
+xz -vv big.log
+
+# Use every CPU core
+xz -T0 -9 big.log
+
+# Use four threads
+xz -T4 big.log
+
+# Read a compressed file without decompressing it
+xzcat big.log.xz
+
+# Page through it
+xzless big.log.xz
+
+# Search inside it
+xzgrep -i error app.log.xz
+
+# Count lines without writing a temporary file
+xzcat big.log.xz | wc -l
+
+# Test an archive for corruption
+xz -t big.log.xz
+
+# Test every xz file in a directory
+xz -t *.xz && echo "all good"
+
+# Show compression details
+xz -l big.log.xz
+
+# Verbose listing, with block information
+xz -lvv big.log.xz
+
+# Compress a whole directory: xz handles one file, so use tar
+tar -cJf logs.tar.xz /var/log/myapp
+
+# Extract that archive
+tar -xJf logs.tar.xz
+
+# Let tar pick the compressor from the file name
+tar -caf logs.tar.xz /var/log/myapp
+
+# Multi-threaded tar with xz
+XZ_OPT='-T0 -9' tar -cJf logs.tar.xz /var/log/myapp
+
+# Compress a database dump as it is produced
+pg_dump -d mydb | xz -T0 -9 > mydb.sql.xz
+
+# Restore straight from it
+xzcat mydb.sql.xz | psql -d mydb
+
+# Limit the memory xz will use when decompressing
+xz -d --memlimit=256MiB big.log.xz
+
+# Recompress a gzip file as xz, usually much smaller
+zcat old.log.gz | xz -9 > old.log.xz
+
+# Compare the three common compressors on one file
+gzip -9 -k f.log && xz -9 -k f.log && zstd -19 -k f.log && ls -l f.log*
+
+# zstd trades a little size for far more speed
+zstd -19 -T0 big.log
+
+# Decompress zstd
+unzstd big.log.zst
+
+# bzip2, the older middle ground
+bzip2 -9 big.log
+
+# Read a bzip2 file
+bzcat big.log.bz2

@@ -1,0 +1,113 @@
+## Read and set kernel parameters at runtime and at boot
+
+# Show every kernel parameter
+sysctl -a
+
+# Show one parameter
+sysctl net.ipv4.ip_forward
+
+# Show several
+sysctl vm.swappiness net.core.somaxconn
+
+# Just the value, no name
+sysctl -n vm.swappiness
+
+# Find parameters by pattern
+sysctl -a | grep -i somaxconn
+
+# Every vm parameter
+sysctl -a --pattern '^vm\.'
+
+# Set a parameter until the next reboot
+sudo sysctl -w vm.swappiness=10
+
+# Set several at once
+sudo sysctl -w net.core.somaxconn=1024 -w net.ipv4.tcp_max_syn_backlog=2048
+
+# Set without the equals sign
+sudo sysctl vm.swappiness=10
+
+# Quiet, for scripts
+sudo sysctl -q -w vm.swappiness=10
+
+# Enable IP forwarding, for a router or a Docker host
+sudo sysctl -w net.ipv4.ip_forward=1
+
+# Enable IPv6 forwarding
+sudo sysctl -w net.ipv6.conf.all.forwarding=1
+
+# Reduce swapping on a database server
+sudo sysctl -w vm.swappiness=1
+
+# Raise the limit on open files system-wide
+sudo sysctl -w fs.file-max=2097152
+
+# Raise the inotify watch limit, which editors and watchers exhaust
+sudo sysctl -w fs.inotify.max_user_watches=524288
+
+# Allow more connections to queue on a listening socket
+sudo sysctl -w net.core.somaxconn=4096
+
+# Widen the local port range for a busy proxy
+sudo sysctl -w net.ipv4.ip_local_port_range='10000 65535'
+
+# Reuse TIME_WAIT sockets more aggressively
+sudo sysctl -w net.ipv4.tcp_tw_reuse=1
+
+# Enable SYN cookies against SYN floods
+sudo sysctl -w net.ipv4.tcp_syncookies=1
+
+# Ignore ICMP echo requests
+sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1
+
+# Enable reverse path filtering, against spoofed sources
+sudo sysctl -w net.ipv4.conf.all.rp_filter=1
+
+# Allow unprivileged processes to bind low ports
+sudo sysctl -w net.ipv4.ip_unprivileged_port_start=80
+
+# Let a non-root process use ping
+sudo sysctl -w net.ipv4.ping_group_range='0 2147483647'
+
+# Change the hostname through the kernel
+sudo sysctl -w kernel.hostname=web1
+
+# Raise the maximum PID
+sudo sysctl -w kernel.pid_max=4194304
+
+# Make a change survive a reboot
+echo 'vm.swappiness = 10' | sudo tee /etc/sysctl.d/99-tuning.conf
+
+# A whole tuning file
+sudo tee /etc/sysctl.d/99-tuning.conf > /dev/null <<'EOF'
+vm.swappiness = 10
+net.core.somaxconn = 4096
+fs.inotify.max_user_watches = 524288
+EOF
+
+# Apply a specific file now
+sudo sysctl -p /etc/sysctl.d/99-tuning.conf
+
+# Apply every configuration file
+sudo sysctl --system
+
+# Which files are read, and in what order
+ls /etc/sysctl.d/ /usr/lib/sysctl.d/ 2>/dev/null
+
+# The main configuration file
+cat /etc/sysctl.conf
+
+# Read a parameter straight from /proc, which is the same thing
+cat /proc/sys/vm/swappiness
+
+# Write it straight to /proc
+echo 10 | sudo tee /proc/sys/vm/swappiness
+
+# Confirm a change took effect
+sysctl -n net.core.somaxconn
+
+# Save the current values before changing anything
+sysctl -a 2>/dev/null > sysctl-before.txt
+
+# Compare afterwards
+diff <(sysctl -a 2>/dev/null) sysctl-before.txt

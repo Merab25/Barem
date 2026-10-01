@@ -1,0 +1,109 @@
+## Read historical and live system activity from sysstat
+
+# CPU usage, ten samples one second apart
+sar 1 10
+
+# CPU usage from today's saved history
+sar
+
+# Per-core CPU
+sar -P ALL 1 5
+
+# One core only
+sar -P 0 1 5
+
+# Memory usage over time
+sar -r 1 5
+
+# Memory, human-readable units
+sar -r -h 1 5
+
+# Swap activity
+sar -S 1 5
+
+# Paging statistics
+sar -B 1 5
+
+# Disk activity per device
+sar -d -p 1 5
+
+# One device
+sar -d -p --dev=sda 1 5
+
+# Network interface throughput
+sar -n DEV 1 5
+
+# One interface
+sar -n DEV --iface=eth0 1 5
+
+# Network errors
+sar -n EDEV 1 5
+
+# TCP statistics
+sar -n TCP 1 5
+
+# Socket counts
+sar -n SOCK 1 5
+
+# Load average and run queue
+sar -q 1 5
+
+# Context switches and process creation
+sar -w 1 5
+
+# Open files and inode usage
+sar -v 1 5
+
+# Everything at once
+sar -A 1 2
+
+# Today's history, a specific hour range
+sar -s 09:00:00 -e 12:00:00
+
+# Yesterday's CPU history
+sar -f /var/log/sysstat/sa$(date -d yesterday +%d)
+
+# A specific day of this month
+sar -f /var/log/sysstat/sa15
+
+# Memory history for a past day
+sar -r -f /var/log/sysstat/sa15
+
+# Network history for a past day
+sar -n DEV -f /var/log/sysstat/sa15
+
+# Where the archives live
+ls /var/log/sysstat/
+
+# Report in a machine-readable format
+sar -o /tmp/today.bin 1 5
+
+# Read back a binary capture
+sar -f /tmp/today.bin
+
+# CSV-ish output for a spreadsheet
+sadf -d -- -u /var/log/sysstat/sa15
+
+# JSON output
+sadf -j -- -u /var/log/sysstat/sa15
+
+# SVG graph of CPU over a day
+sadf -g -- -u /var/log/sysstat/sa15 > cpu.svg
+
+# Is collection enabled at all?
+systemctl status sysstat
+
+# Enable it
+sudo systemctl enable --now sysstat
+
+# How often it collects
+systemctl cat sysstat-collect.timer
+
+# Collect a sample right now
+sudo /usr/lib/sysstat/sa1 1 1
+
+# Keep more days of history
+sudo sed -i 's/^HISTORY=.*/HISTORY=28/' /etc/sysstat/sysstat
+
+# The live-only alternatives, when sysstat is not installed
+vmstat 1 5

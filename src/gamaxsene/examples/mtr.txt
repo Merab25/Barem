@@ -1,0 +1,104 @@
+## Trace the route to a host and watch latency and loss per hop
+
+# Interactive, continuously updating trace
+mtr example.com
+
+# Do not resolve hop names, which is faster and clearer
+mtr -n example.com
+
+# Show both names and IP addresses
+mtr -b example.com
+
+# Report mode: run a fixed number of cycles then print
+mtr -r -c 20 example.com
+
+# Report mode with wide output, good for pasting into a ticket
+mtr -rw -c 20 example.com
+
+# Report with both names and addresses
+mtr -rwb -c 30 example.com
+
+# One cycle per second for a minute
+mtr -r -c 60 -i 1 example.com
+
+# Faster probing, for a short sharp sample
+mtr -r -c 50 -i 0.2 example.com
+
+# Force IPv4
+mtr -4 example.com
+
+# Force IPv6
+mtr -6 example.com
+
+# Use ICMP echo instead of UDP
+mtr --icmp example.com
+
+# Use UDP
+mtr --udp example.com
+
+# Use TCP to a specific port, best through firewalls
+sudo mtr --tcp --port 443 example.com
+
+# TCP to a database port
+sudo mtr --tcp --port 5432 db.example.com
+
+# Larger packets, to look for MTU problems
+mtr -s 1400 -r -c 10 example.com
+
+# Limit the number of hops
+mtr -m 15 -r -c 10 example.com
+
+# Start reporting from a later hop
+mtr -f 3 example.com
+
+# Leave from a specific interface
+mtr -I eth0 example.com
+
+# Use a specific source address
+mtr -a 192.168.1.10 example.com
+
+# Show the AS number of each hop
+mtr -z -r -c 10 example.com
+
+# CSV output, for a spreadsheet
+mtr --csv -c 10 example.com
+
+# JSON output, for monitoring
+mtr --json -c 10 example.com
+
+# XML output
+mtr --xml -c 10 example.com
+
+# Split output, one line per hop, easy to parse
+mtr --split -c 10 example.com
+
+# Show only hops with packet loss
+mtr -r -c 20 -n example.com | awk 'NR>2 && $3+0 > 0'
+
+# Save a trace with a timestamp for a support ticket
+{ date; mtr -rwbc 30 example.com; } > mtr-$(date +%F-%H%M).txt
+
+# Compare two destinations
+mtr -r -c 20 -n 1.1.1.1 > a.txt; mtr -r -c 20 -n 8.8.8.8 > b.txt; diff a.txt b.txt
+
+# Loss at an intermediate hop is often just ICMP rate limiting; loss that
+# continues to the last hop is the real problem
+mtr -rwbc 30 example.com
+
+# Inside mtr: d cycles the display mode
+mtr example.com
+
+# Inside mtr: n toggles name resolution, and q quits
+mtr example.com
+
+# Inside mtr: s changes the packet size, and p pauses
+mtr example.com
+
+# The one-shot equivalent
+traceroute -n example.com
+
+# tracepath, which needs no root and reports the MTU
+tracepath example.com
+
+# Just test reachability and latency
+ping -c 5 example.com

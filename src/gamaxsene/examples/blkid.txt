@@ -1,0 +1,103 @@
+## Find filesystem UUIDs, labels and types
+
+# Every block device with a filesystem
+sudo blkid
+
+# One device
+sudo blkid /dev/sdb1
+
+# Just the UUID, ready for a script
+sudo blkid -s UUID -o value /dev/sdb1
+
+# Just the filesystem type
+sudo blkid -s TYPE -o value /dev/sdb1
+
+# Just the label
+sudo blkid -s LABEL -o value /dev/sdb1
+
+# Only the UUID tag, in the normal format
+sudo blkid -s UUID /dev/sdb1
+
+# Output as shell variable assignments
+sudo blkid -o export /dev/sdb1
+
+# Evaluate those assignments in a script
+eval "$(sudo blkid -o export /dev/sdb1)" && echo "$TYPE $UUID"
+
+# List devices only, no tags
+sudo blkid -o device
+
+# Full output with all tags
+sudo blkid -p /dev/sdb1
+
+# Probe the device directly, ignoring the cache
+sudo blkid -p -o udev /dev/sdb1
+
+# Find the device that has a given UUID
+sudo blkid -U 8f3a1b2c-4d5e-6f70-8192-a3b4c5d6e7f8
+
+# Find the device with a given label
+sudo blkid -L data
+
+# Find every device of one filesystem type
+sudo blkid -t TYPE=ext4 -o device
+
+# Find every swap device
+sudo blkid -t TYPE=swap -o device
+
+# Find devices with a specific label
+sudo blkid -t LABEL=data
+
+# Match on any tag
+sudo blkid -t UUID=8f3a1b2c-4d5e-6f70-8192-a3b4c5d6e7f8 -o device
+
+# Clear the cache and re-probe everything
+sudo blkid -g && sudo blkid
+
+# Use a different cache file
+sudo blkid -c /dev/null
+
+# Ignore the cache entirely, always probing
+sudo blkid -c /dev/null /dev/sdb1
+
+# Build an fstab line from the UUID
+echo "UUID=$(sudo blkid -s UUID -o value /dev/sdb1) /mnt/data ext4 defaults,noatime 0 2"
+
+# Append it to fstab
+echo "UUID=$(sudo blkid -s UUID -o value /dev/sdb1) /mnt/data ext4 defaults,noatime 0 2" | sudo tee -a /etc/fstab
+
+# Test the new fstab entry
+sudo mount -a && findmnt /mnt/data
+
+# The tree view, which shows the same information
+lsblk -f
+
+# Pick the columns you want
+lsblk -o NAME,SIZE,FSTYPE,LABEL,UUID,MOUNTPOINT
+
+# Which device is mounted at a path
+findmnt -n -o SOURCE /mnt/data
+
+# Which UUID the root filesystem uses
+sudo blkid -s UUID -o value "$(findmnt -n -o SOURCE /)"
+
+# What signatures are on a device, before overwriting it
+sudo wipefs /dev/sdb1
+
+# Remove those signatures
+sudo wipefs -a /dev/sdb1
+
+# Change an ext4 UUID
+sudo tune2fs -U random /dev/sdb1
+
+# Set a specific UUID
+sudo tune2fs -U 8f3a1b2c-4d5e-6f70-8192-a3b4c5d6e7f8 /dev/sdb1
+
+# Change an ext4 label
+sudo e2label /dev/sdb1 newlabel
+
+# Change an XFS label
+sudo xfs_admin -L newlabel /dev/sdb1
+
+# Duplicate UUIDs happen after cloning a disk; find them
+sudo blkid | awk '{for (i=1;i<=NF;i++) if ($i ~ /^UUID=/) print $i}' | sort | uniq -d

@@ -1,0 +1,100 @@
+## Number the lines of a file
+
+# Number non-blank lines (the default)
+nl script.sh
+
+# Number every line, blanks included
+nl -b a script.sh
+
+# Number only non-empty lines
+nl -b t script.sh
+
+# Number only lines matching a pattern
+nl -b p'^function' script.sh
+
+# Number only lines containing ERROR
+nl -b p'ERROR' app.log
+
+# Start at a different number
+nl -v 100 script.sh
+
+# Count in steps of 10
+nl -i 10 script.sh
+
+# Set the field width for the number
+nl -w 6 script.sh
+
+# Pad numbers with zeros
+nl -n rz script.sh
+
+# Left-align the numbers
+nl -n ln script.sh
+
+# Right-align without padding (the default)
+nl -n rn script.sh
+
+# Change the separator between number and text
+nl -s ': ' script.sh
+
+# Separator of a tab
+nl -s$'\t' script.sh
+
+# Number with a dot and a space, like a list
+nl -s'. ' notes.txt
+
+# Number lines from standard input
+ps aux | nl
+
+# Number a command's output for reference
+systemctl list-units --failed --no-legend | nl
+
+# Number search results
+grep -n TODO src/*.py
+
+# Number a directory listing
+ls -1 | nl
+
+# Number only the files, one per line
+find . -maxdepth 1 -type f | nl
+
+# Number the lines of a config, to talk about line 42
+nl -b a /etc/nginx/nginx.conf | sed -n '40,45p'
+
+# The simpler tool for the same job
+cat -n script.sh
+
+# cat numbering skipping blank lines
+cat -b script.sh
+
+# Number lines while paging
+nl -b a app.log | less
+
+# Number lines in a specific range
+sed -n '100,120p' app.log | nl -v 100
+
+# Renumber after filtering, so numbers are sequential again
+grep ERROR app.log | nl
+
+# Keep the original line numbers instead
+grep -n ERROR app.log
+
+# Add line numbers permanently to a file
+nl -b a -s' ' notes.txt > numbered.txt
+
+# Strip existing numbering
+sed 's/^ *[0-9]\+\s*//' numbered.txt
+
+# Number with awk, for full control of the format
+awk '{printf "%4d  %s\n", NR, $0}' script.sh
+
+# Number only matching lines with awk
+awk '/ERROR/ {printf "%d: %s\n", NR, $0}' app.log
+
+# Number paragraphs rather than lines
+nl -b a -d '::' document.txt
+
+# Restart numbering at each logical page delimiter
+nl -p report.txt
+
+# Do not restart numbering across pages
+nl -p -b a report.txt

@@ -1,0 +1,103 @@
+## Read and change the system hostname and machine metadata
+
+# Show hostname, machine id, OS and kernel
+hostnamectl
+
+# Just the hostname
+hostnamectl hostname
+
+# The older command
+hostname
+
+# Fully qualified domain name
+hostname -f
+
+# Short hostname only
+hostname -s
+
+# The domain part
+hostname -d
+
+# All IP addresses of this host
+hostname -I
+
+# Set the hostname permanently
+sudo hostnamectl set-hostname web1.example.com
+
+# Set the static hostname explicitly
+sudo hostnamectl set-hostname web1.example.com --static
+
+# Set a pretty name, which may contain spaces
+sudo hostnamectl set-hostname 'Merab Web Server' --pretty
+
+# Set a transient hostname, until the next reboot
+sudo hostnamectl set-hostname web1-temp --transient
+
+# Clear the pretty name
+sudo hostnamectl set-hostname '' --pretty
+
+# Set the chassis type, which some tools display
+sudo hostnamectl set-chassis server
+
+# Set the deployment environment
+sudo hostnamectl set-deployment production
+
+# Set a location
+sudo hostnamectl set-location 'Tbilisi, rack 4'
+
+# Machine-readable output
+hostnamectl --json=short
+
+# One value from the JSON
+hostnamectl --json=short | jq -r '.StaticHostname'
+
+# The static hostname file
+cat /etc/hostname
+
+# The machine id, which is unique per install
+cat /etc/machine-id
+
+# Also available through hostnamectl
+hostnamectl | grep 'Machine ID'
+
+# The boot id, which changes every boot
+cat /proc/sys/kernel/random/boot_id
+
+# After a rename, keep /etc/hosts consistent
+sudo sed -i "s/^127.0.1.1.*/127.0.1.1\tweb1.example.com web1/" /etc/hosts
+
+# Check the mapping resolves
+getent hosts web1.example.com
+
+# The kernel's idea of the hostname
+sysctl kernel.hostname
+
+# Set it through sysctl, transiently
+sudo sysctl -w kernel.hostname=web1
+
+# Operating system and version
+cat /etc/os-release
+
+# Just the pretty OS name
+hostnamectl | grep 'Operating System'
+
+# Kernel version
+hostnamectl | grep Kernel
+
+# Architecture
+hostnamectl | grep Architecture
+
+# Virtualisation, if any
+hostnamectl | grep Virtualization
+
+# Detect the hypervisor directly
+systemd-detect-virt
+
+# Cloud instances often get their hostname from DHCP; check the config
+grep -r hostname /etc/cloud/cloud.cfg 2>/dev/null
+
+# Stop cloud-init from resetting the hostname
+sudo sed -i 's/^preserve_hostname:.*/preserve_hostname: true/' /etc/cloud/cloud.cfg
+
+# Confirm the change survived a reboot
+hostnamectl hostname

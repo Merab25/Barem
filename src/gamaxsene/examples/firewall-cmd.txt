@@ -1,0 +1,118 @@
+## Manage firewalld on Fedora, RHEL and Rocky
+
+# Is firewalld running?
+sudo firewall-cmd --state
+
+# Everything about the active zones
+sudo firewall-cmd --list-all
+
+# The default zone
+sudo firewall-cmd --get-default-zone
+
+# Every defined zone
+sudo firewall-cmd --get-zones
+
+# Which zones are active, and their interfaces
+sudo firewall-cmd --get-active-zones
+
+# List all zones in full
+sudo firewall-cmd --list-all-zones
+
+# Set the default zone
+sudo firewall-cmd --set-default-zone=public
+
+# Assign an interface to a zone
+sudo firewall-cmd --permanent --zone=internal --add-interface=eth1
+
+# Allow a service by name
+sudo firewall-cmd --permanent --add-service=https
+
+# Allow several services
+sudo firewall-cmd --permanent --add-service={http,https}
+
+# List the services firewalld knows
+sudo firewall-cmd --get-services
+
+# What does a service definition include?
+sudo firewall-cmd --info-service=https
+
+# Allow a port
+sudo firewall-cmd --permanent --add-port=8080/tcp
+
+# Allow a UDP port
+sudo firewall-cmd --permanent --add-port=51820/udp
+
+# Allow a port range
+sudo firewall-cmd --permanent --add-port=60000-60010/udp
+
+# Allow from one source address
+sudo firewall-cmd --permanent --zone=trusted --add-source=203.0.113.10
+
+# Allow a subnet into a zone
+sudo firewall-cmd --permanent --zone=internal --add-source=10.0.0.0/8
+
+# A rich rule: one source to one port
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="203.0.113.10" port port="5432" protocol="tcp" accept'
+
+# A rich rule that logs and drops
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="198.51.100.7" log prefix="blocked" level="info" drop'
+
+# Rate-limit SSH with a rich rule
+sudo firewall-cmd --permanent --add-rich-rule='rule service name="ssh" limit value="10/m" accept'
+
+# Block a single address
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="198.51.100.7" reject'
+
+# Apply the permanent configuration now
+sudo firewall-cmd --reload
+
+# Add a rule for this boot only, to test it safely
+sudo firewall-cmd --add-port=8080/tcp
+
+# Add a rule that expires by itself
+sudo firewall-cmd --add-port=8080/tcp --timeout=300
+
+# Remove a port permanently
+sudo firewall-cmd --permanent --remove-port=8080/tcp
+
+# Remove a service
+sudo firewall-cmd --permanent --remove-service=http
+
+# Check whether a port is allowed
+sudo firewall-cmd --query-port=443/tcp
+
+# Check whether a service is allowed
+sudo firewall-cmd --query-service=https
+
+# List the open ports of the active zone
+sudo firewall-cmd --list-ports
+
+# List the allowed services
+sudo firewall-cmd --list-services
+
+# List rich rules
+sudo firewall-cmd --list-rich-rules
+
+# Enable masquerading, for a NAT gateway
+sudo firewall-cmd --permanent --add-masquerade
+
+# Forward a port to another host
+sudo firewall-cmd --permanent --add-forward-port=port=8080:proto=tcp:toaddr=10.0.0.5:toport=80
+
+# Panic mode: drop everything, including established connections
+sudo firewall-cmd --panic-on
+
+# Leave panic mode
+sudo firewall-cmd --panic-off
+
+# Discard pending permanent changes by reloading from disk
+sudo firewall-cmd --reload
+
+# Reload completely, dropping state tracking too
+sudo firewall-cmd --complete-reload
+
+# The backend rules firewalld actually generated
+sudo nft list ruleset | head -n 40
+
+# Enable firewalld at boot
+sudo systemctl enable --now firewalld

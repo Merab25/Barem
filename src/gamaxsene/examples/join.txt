@@ -1,0 +1,94 @@
+## Join two files on a shared key column, like an SQL join
+
+# Join on the first field of both files
+join users.txt roles.txt
+
+# Both inputs must be sorted on the join field
+join <(sort users.txt) <(sort roles.txt)
+
+# Comma-separated files
+join -t, <(sort users.csv) <(sort roles.csv)
+
+# Tab-separated
+join -t$'\t' <(sort a.tsv) <(sort b.tsv)
+
+# Join on field 2 of the first file
+join -1 2 <(sort -k2 a.txt) <(sort b.txt)
+
+# Join on different fields in each file
+join -t, -1 1 -2 3 <(sort -t, -k1 a.csv) <(sort -t, -k3 b.csv)
+
+# Choose which fields to output
+join -t, -o 1.1,1.2,2.2 <(sort a.csv) <(sort b.csv)
+
+# Output the key once, then all fields of both
+join -t, -o 0,1.2,2.2 <(sort a.csv) <(sort b.csv)
+
+# Left join: keep unmatched lines from the first file
+join -t, -a 1 <(sort a.csv) <(sort b.csv)
+
+# Right join
+join -t, -a 2 <(sort a.csv) <(sort b.csv)
+
+# Full outer join
+join -t, -a 1 -a 2 <(sort a.csv) <(sort b.csv)
+
+# Fill missing fields with a placeholder
+join -t, -a 1 -e 'NULL' -o 1.1,1.2,2.2 <(sort a.csv) <(sort b.csv)
+
+# Anti-join: lines in the first file with no match in the second
+join -t, -v 1 <(sort a.csv) <(sort b.csv)
+
+# Lines in the second file with no match in the first
+join -t, -v 2 <(sort a.csv) <(sort b.csv)
+
+# Case-insensitive join
+join -i <(sort -f a.txt) <(sort -f b.txt)
+
+# Ignore the ordering check
+join --nocheck-order a.txt b.txt
+
+# Keep the header row out of the sort, then add it back
+{ head -n 1 a.csv; join -t, <(tail -n +2 a.csv | sort) <(tail -n +2 b.csv | sort); }
+
+# Join user names to their UIDs
+join -t: <(sort /etc/passwd) <(sort /etc/shadow) -o 1.1,1.3
+
+# Match host names to IP addresses
+join <(sort hosts.txt) <(sort ips.txt)
+
+# Add a friendly name to a list of IDs
+join -t, -o 1.1,2.2,1.2 <(sort -t, events.csv) <(sort -t, users.csv)
+
+# Which requested paths returned errors, joining two extracts
+join <(awk '{print $7}' access.log | sort -u) <(awk '$9 ~ /^5/ {print $7}' access.log | sort -u)
+
+# Combine disk usage with mount points
+join <(df -P | awk 'NR>1 {print $1, $5}' | sort) <(findmnt -ln -o SOURCE,TARGET | sort)
+
+# Join package names to their versions
+join <(dpkg -l | awk '/^ii/ {print $2}' | sort) <(dpkg -l | awk '/^ii/ {print $2, $3}' | sort)
+
+# Find users present in one system but with a different shell in another
+join -t: -o 1.1,1.7,2.7 <(sort /etc/passwd) <(sort passwd-backup)
+
+# Join three files by chaining
+join a.txt b.txt | join - c.txt
+
+# Sort numerically for display after joining
+join -t, <(sort a.csv) <(sort b.csv) | sort -t, -k3 -n
+
+# Count matched rows
+join -t, <(sort a.csv) <(sort b.csv) | wc -l
+
+# Count unmatched rows on the left
+join -t, -v 1 <(sort a.csv) <(sort b.csv) | wc -l
+
+# When the key is not the first field and quoting is involved, use awk
+awk -F, 'NR==FNR {m[$1]=$2; next} $1 in m {print $0 "," m[$1]}' b.csv a.csv
+
+# Or reach for a real SQL engine on CSV files
+sqlite3 -csv ':memory:' '.import a.csv a' '.import b.csv b' 'SELECT * FROM a JOIN b USING(id)'
+
+# Set operations on whole lines instead of a key
+comm -12 <(sort a.txt) <(sort b.txt)

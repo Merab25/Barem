@@ -1,0 +1,106 @@
+## Set the time, timezone and clock synchronisation
+
+# Current time, timezone and sync status
+timedatectl
+
+# Just the status, spelled out
+timedatectl status
+
+# Is the clock synchronised?
+timedatectl show -p NTPSynchronized --value
+
+# List every timezone
+timedatectl list-timezones
+
+# Find a timezone
+timedatectl list-timezones | grep -i tbilisi
+
+# Timezones in one region
+timedatectl list-timezones | grep '^Europe/'
+
+# Set the timezone
+sudo timedatectl set-timezone Asia/Tbilisi
+
+# Set to UTC, which servers usually want
+sudo timedatectl set-timezone UTC
+
+# Enable network time synchronisation
+sudo timedatectl set-ntp true
+
+# Disable it, so the clock can be set by hand
+sudo timedatectl set-ntp false
+
+# Set the date and time manually (NTP must be off)
+sudo timedatectl set-time '2026-10-01 14:30:00'
+
+# Set the time only
+sudo timedatectl set-time '14:30:00'
+
+# Treat the hardware clock as local time, for dual boot with Windows
+sudo timedatectl set-local-rtc 1
+
+# Back to UTC in the hardware clock, the sane default
+sudo timedatectl set-local-rtc 0
+
+# Show every property, machine-readable
+timedatectl show
+
+# One property
+timedatectl show -p Timezone --value
+
+# Detailed sync status from systemd-timesyncd
+timedatectl timesync-status
+
+# Which NTP server is in use
+timedatectl timesync-status | grep -i server
+
+# Status of the sync service
+systemctl status systemd-timesyncd
+
+# Restart it after changing servers
+sudo systemctl restart systemd-timesyncd
+
+# Configure the NTP servers
+sudo tee /etc/systemd/timesyncd.conf.d/servers.conf > /dev/null <<'EOF'
+[Time]
+NTP=time.cloudflare.com time.google.com
+EOF
+
+# Force an immediate resync
+sudo systemctl restart systemd-timesyncd && sleep 2 && timedatectl timesync-status
+
+# The chrony alternative, common on RHEL
+chronyc tracking
+
+# Chrony's sources and how far off they are
+chronyc sources -v
+
+# Force chrony to step the clock now
+sudo chronyc makestep
+
+# The older ntpd query
+ntpq -p
+
+# Read the hardware clock
+sudo hwclock --show
+
+# Write the system time to the hardware clock
+sudo hwclock --systohc
+
+# Set the system time from the hardware clock
+sudo hwclock --hctosys
+
+# The current time in another timezone, without changing anything
+TZ=America/New_York date
+
+# Compare several timezones at once
+for z in UTC Asia/Tbilisi Europe/London; do printf '%-18s %s\n' "$z" "$(TZ=$z date +'%F %T')"; done
+
+# The timezone the system is configured for
+readlink -f /etc/localtime
+
+# How far the clock has drifted, in the journal
+journalctl -u systemd-timesyncd --since today | tail
+
+# Certificate and token errors are often just a wrong clock
+timedatectl | grep -E 'System clock|NTP service'

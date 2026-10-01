@@ -1,0 +1,97 @@
+## Compare two sorted files line by line
+
+# Three columns: only in A, only in B, in both
+comm a.txt b.txt
+
+# Both files must be sorted first
+comm <(sort a.txt) <(sort b.txt)
+
+# Only the lines unique to the first file
+comm -23 <(sort a.txt) <(sort b.txt)
+
+# Only the lines unique to the second file
+comm -13 <(sort a.txt) <(sort b.txt)
+
+# Only the lines in both files
+comm -12 <(sort a.txt) <(sort b.txt)
+
+# Everything except the common lines
+comm -3 <(sort a.txt) <(sort b.txt)
+
+# Drop the leading tabs from -3 output
+comm -3 <(sort a.txt) <(sort b.txt) | tr -d '\t'
+
+# Case-insensitive comparison
+comm -i <(sort -f a.txt) <(sort -f b.txt)
+
+# Check the inputs really are sorted
+comm --check-order <(sort a.txt) <(sort b.txt)
+
+# Do not complain about ordering
+comm --nocheck-order a.txt b.txt
+
+# Count the lines only in the first file
+comm -23 <(sort a.txt) <(sort b.txt) | wc -l
+
+# Use a different output delimiter
+comm --output-delimiter=' | ' <(sort a.txt) <(sort b.txt)
+
+# Show totals for each of the three columns
+comm --total <(sort a.txt) <(sort b.txt)
+
+# Which packages are on host A but not host B
+comm -23 <(ssh web1 'dpkg -l | awk "/^ii/ {print \$2}"' | sort) <(ssh web2 'dpkg -l | awk "/^ii/ {print \$2}"' | sort)
+
+# Which users exist locally but not in LDAP
+comm -23 <(cut -d: -f1 /etc/passwd | sort) <(getent passwd | cut -d: -f1 | sort)
+
+# Which files are in a backup but not in the source
+comm -13 <(cd /srv/data && find . -type f | sort) <(cd /backup/data && find . -type f | sort)
+
+# Which files exist in both trees
+comm -12 <(cd a && find . -type f | sort) <(cd b && find . -type f | sort)
+
+# Which services are enabled but not running
+comm -23 <(systemctl list-unit-files --state=enabled --no-legend | awk '{print $1}' | sort) <(systemctl list-units --state=running --no-legend | awk '{print $1}' | sort)
+
+# Which IPs appeared today but not yesterday
+comm -23 <(cut -d' ' -f1 today.log | sort -u) <(cut -d' ' -f1 yesterday.log | sort -u)
+
+# Which dependencies a requirements file adds
+comm -13 <(sort old-requirements.txt) <(sort requirements.txt)
+
+# Which pip packages are installed but not pinned
+comm -23 <(pip freeze | cut -d= -f1 | sort -f) <(cut -d= -f1 requirements.txt | sort -f)
+
+# Which ports are listening now but were not before
+comm -13 <(sort ports-before.txt) <(ss -ltn | awk 'NR>1 {print $4}' | sort)
+
+# Which git branches are local only
+comm -23 <(git branch --format='%(refname:short)' | sort) <(git branch -r --format='%(refname:lstrip=3)' | sort)
+
+# Compare two sorted numeric lists
+comm -12 <(sort -n a.txt) <(sort -n b.txt)
+
+# comm needs the same sort order both sides; use plain sort, not sort -n, with comm
+comm -12 <(sort a.txt) <(sort b.txt)
+
+# Deduplicate before comparing, so counts are meaningful
+comm -23 <(sort -u a.txt) <(sort -u b.txt)
+
+# Save each of the three sets to its own file
+comm <(sort a.txt) <(sort b.txt) | awk -F'\t' '{ if (NF==1) print $1 > "only-a.txt"; else if (NF==2) print $2 > "only-b.txt"; else print $3 > "both.txt" }'
+
+# When the files are unsorted and you only want set operations
+sort a.txt b.txt | uniq -u
+
+# Lines in both, without comm
+sort a.txt b.txt | uniq -d
+
+# Join on a key column instead of whole lines
+join -t, <(sort a.csv) <(sort b.csv)
+
+# A line-by-line diff, when order matters
+diff a.txt b.txt
+
+# Whole-file comparison instead
+cmp a.txt b.txt

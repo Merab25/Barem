@@ -1,0 +1,100 @@
+## Create filesystems on partitions and images
+
+# Create an ext4 filesystem
+sudo mkfs.ext4 /dev/sdb1
+
+# With a label, so fstab can use LABEL=
+sudo mkfs.ext4 -L data /dev/sdb1
+
+# Do not reserve 5% for root, on a data-only disk
+sudo mkfs.ext4 -m 0 -L data /dev/sdb1
+
+# Fewer inodes, for a disk holding a few huge files
+sudo mkfs.ext4 -T largefile -L media /dev/sdb1
+
+# More inodes, for millions of small files
+sudo mkfs.ext4 -T news -L maildir /dev/sdb1
+
+# Skip the slow full initialisation
+sudo mkfs.ext4 -E nodiscard,lazy_itable_init=1 /dev/sdb1
+
+# Force creation even if a filesystem is already there
+sudo mkfs.ext4 -F /dev/sdb1
+
+# Check for bad blocks while creating (slow)
+sudo mkfs.ext4 -c /dev/sdb1
+
+# Create XFS, common on RHEL
+sudo mkfs.xfs -L data /dev/sdb1
+
+# Overwrite an existing XFS filesystem
+sudo mkfs.xfs -f -L data /dev/sdb1
+
+# Create btrfs
+sudo mkfs.btrfs -L data /dev/sdb1
+
+# btrfs across two devices, mirrored
+sudo mkfs.btrfs -L data -d raid1 -m raid1 /dev/sdb1 /dev/sdc1
+
+# Create ext3, for an old system
+sudo mkfs.ext3 -L data /dev/sdb1
+
+# Create ext2, for a small /boot
+sudo mkfs.ext2 -L boot /dev/sdb1
+
+# Create FAT32, for a USB stick or an EFI partition
+sudo mkfs.vfat -F 32 -n USBSTICK /dev/sdb1
+
+# Create exFAT, for large files on a shared stick
+sudo mkfs.exfat -n USBSTICK /dev/sdb1
+
+# Create NTFS quickly
+sudo mkfs.ntfs -f -L DATA /dev/sdb1
+
+# Create swap
+sudo mkswap -L swap /dev/sdb2
+
+# Enable that swap now
+sudo swapon /dev/sdb2
+
+# Create a filesystem inside an image file
+dd if=/dev/zero of=disk.img bs=1M count=1024 && mkfs.ext4 -F disk.img
+
+# Mount that image
+sudo mount -o loop disk.img /mnt/img
+
+# See what filesystem a device already holds, before overwriting it
+sudo blkid /dev/sdb1
+
+# Confirm nothing is mounted from it
+findmnt -S /dev/sdb1
+
+# Confirm no process is using it
+sudo fuser -vm /dev/sdb1
+
+# Remove old signatures so the new filesystem is detected cleanly
+sudo wipefs -a /dev/sdb1
+
+# Get the UUID for an fstab entry
+sudo blkid -s UUID -o value /dev/sdb1
+
+# Add it to fstab
+echo "UUID=$(sudo blkid -s UUID -o value /dev/sdb1) /mnt/data ext4 defaults,noatime 0 2" | sudo tee -a /etc/fstab
+
+# Test the fstab entry without rebooting
+sudo mount -a && findmnt /mnt/data
+
+# Change an ext4 label after the fact
+sudo e2label /dev/sdb1 newlabel
+
+# Change an XFS label
+sudo xfs_admin -L newlabel /dev/sdb1
+
+# Tune ext4 options later
+sudo tune2fs -m 0 -L data /dev/sdb1
+
+# Show ext4 filesystem details
+sudo tune2fs -l /dev/sdb1
+
+# Check a filesystem after creating it
+sudo fsck -f /dev/sdb1

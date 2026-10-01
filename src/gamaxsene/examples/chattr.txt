@@ -1,0 +1,100 @@
+## Set filesystem attributes, including making a file immutable
+
+# Show a file's attributes
+lsattr config.yaml
+
+# Attributes of everything in a directory
+lsattr /etc
+
+# Recursively
+lsattr -R /etc/myapp
+
+# Include the directory itself
+lsattr -d /etc/myapp
+
+# Show all files, hidden ones included
+lsattr -a /root
+
+# Make a file immutable: not even root can change or delete it
+sudo chattr +i /etc/resolv.conf
+
+# Remove immutability
+sudo chattr -i /etc/resolv.conf
+
+# Stop a DHCP client from rewriting resolv.conf
+sudo chattr +i /etc/resolv.conf
+
+# Protect an ssh config from being overwritten by automation
+sudo chattr +i /etc/ssh/sshd_config
+
+# Append-only: content can be added but not changed or truncated
+sudo chattr +a /var/log/audit.log
+
+# Remove append-only
+sudo chattr -a /var/log/audit.log
+
+# Apply recursively to a tree
+sudo chattr -R +i /etc/myapp
+
+# Do not include the extended attributes of subdirectories
+sudo chattr +i /etc/myapp/config.yaml
+
+# Verbose, reporting each change
+sudo chattr -V +i config.yaml
+
+# Exclude this file from dump backups
+sudo chattr +d /var/cache/bigfile
+
+# Disable copy-on-write for a file, on btrfs
+chattr +C vm-disk.img
+
+# Disable compression for a file
+chattr +m /srv/data/already-compressed.zst
+
+# Force compression
+chattr +c /srv/data/logs.txt
+
+# Secure deletion: zero the blocks when the file is deleted
+sudo chattr +s secret.txt
+
+# Undeletable
+sudo chattr +u important.txt
+
+# Synchronous updates, written immediately rather than cached
+sudo chattr +S /var/lib/myapp/state
+
+# No atime updates for this file
+sudo chattr +A /var/log/busy.log
+
+# Mark a directory so new files inherit its project id
+sudo chattr +P /srv/project
+
+# Set several attributes at once
+sudo chattr +iA config.yaml
+
+# Set exactly this attribute set, clearing the others
+sudo chattr =i config.yaml
+
+# Why can root not delete this file? Check for +i
+lsattr /etc/resolv.conf
+
+# Find every immutable file in a tree
+sudo lsattr -R /etc 2>/dev/null | grep '^....i'
+
+# Find append-only files
+sudo lsattr -R /var/log 2>/dev/null | grep '^.....a'
+
+# Immutable files break package upgrades; clear them first
+sudo chattr -i /etc/resolv.conf && sudo apt upgrade
+
+# The filesystem must support it: ext4, xfs and btrfs do
+sudo tune2fs -l /dev/sdb1 | grep -i features
+
+# Extended attributes are a different thing
+getfattr -d config.yaml
+
+# ACLs are a different thing again
+getfacl config.yaml
+
+# Ordinary permissions, for comparison
+ls -l config.yaml

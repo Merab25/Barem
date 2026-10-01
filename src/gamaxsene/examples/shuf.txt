@@ -1,0 +1,97 @@
+## Shuffle lines and pick random samples
+
+# Shuffle the lines of a file
+shuf names.txt
+
+# Pick one random line
+shuf -n 1 names.txt
+
+# Pick 10 random lines
+shuf -n 10 names.txt
+
+# Sample without shuffling the whole file first
+shuf -n 100 huge.log
+
+# Shuffle and write to a new file
+shuf names.txt -o shuffled.txt
+
+# Shuffle in place by writing to the same file (shuf reads it all first)
+shuf names.txt -o names.txt
+
+# Shuffle a range of numbers
+shuf -i 1-100
+
+# Pick a random number in a range
+shuf -i 1-100 -n 1
+
+# Pick a random port above 1024
+shuf -i 1025-65535 -n 1
+
+# Several distinct random numbers
+shuf -i 1-49 -n 6
+
+# Allow repeats
+shuf -r -i 1-6 -n 10
+
+# Roll a die
+shuf -i 1-6 -n 1
+
+# Shuffle words given on the command line
+shuf -e alice bob carol dave
+
+# Pick a random item from a list
+shuf -e alice bob carol -n 1
+
+# Pick a random file from a directory
+ls | shuf -n 1
+
+# Pick a random line from command output
+ps -eo comm | shuf -n 1
+
+# Reproducible shuffle, using a fixed seed
+shuf --random-source=<(yes 42) names.txt
+
+# Same seed gives the same order every time
+shuf -i 1-10 --random-source=<(yes seed)
+
+# Read from standard input
+seq 1 100 | shuf | head -n 5
+
+# Zero-terminated output, for file names with spaces
+find . -type f -print0 | shuf -z -n 5 | xargs -0 ls -l
+
+# Pick a random host from an inventory
+shuf -n 1 hosts.txt
+
+# Pick a random subset of tests to run
+find tests -name 'test_*.py' | shuf -n 5 | xargs pytest
+
+# Split a dataset into a random 80/20 train and test set
+shuf data.csv -o shuffled.csv && head -n 800 shuffled.csv > train.csv && tail -n +801 shuffled.csv > test.csv
+
+# Shuffle a CSV but keep the header
+{ head -n 1 data.csv; tail -n +2 data.csv | shuf; } > shuffled.csv
+
+# Randomise the order of a playlist
+shuf playlist.m3u -o playlist-shuffled.m3u
+
+# Generate a random password from a word list
+shuf -n 4 /usr/share/dict/words | paste -sd-
+
+# Random delay before a cron job, to spread load
+sleep "$(shuf -i 0-300 -n 1)" && /usr/local/bin/sync.sh
+
+# Pick a random line efficiently from a very large file
+shuf -n 1 huge.log
+
+# Random bytes are a different job
+head -c 16 /dev/urandom | base64
+
+# A random value in the shell, without shuf
+echo $((RANDOM % 100))
+
+# Shuffle and number the result
+shuf names.txt | nl
+
+# Check the sample size came out right
+shuf -n 10 names.txt | wc -l

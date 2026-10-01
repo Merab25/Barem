@@ -1,0 +1,106 @@
+## Show CPU architecture, cores, cache and flags
+
+# Everything about the CPU
+lscpu
+
+# Just the model name
+lscpu | grep 'Model name'
+
+# Number of logical CPUs
+nproc
+
+# Logical CPUs from lscpu
+lscpu -p | grep -vc '^#'
+
+# Physical cores
+lscpu | awk '/^Core\(s\) per socket/ {c=$4} /^Socket\(s\)/ {s=$2} END {print c * s}'
+
+# Sockets, cores and threads at a glance
+lscpu | grep -E '^(Socket|Core|Thread)'
+
+# Is hyper-threading on? Threads per core above 1 means yes
+lscpu | grep 'Thread(s) per core'
+
+# Architecture
+lscpu | grep Architecture
+
+# Byte order
+lscpu | grep 'Byte Order'
+
+# Current, minimum and maximum clock speed
+lscpu | grep -i mhz
+
+# Cache sizes
+lscpu | grep -i cache
+
+# NUMA nodes and which CPUs belong to each
+lscpu | grep -i numa
+
+# Virtualisation support
+lscpu | grep -i virtuali
+
+# Are we in a VM, and which hypervisor?
+lscpu | grep -i hypervisor
+
+# CPU flags, one per line
+lscpu | grep '^Flags' | tr ' ' '\n' | sort | head -n 40
+
+# Does the CPU support AES acceleration?
+lscpu | grep -q aes && echo "AES-NI available"
+
+# Does it support AVX2?
+lscpu | grep -qw avx2 && echo "AVX2 available"
+
+# Known vulnerabilities and their mitigations
+lscpu | grep -i -A1 vulnerab
+
+# Just the mitigation lines
+grep . /sys/devices/system/cpu/vulnerabilities/*
+
+# Parsable output, for scripts
+lscpu -p
+
+# Choose the columns
+lscpu -p=cpu,core,socket,node
+
+# Extended, human-readable table
+lscpu -e
+
+# Extended with chosen columns
+lscpu -e=CPU,CORE,SOCKET,NODE,ONLINE,MAXMHZ
+
+# Which CPUs are online
+lscpu -e=CPU,ONLINE
+
+# Offline a CPU
+echo 0 | sudo tee /sys/devices/system/cpu/cpu3/online
+
+# JSON output
+lscpu -J
+
+# The raw kernel source of the same information
+cat /proc/cpuinfo
+
+# Model name from /proc
+grep -m1 'model name' /proc/cpuinfo
+
+# Count processors from /proc
+grep -c ^processor /proc/cpuinfo
+
+# Current CPU frequency governor
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+# Set the governor to performance
+echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+
+# CPU temperature
+sensors 2>/dev/null | grep -i core
+
+# Per-core utilisation right now
+mpstat -P ALL 1 2
+
+# Pin a command to specific cores
+taskset -c 0,1 ./cpu-bound.sh
+
+# Which cores is a process allowed to use?
+taskset -pc 4821

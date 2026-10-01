@@ -1,0 +1,94 @@
+## Split a large file into smaller pieces
+
+# Split into 1000-line pieces, named xaa, xab, ...
+split -l 1000 access.log
+
+# Choose a prefix for the pieces
+split -l 1000 access.log chunk-
+
+# Split by size instead of lines
+split -b 100M backup.tar.gz part-
+
+# Size in kilobytes
+split -b 512K big.csv part-
+
+# Size in gigabytes
+split -b 2G disk.img image-
+
+# Split into a fixed number of pieces
+split -n 4 big.csv part-
+
+# Split into 4 pieces without breaking lines
+split -n l/4 big.csv part-
+
+# Round-robin lines across 4 files, for parallel work
+split -n r/4 big.csv worker-
+
+# Numeric suffixes instead of letters
+split -d -l 1000 access.log chunk-
+
+# Numeric suffixes of a fixed width
+split -d -a 4 -l 1000 access.log chunk-
+
+# Add an extension to each piece
+split -l 1000 --additional-suffix=.log access.log chunk-
+
+# Keep the header line in every piece
+tail -n +2 data.csv | split -l 1000 - part- --filter='{ head -n 1 data.csv; cat; } > $FILE.csv'
+
+# Pipe each piece through a command instead of writing plain files
+split -l 1000 access.log --filter='gzip > $FILE.gz' chunk-
+
+# Compress each piece as it is written
+split -b 100M backup.tar --filter='gzip > $FILE.gz' part-
+
+# Split standard input
+mysqldump mydb | split -b 100M - dump-
+
+# Show what is being created
+split -l 1000 -v access.log chunk-
+
+# Never break a line in the middle, even with -b
+split -C 100M big.log part-
+
+# Split by size but always at a line boundary
+split -C 50M access.log chunk-
+
+# Rejoin the pieces in order
+cat part-* > backup.tar.gz
+
+# Rejoin numerically ordered pieces safely
+cat $(ls part-* | sort) > backup.tar.gz
+
+# Verify the rejoined file matches the original
+sha256sum backup.tar.gz backup.tar.gz.orig
+
+# Split a tarball for a size-limited transfer
+tar -cz /srv/data | split -b 1900M - data.tar.gz.part-
+
+# Restore that split tarball
+cat data.tar.gz.part-* | tar -xz
+
+# Split a file list for parallel processing
+find /srv -type f | split -n r/8 - filelist-
+
+# Process the pieces in parallel
+ls filelist-* | xargs -P8 -I{} ./process.sh {}
+
+# Count the pieces produced
+ls chunk-* | wc -l
+
+# Check the sizes came out as expected
+ls -lh part-*
+
+# Clean up the pieces afterwards
+rm -f chunk-*
+
+# Split a CSV by a column value instead, which split cannot do
+awk -F, 'NR>1 {print > ("region-" $3 ".csv")}' data.csv
+
+# csplit splits on a pattern rather than a size
+csplit -z logfile.txt '/^=== /' '{*}'
+
+# Split an archive with tar's own volume support
+tar -cM -L 1900m -f data.tar /srv/data

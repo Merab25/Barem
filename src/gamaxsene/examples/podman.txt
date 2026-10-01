@@ -1,0 +1,139 @@
+## Run containers without a daemon, rootless by default
+
+# Run a container and remove it when it exits
+podman run --rm alpine echo hello
+
+# Run detached with a name and a published port
+podman run -d --name web -p 8080:80 nginx:alpine
+
+# Interactive shell in a container
+podman run -it --rm alpine sh
+
+# Shell in an already-running container
+podman exec -it web sh
+
+# Run a one-off command in a running container
+podman exec web nginx -t
+
+# List running containers
+podman ps
+
+# List all containers, stopped ones included
+podman ps -a
+
+# Custom output format
+podman ps --format '{{.Names}}\t{{.Status}}\t{{.Ports}}'
+
+# Follow a container's logs
+podman logs -f --tail 50 web
+
+# Logs since a time
+podman logs --since 10m web
+
+# Live resource usage
+podman stats --no-stream
+
+# Inspect a container
+podman inspect web
+
+# One field from the inspect output
+podman inspect -f '{{.State.Status}}' web
+
+# The container's IP address
+podman inspect -f '{{.NetworkSettings.IPAddress}}' web
+
+# Stop and start
+podman stop web && podman start web
+
+# Restart
+podman restart web
+
+# Remove a stopped container
+podman rm web
+
+# Force-remove a running container
+podman rm -f web
+
+# Mount a host directory, with the SELinux relabel flag
+podman run -d -v /srv/site:/usr/share/nginx/html:ro,Z -p 8080:80 nginx:alpine
+
+# Named volume
+podman run -d -v sitedata:/data alpine sleep 1000
+
+# List volumes
+podman volume ls
+
+# Environment variables
+podman run --rm -e DEBUG=1 -e LOG_LEVEL=trace alpine env
+
+# Environment from a file
+podman run --rm --env-file app.env alpine env
+
+# Limit memory and CPU
+podman run -d --memory 512m --cpus 0.5 nginx:alpine
+
+# Pull an image
+podman pull docker.io/library/nginx:alpine
+
+# List images
+podman images
+
+# Remove an image
+podman rmi nginx:alpine
+
+# Build an image from a Containerfile or Dockerfile
+podman build -t myapp:1.0 .
+
+# Build with a build argument
+podman build --build-arg VERSION=1.4.2 -t myapp:1.4.2 .
+
+# Tag for a registry
+podman tag myapp:1.0 registry.example.com/myapp:1.0
+
+# Log in to a registry
+podman login registry.example.com
+
+# Push
+podman push registry.example.com/myapp:1.0
+
+# Save an image to a tarball
+podman save -o myapp.tar myapp:1.0
+
+# Load it elsewhere
+podman load -i myapp.tar
+
+# Pods, which is what podman is named for
+podman pod create --name web-pod -p 8080:80
+
+# Run a container inside that pod
+podman run -d --pod web-pod --name web nginx:alpine
+
+# List pods
+podman pod ps
+
+# Generate a systemd unit so a container starts at boot
+podman generate systemd --new --name web > ~/.config/systemd/user/web.service
+
+# Reload user units after writing one
+systemctl --user daemon-reload
+
+# Let user services run without a login session
+loginctl enable-linger "$USER"
+
+# Generate Kubernetes YAML from a running pod
+podman generate kube web-pod > web-pod.yaml
+
+# Run from Kubernetes YAML
+podman play kube web-pod.yaml
+
+# Reclaim space
+podman system prune -a
+
+# Disk usage
+podman system df
+
+# Compose files work through podman-compose
+podman-compose up -d
+
+# Most docker commands work unchanged
+alias docker=podman

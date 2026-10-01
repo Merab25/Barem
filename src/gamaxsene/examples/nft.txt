@@ -1,0 +1,124 @@
+## Configure the nftables firewall, the successor to iptables
+
+# Show the whole ruleset
+sudo nft list ruleset
+
+# Show it with handles, which you need in order to delete rules
+sudo nft -a list ruleset
+
+# List tables
+sudo nft list tables
+
+# List one table
+sudo nft list table inet filter
+
+# List a chain
+sudo nft list chain inet filter input
+
+# Create a table
+sudo nft add table inet filter
+
+# Create an input chain that drops by default
+sudo nft add chain inet filter input '{ type filter hook input priority 0; policy drop; }'
+
+# Create a forward chain
+sudo nft add chain inet filter forward '{ type filter hook forward priority 0; policy drop; }'
+
+# Create an output chain that accepts
+sudo nft add chain inet filter output '{ type filter hook output priority 0; policy accept; }'
+
+# Allow loopback traffic, which you almost always need first
+sudo nft add rule inet filter input iif lo accept
+
+# Allow established and related connections
+sudo nft add rule inet filter input ct state established,related accept
+
+# Drop invalid packets
+sudo nft add rule inet filter input ct state invalid drop
+
+# Allow SSH
+sudo nft add rule inet filter input tcp dport 22 accept
+
+# Allow HTTP and HTTPS in one rule
+sudo nft add rule inet filter input tcp dport '{ 80, 443 }' accept
+
+# Allow a port range
+sudo nft add rule inet filter input udp dport 60000-60010 accept
+
+# Allow from one address
+sudo nft add rule inet filter input ip saddr 203.0.113.10 accept
+
+# Allow a subnet to a port
+sudo nft add rule inet filter input ip saddr 10.0.0.0/8 tcp dport 5432 accept
+
+# Allow ICMP echo, so ping works
+sudo nft add rule inet filter input icmp type echo-request accept
+
+# Allow IPv6 neighbour discovery, or IPv6 breaks
+sudo nft add rule inet filter input icmpv6 type '{ nd-neighbor-solicit, nd-router-advert, nd-neighbor-advert }' accept
+
+# Rate-limit new SSH connections
+sudo nft add rule inet filter input tcp dport 22 ct state new limit rate 10/minute accept
+
+# Log and drop, with a prefix you can grep for
+sudo nft add rule inet filter input log prefix '"nft-drop: "' drop
+
+# Insert a rule at the top of a chain
+sudo nft insert rule inet filter input tcp dport 22 accept
+
+# Insert before a specific handle
+sudo nft insert rule inet filter input handle 7 tcp dport 8080 accept
+
+# Delete a rule by handle
+sudo nft delete rule inet filter input handle 7
+
+# Flush one chain
+sudo nft flush chain inet filter input
+
+# Flush everything (this opens the firewall completely)
+sudo nft flush ruleset
+
+# Delete a table
+sudo nft delete table inet filter
+
+# Named sets, so you can add addresses without editing rules
+sudo nft add set inet filter blocklist '{ type ipv4_addr; flags interval; }'
+
+# Use the set in a rule
+sudo nft add rule inet filter input ip saddr @blocklist drop
+
+# Add an address to the set
+sudo nft add element inet filter blocklist '{ 198.51.100.7 }'
+
+# Remove an address from the set
+sudo nft delete element inet filter blocklist '{ 198.51.100.7 }'
+
+# Masquerade outbound traffic, for a NAT gateway
+sudo nft add table ip nat
+
+# Add the postrouting chain and the masquerade rule
+sudo nft add chain ip nat postrouting '{ type nat hook postrouting priority 100; }'
+
+# Masquerade everything leaving eth0
+sudo nft add rule ip nat postrouting oifname eth0 masquerade
+
+# Port forward 8080 to an internal host
+sudo nft add rule ip nat prerouting tcp dport 8080 dnat to 10.0.0.5:80
+
+# Save the ruleset so it survives a reboot
+sudo nft list ruleset | sudo tee /etc/nftables.conf > /dev/null
+
+# Load a ruleset from a file
+sudo nft -f /etc/nftables.conf
+
+# Check a file's syntax without applying it
+sudo nft -c -f /etc/nftables.conf
+
+# Enable the service that loads it at boot
+sudo systemctl enable --now nftables
+
+# Watch what is being logged
+sudo journalctl -k -f --grep='nft-drop'
+
+# Translate an existing iptables rule to nftables syntax
+iptables-translate -A INPUT -p tcp --dport 22 -j ACCEPT

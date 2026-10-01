@@ -6,6 +6,34 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-01
+
+### Added
+
+- 40 more commands, taking the tool from 117 to **157 commands** and from
+  3,918 to **5,314 examples**.
+  - Core utilities: `dd`, `printf`, `seq`, `shuf`, `split`, `nl`, `comm`,
+    `join`, `iconv`, `strings`, `xxd`, `sysctl`
+  - Disks and filesystems: `fdisk`, `parted`, `mkfs`, `fsck`, `blkid`, `ncdu`,
+    `smartctl`, `chattr`
+  - Processes and system: `lsmod`, `lscpu`, `hostnamectl`, `timedatectl`,
+    `at`, `sar`
+  - Networking: `nft`, `nmcli`, `socat`, `mtr`, `sftp`, `netstat`, `whois`
+  - Security: `firewall-cmd`, `setfacl`, `fail2ban-client`
+  - Containers and cloud: `podman`, `gcloud`
+  - Databases: `sqlite3`
+  - Archives: `xz`
+- A new **Disks and filesystems** README section, which `lsblk` moves into
+  alongside the new partitioning, filesystem and health tools.
+
+### Changed
+
+- `dd` and `sysctl` were the two largest remaining gaps: fundamental tools
+  that nothing else in the set substituted for.
+- Every firewall front end is now covered in one place: `ufw` for Debian and
+  Ubuntu, `firewall-cmd` for the RHEL family, `nft` for the layer underneath
+  both, and `iptables` for the legacy syntax.
+
 ## [0.4.0] - 2026-10-01
 
 ### Added
@@ -104,7 +132,8 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Packaging with hatchling: the example files ship inside the wheel and are
   found with `importlib.resources`, wherever the package is installed.
 
-[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/Merab25/Gamaxsene/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/Merab25/Gamaxsene/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/Merab25/Gamaxsene/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/Merab25/Gamaxsene/compare/v0.1.0...v0.2.0

@@ -1,0 +1,100 @@
+## Dump and patch files in hexadecimal
+
+# Hex dump of a file
+xxd firmware.bin
+
+# First 64 bytes only
+xxd -l 64 firmware.bin
+
+# Start at an offset
+xxd -s 1024 -l 64 disk.img
+
+# Offset counted from the end of the file
+xxd -s -128 -l 128 archive.zip
+
+# Wider lines, 32 bytes each
+xxd -c 32 firmware.bin
+
+# Group bytes in pairs instead of fours
+xxd -g 2 firmware.bin
+
+# No grouping at all
+xxd -g 0 firmware.bin
+
+# Plain hex, no offsets or ASCII column
+xxd -p firmware.bin
+
+# Plain hex on one line
+xxd -p firmware.bin | tr -d '\n'
+
+# Binary digits instead of hex
+xxd -b -l 8 firmware.bin
+
+# Uppercase hex
+xxd -u -l 32 firmware.bin
+
+# Little-endian word display
+xxd -e -g 4 -l 32 firmware.bin
+
+# Convert hex back to binary
+xxd -r -p hexdump.txt > restored.bin
+
+# Round-trip a file through hex
+xxd -p file.bin | xxd -r -p > copy.bin
+
+# Encode a string as hex
+echo -n "hello" | xxd -p
+
+# Decode hex back to text
+echo "68656c6c6f" | xxd -r -p
+
+# Check a file's magic bytes
+xxd -l 16 mystery.bin
+
+# Is it a PNG? (starts 89 50 4e 47)
+xxd -l 8 image.png
+
+# Is it a gzip? (starts 1f 8b)
+xxd -l 2 archive.gz
+
+# Is it an ELF binary? (starts 7f 45 4c 46)
+xxd -l 4 /usr/bin/ls
+
+# Check for a UTF-8 byte order mark (ef bb bf)
+xxd -l 3 document.txt
+
+# Find CRLF line endings
+xxd file.txt | grep '0d0a'
+
+# See trailing whitespace and line endings clearly
+xxd -l 128 file.txt
+
+# Patch a single byte in place
+printf '\x42' | dd of=target.bin bs=1 seek=1024 conv=notrunc
+
+# Patch using a hex edit round trip
+xxd target.bin > hex.txt
+
+# Compare two binaries in hex
+diff <(xxd a.bin) <(xxd b.bin) | head
+
+# Show only the differing offsets
+cmp -l a.bin b.bin | head
+
+# Dump from standard input
+head -c 64 /dev/urandom | xxd
+
+# Dump a network capture's first bytes
+xxd -l 64 capture.pcap
+
+# Inspect what a process wrote, captured with strace
+sudo strace -e trace=write -s 64 -p 4821
+
+# The older tool, present on more systems
+hexdump -C firmware.bin | head
+
+# One-byte-per-line hex with hexdump
+hexdump -v -e '1/1 "%02x\n"' firmware.bin | head
+
+# od, the POSIX option
+od -A x -t x1z -v firmware.bin | head
