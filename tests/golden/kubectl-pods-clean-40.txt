@@ -1,0 +1,31 @@
+ web-7d9f8b6c5d-abcde
+   Ready     1/1
+   Status    Running
+   Restarts  0
+   Age       3d 4h
+
+ web-7d9f8b6c5d-fghij
+   Ready     1/1
+   Status    Running
+   Restarts  2
+   Age       3d 4h
+
+ api-5c7b9d8f6a-klmno
+   Ready     0/1
+   Status    CrashLoopBackOff
+   Restarts  14
+   Age       22m
+
+ cache-6b8d7f5c4e-pqrst
+   Ready     1/1
+   Status    Running
+   Restarts  0
+   Age       12d
+
+ migrate-job-xyz
+   Ready     0/1
+   Status    Completed
+   Restarts  0
+   Age       5h
+
+ 5 pods · 1 unhealthy

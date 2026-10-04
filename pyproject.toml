@@ -74,3 +74,6 @@ select = [
 # argparse has no public API for "every option you accept", and completion
 # has to know exactly that, so option_names() reads parser._actions.
 "src/gamaxsene/cli.py" = ["SLF001"]
+# The table fixtures are literal command output, pasted as it is printed.
+# Wrapping those lines would change what the parser is being tested against.
+"tests/test_table_parse.py" = ["E501"]

@@ -30,10 +30,38 @@ If you add a command, also add its row to the matching table in the README. A
 test compares those tables against the files, so a missing or stale row fails
 the build.
 
+## Working on table mode
+
+Table mode lives under `src/gamaxsene/table/`, and its design is written up in
+[table-mode.md](table-mode.md) — read that first, especially sections 6 (the
+responsive layout), 7 (measuring width correctly) and 8.2 (why columns are
+found by position rather than by `split()`).
+
+Two things to know before changing the renderer:
+
+- **Tests use fixtures, never live commands.** Real output is saved in
+  `tests/fixtures/`, so the tests are deterministic and pass on any machine.
+  Add a fixture rather than calling `df` from a test.
+- **Golden files store each fixture rendered at 40, 60, 80 and 120 columns.**
+  After an intended layout change, regenerate them and read the diff:
+
+  ```bash
+  pytest --update-golden
+  git diff tests/golden/
+  ```
+
+  A diff you did not expect is a layout regression. The width invariant
+  (`test_width_invariant`) asserts that no rendered line is ever wider than the
+  width it was given, which catches most of them on its own.
+
+To add a profile for a command, write it in `src/gamaxsene/table/profiles/` with
+a header fingerprint, or drop one into `~/.config/gamaxsene/profiles/` for
+yourself. Check it with `your-command | gamaxsene --as yourprofile`.
+
 ## Before opening a pull request
 
 ```bash
-pytest                 # parser, example files, CLI and completion
+pytest                 # examples, docs, and table mode
 ruff check .           # lint
 ruff format .          # format
 ```

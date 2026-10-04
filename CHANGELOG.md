@@ -6,6 +6,55 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-04
+
+### Added
+
+- **Table mode.** Piping a command into `gamaxsene` now formats its output as a
+  readable table that adapts to the terminal width, instead of looking anything
+  up: `df -h | gamaxsene`, `ps aux | gamaxsene --sort -%mem --top 10`. The
+  design is written up in [table-mode.md](table-mode.md) and implemented under
+  `src/gamaxsene/table/`.
+  - Columns are found by character position, not by `split()`, which real
+    output defeats: `df` has a `Mounted on` header, `ps aux` keeps a whole
+    command line in one column, `docker ps` has both plus a STATUS column
+    reading `Exited (137) 5 hours ago`.
+  - Column meanings — size, percentage, status, path, duration — drive
+    alignment, humanizing and sorting, so `1.8T` sorts above `512M` rather
+    than below it alphabetically.
+  - Percentages get a usage bar accurate to about an eighth of a cell, with
+    thresholds that colour the number and mark it `!` whenever colour is off.
+  - The layout gives things up in order as the window narrows: text columns
+    shrink, then bars and status symbols go, then whole columns are dropped
+    and listed under the table, and below ~50 columns each row becomes a card.
+    The identity column is never dropped and numbers are never truncated.
+  - 18 profiles recognised by header fingerprint (`df`, `df -i`, `lsblk`,
+    `lsblk -f`, `findmnt`, `ps aux`, `ps -ef`, `free`, `ss`, `netstat`,
+    `ip -br a`, `docker ps`, `docker images`, `kubectl get pods`,
+    `kubectl get nodes`, `systemctl list-units`, `list-unit-files`,
+    `list-timers`), plus inference for everything else.
+  - JSON, JSON lines, CSV, TSV and `key=value` input detected automatically.
+  - `--sort`, `--top`, `--where`, `--cols`, `--format md|csv|tsv|json`,
+    `--box`, `--ascii`, `--cards`, `--width`, `--bar-width`, `--warn`,
+    `--crit`, `--symbols`, `--relative`, `--input`, `--raw`, `--profiles`.
+  - `gamaxsene run df -h` runs the command itself, so its name is known for
+    certain rather than guessed, and `--watch 2` re-runs and redraws in place.
+  - User profiles load from `~/.config/gamaxsene/profiles/`.
+- Tests for table mode: unit tests for the width functions first, parser tests
+  for each way `split()` fails, the width and alignment invariants across every
+  fixture, style and width, hostile input (embedded ANSI, CJK, a 4000-character
+  path, 5,000 rows), and golden files per width regenerated with
+  `pytest --update-golden`. 817 tests in total, up from 348.
+
+### Changed
+
+- The example lookup is unaffected: a command name always means examples, so
+  table mode starts only when standard input is a pipe or a table flag says so.
+- `ps` reports VSZ and RSS in kilobytes, so they render as plain numbers rather
+  than being humanized as bytes, which would have understated them 1024x.
+- `--warn` and `--crit` on the command line now override a profile's per-column
+  thresholds, which previously won.
+
 ## [0.5.0] - 2026-10-01
 
 ### Added
@@ -132,7 +181,8 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Packaging with hatchling: the example files ship inside the wheel and are
   found with `importlib.resources`, wherever the package is installed.
 
-[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/Merab25/Gamaxsene/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/Merab25/Gamaxsene/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/Merab25/Gamaxsene/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/Merab25/Gamaxsene/compare/v0.2.0...v0.3.0

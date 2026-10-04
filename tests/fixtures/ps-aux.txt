@@ -1,0 +1,5 @@
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  0.0  0.1 168404 11952 ?        Ss   09:14   0:03 /sbin/init splash
+merab       4821 94.3 12.5 489123 20480 ?        Rl   10:02  12:44 /usr/lib/firefox/firefox -contentproc
+postgres    1337  2.1 24.8 123456 40960 ?        Ss   09:15   1:02 postgres: checkpointer
+www-data    2048 34.0  1.2  98765 12345 ?        Sl   09:20   0:45 nginx: worker process

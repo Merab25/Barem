@@ -16,9 +16,33 @@ import textwrap
 from dataclasses import dataclass, field
 from importlib import resources
 
-from . import __version__
+from . import __version__, table
 
 EXTENSION = ".txt"
+
+#: Flags whose value may legitimately start with a dash: `--sort -size` means
+#: descending. argparse would read that as another option, so these are
+#: rewritten to `--sort=-size` before parsing.
+DASH_VALUE_FLAGS = ("--sort", "--cols", "--where", "--as")
+
+#: Flags that mean the user wants table mode even without a pipe in sight.
+TABLE_INTENT = (
+    "profile",
+    "sort",
+    "top",
+    "cols",
+    "where",
+    "export",
+    "box",
+    "ascii",
+    "cards",
+    "input_format",
+    "raw",
+    "no_header",
+    "no_summary",
+    "symbols",
+    "relative",
+)
 
 DESCRIPTION = """\
 Real-world, copy-paste-ready examples for Linux commands.
@@ -300,7 +324,196 @@ def build_parser() -> argparse.ArgumentParser:
         help=f"print a completion script for {' or '.join(COMPLETION_SHELLS)}",
     )
     parser.add_argument("-V", "--version", action="version", version=f"%(prog)s {__version__}")
+    _add_table_arguments(parser)
     return parser
+
+
+def _add_table_arguments(parser: argparse.ArgumentParser) -> None:
+    """Flags for table mode, which reads piped command output.
+
+    Kept in their own group so `--help` does not mix them with the example
+    lookup options, which are what most people came for.
+    """
+    group = parser.add_argument_group(
+        "table mode",
+        "format piped output: df -h | gamaxsene, or gamaxsene run df -h",
+    )
+    group.add_argument(
+        "--as",
+        dest="profile",
+        metavar="NAME",
+        help="force a profile, e.g. --as df (see --profiles)",
+    )
+    group.add_argument("--profiles", action="store_true", help="list the known command profiles")
+    group.add_argument(
+        "--sort", metavar="COL", help="sort by a column by real value; prefix - for descending"
+    )
+    group.add_argument("--top", type=int, metavar="N", help="keep only the first N rows")
+    group.add_argument("--cols", metavar="LIST", help="choose and order columns, comma separated")
+    group.add_argument(
+        "--where",
+        action="append",
+        default=[],
+        metavar="EXPR",
+        help="keep rows matching 'col > value'; also < >= <= == != ~",
+    )
+    group.add_argument(
+        "--format",
+        dest="export",
+        choices=table.FORMATS,
+        metavar="STYLE",
+        help="export instead of rendering: md, csv, tsv or json",
+    )
+    style = group.add_mutually_exclusive_group()
+    style.add_argument("--box", action="store_true", help="draw borders around every cell")
+    style.add_argument("--ascii", action="store_true", help="no Unicode, for old terminals")
+    style.add_argument("--cards", action="store_true", help="one block per row, for narrow windows")
+    group.add_argument("--width", type=int, metavar="N", help="assume this terminal width")
+    group.add_argument(
+        "--max-width",
+        type=int,
+        metavar="N",
+        help="never use more than this many columns (default 160)",
+    )
+    group.add_argument("--no-bars", action="store_true", help="numbers without usage bars")
+    group.add_argument(
+        "--bar-width",
+        type=int,
+        default=10,
+        metavar="N",
+        help="cells in a usage bar (default 10, 0 to disable)",
+    )
+    group.add_argument("--symbols", action="store_true", help="add a symbol to status cells")
+    group.add_argument(
+        "--warn",
+        type=float,
+        default=70.0,
+        metavar="N",
+        help="percentage at which a value counts as worth watching",
+    )
+    group.add_argument(
+        "--crit",
+        type=float,
+        default=90.0,
+        metavar="N",
+        help="percentage at which a value counts as critical",
+    )
+    group.add_argument(
+        "--relative", action="store_true", help="show durations as '3 min ago' instead of '3m'"
+    )
+    group.add_argument(
+        "--input",
+        dest="input_format",
+        choices=table.detect.INPUT_FORMATS,
+        metavar="FMT",
+        help="force the input format instead of detecting it",
+    )
+    group.add_argument("--no-header", action="store_true", help="the input has no header row")
+    group.add_argument("--no-summary", action="store_true", help="omit the line under the table")
+    group.add_argument("--raw", action="store_true", help="print the input unchanged")
+    group.add_argument(
+        "--watch", type=float, metavar="SECONDS", help="with 'run', re-run and redraw every SECONDS"
+    )
+
+
+def join_dash_values(argv: list[str]) -> list[str]:
+    """Rewrite `--sort -size` as `--sort=-size`.
+
+    A descending sort is spelled with a leading dash, which argparse would
+    otherwise treat as the start of another option.
+    """
+    out: list[str] = []
+    index = 0
+    while index < len(argv):
+        token = argv[index]
+        if (
+            token in DASH_VALUE_FLAGS
+            and index + 1 < len(argv)
+            and argv[index + 1].startswith("-")
+            and argv[index + 1] != "--"
+        ):
+            out.append(f"{token}={argv[index + 1]}")
+            index += 2
+            continue
+        out.append(token)
+        index += 1
+    return out
+
+
+def table_options(args: argparse.Namespace) -> table.Options:
+    """Translate parsed arguments into table-mode options."""
+    style = "clean"
+    if args.box:
+        style = "box"
+    elif args.ascii:
+        style = "ascii"
+    elif args.cards:
+        style = "cards"
+    return table.Options(
+        profile=args.profile,
+        input_format=args.input_format,
+        style=style,
+        export=args.export,
+        width=args.width,
+        max_width=args.max_width,
+        bars=not args.no_bars,
+        bar_width=args.bar_width,
+        symbols=args.symbols,
+        warn=args.warn,
+        crit=args.crit,
+        color=False if args.no_color else None,
+        unicode=not args.ascii,
+        summary=not args.no_summary,
+        sort=args.sort,
+        top=args.top,
+        columns=[c.strip() for c in (args.cols or "").split(",") if c.strip()],
+        where=list(args.where or []),
+        relative=args.relative,
+        no_header=args.no_header,
+        raw=args.raw,
+    )
+
+
+def wants_table(args: argparse.Namespace) -> bool:
+    """Whether to read standard input and format it as a table.
+
+    A command name always means the example lookup, which is what the tool
+    was before table mode existed. Otherwise a table flag or a pipe on
+    standard input is taken as the intent.
+    """
+    if args.command or args.list or args.search or args.completion or args.profiles:
+        return False
+    if any(getattr(args, name, None) for name in TABLE_INTENT):
+        return True
+    try:
+        return not sys.stdin.isatty()
+    except (AttributeError, ValueError):
+        return False
+
+
+def read_stdin() -> str | None:
+    """Read piped input, or None when there is nothing readable."""
+    try:
+        return sys.stdin.read()
+    except (OSError, ValueError, UnicodeDecodeError):
+        return None
+    except Exception:
+        # pytest replaces stdin with an object that refuses to be read.
+        return None
+
+
+def run_wrapper(argv: list[str]) -> int:
+    """`gamaxsene run df -h`: run the command, then format its output."""
+    from .table import runner
+
+    own, command = runner.split_command(argv)
+    parser = build_parser()
+    args = parser.parse_args(join_dash_values(own))
+    options = table_options(args)
+    hint = command[0] if command else None
+    if args.watch:
+        return runner.watch(command, options, args.watch, profile_hint=hint)
+    return runner.run_once(command, options, profile_hint=hint)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -314,8 +527,13 @@ def main(argv: list[str] | None = None) -> int:
         found = completion_candidates(argv[1:])
         return emit("\n".join(found)) if found else 0
 
+    # `run` wraps a command, so everything after it belongs to that command
+    # and must not be parsed as ours.
+    if argv and argv[0] == "run":
+        return run_wrapper(argv[1:])
+
     parser = build_parser()
-    args = parser.parse_intermixed_args(argv)
+    args = parser.parse_intermixed_args(join_dash_values(argv))
     style = Style(colors_enabled(args.no_color))
 
     if args.search and args.command:
@@ -323,6 +541,23 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.completion:
         return emit(completion_script(args.completion))
+
+    if args.profiles:
+        names = table.profile_names()
+        lines = [style.title(f"Known table profiles ({len(names)}):"), ""]
+        lines += [f"  {style.command(name)}" for name in names]
+        lines += ["", "Force one with: df -h | gamaxsene --as df"]
+        return emit("\n".join(lines))
+
+    if wants_table(args):
+        text = read_stdin()
+        if text is None:
+            parser.print_help()
+            return 0
+        if not text.strip():
+            return 0
+        rendered = table.format_text(text, table_options(args))
+        return emit(rendered) if rendered else 0
 
     if args.list:
         return emit(render_list(style))

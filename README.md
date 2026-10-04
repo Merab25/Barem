@@ -35,6 +35,7 @@ It currently ships **157 commands** and **5,314 examples** — about 30 per comm
 - **Keyword filtering**: `gamaxsene tar extract` shows only the examples that mention "extract".
 - **Search everything**: `gamaxsene -s port` searches the examples of every command at once.
 - **Tab completion**: bash and zsh completion for command names, keywords and options, built from the example files that are installed.
+- **Table mode**: pipe a command *into* `gamaxsene` and it formats the output — aligned columns, usage bars, and a layout that adapts to your terminal width. `df -h | gamaxsene`
 - **Grep-friendly**: `--oneline` prints `command  # description` on one line, and colors switch off automatically when output goes to a pipe or file.
 - **Zero dependencies**: standard library only, Python 3.9+.
 - **Easy to extend**: adding a command means adding one plain text file.
@@ -57,7 +58,7 @@ pipx install git+https://github.com/Merab25/Gamaxsene.git
 pipx creates an isolated virtual environment for the tool and puts the `gamaxsene` command on your `PATH`.
 
 ```bash
-pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.5.0   # a specific release
+pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.6.0   # a specific release
 pipx upgrade gamaxsene                                             # update
 pipx uninstall gamaxsene                                           # remove
 ```
@@ -77,6 +78,8 @@ pipx uninstall gamaxsene                                           # remove
 | `gamaxsene -V` | Show the version |
 | `gamaxsene --completion bash` | Print a completion script (also `zsh`) |
 | `python -m gamaxsene find` | Same as `gamaxsene find` |
+| `df -h \| gamaxsene` | Format piped output as a table (see [Table mode](#table-mode)) |
+| `gamaxsene run df -h` | Run the command, then format it |
 
 Keywords are case-insensitive and match the **start of a word**: `port` finds "port", "ports" and `--port`, but not "export" or "report".
 
@@ -93,6 +96,107 @@ gamaxsene curl json -1 > curl-json.sh  # save examples as a commented script
 ```
 
 Exit codes make it usable in scripts: `0` when examples were printed, `1` for an unknown command or no matches.
+
+## Table mode
+
+Pipe a command into `gamaxsene` and it formats the output instead of looking anything up:
+
+```console
+$ df -h | gamaxsene
+```
+
+```text
+ FILESYSTEM      SIZE  USED  AVAIL              USE%  MOUNTED ON
+ ───────────────────────────────────────────────────────────────
+ /dev/nvme0n1p2  468G  112G   332G  ██▌░░░░░░░   25%  /
+ /dev/sdb1       1.8T  1.7T    43G  █████████▌  95%!  /data
+ /dev/nvme0n1p1  512M   62M   450M  █▏░░░░░░░░   12%  /boot/efi
+ tmpfs            16G  2.1M    16G  ░░░░░░░░░░    1%  /run
+
+ 4 filesystems · 2.3T total · 1.8T used (80%)
+```
+
+It works out which command produced the text, splits it into columns, decides what each
+column means — a size, a percentage, a status, a path — and lays it out to the width of
+your terminal. The commands stay the source of truth; this is only a nicer view of them.
+
+```bash
+df -i | gamaxsene                            # inode usage, with bars
+ps aux | gamaxsene --sort -%mem --top 10     # replaces an awk and sort pipeline
+ss -tlnp | gamaxsene                         # listening sockets, aligned
+docker ps | gamaxsene --symbols              # ● up, ✖ exited
+kubectl get pods | gamaxsene --where 'status ~ Crash'
+free -h | gamaxsene --box                    # borders, for pasting into a ticket
+mount | gamaxsene --format md                # a Markdown table
+gamaxsene run --watch 2 df -h                # re-run and redraw every 2 seconds
+```
+
+### Options
+
+| Flag | Effect |
+| --- | --- |
+| `--as df` | Force a profile; `--profiles` lists them |
+| `--sort use%` / `--sort -size` | Sort by a column, `-` for descending, by real value not by text |
+| `--top 10` | Keep the first N rows after sorting |
+| `--cols fs,use%,target` | Choose and order columns |
+| `--where 'use% > 80'` | Keep matching rows; also `< >= <= == != ~` (regex) |
+| `--format md\|csv\|tsv\|json` | Export instead of rendering |
+| `--box` / `--ascii` / `--cards` | Borders / no Unicode / one block per row |
+| `--width N` / `--max-width N` | Assume a width, or cap it (`GAMAXSENE_WIDTH` also works) |
+| `--no-bars` / `--bar-width N` | Numbers without bars, or a different bar size |
+| `--warn 80 --crit 95` | Move the thresholds; 90% is critical for a disk, normal for a CPU |
+| `--symbols` | Add `●`, `◐`, `✖` to status cells |
+| `--relative` | Durations as "3 min ago" rather than "3m" |
+| `--input csv` | Force the input format instead of detecting it |
+| `--no-summary` / `--raw` | Drop the line under the table / print the input untouched |
+| `gamaxsene run CMD` | Run the command, so its name is known for certain |
+| `--watch 2` | With `run`, re-run and redraw in place |
+
+### How it adapts
+
+Nothing in the output is fixed to 80 columns. As the window narrows, the table gives
+things up in the order that keeps the most useful information longest: text columns
+shrink, then the bars go, then whole columns are dropped — and dropped ones are listed
+under the table. Below about 50 columns a table cannot work at all, so each row becomes
+a small block instead:
+
+```text
+ /dev/sdb1
+   Size        1.8T
+   Used        1.7T
+   Avail       43G
+   Use%        95%!  █████████▌
+   Mounted On  /data
+```
+
+The column that names the row is never dropped, and numbers are never truncated.
+
+### Reading the output
+
+- **Text is left-aligned, numbers right-aligned**, so digits line up where the eye expects them.
+- **Paths are shortened in the middle** (`/var/lib/…/overlay2/diff`), because both ends carry meaning.
+- **Colour is never the only signal.** A critical value is also marked `!` whenever colour
+  is off, so the output reads the same in a log file, under `NO_COLOR`, and for a
+  colourblind reader.
+- **Values above 100%** keep their real number (`ps` reports 340% for a multi-threaded
+  process) while the bar clamps at full.
+- **If anything cannot be parsed, the input is printed unchanged.** A formatting tool must
+  never be the reason you cannot read your disk usage.
+
+### Known commands
+
+Profiles give correct column types without `--as`: `df`, `df -i`, `lsblk`, `lsblk -f`,
+`findmnt`, `ps aux`, `ps -ef`, `free`, `ss`, `netstat`, `ip -br a`, `docker ps`,
+`docker images`, `kubectl get pods`, `kubectl get nodes`, `systemctl list-units`,
+`systemctl list-unit-files` and `systemctl list-timers`.
+
+Anything else still works: column types are inferred from the data, which is the path
+that runs for every command nobody wrote a profile for. JSON, JSON lines, CSV, TSV and
+`key=value` input are detected automatically, so `ip -j addr | gamaxsene` and
+`cat /etc/os-release | gamaxsene` both do something sensible.
+
+Add your own profiles as small Python modules in `~/.config/gamaxsene/profiles/`,
+each exposing a `PROFILE`.
 
 ## Shell completion
 
@@ -402,10 +506,25 @@ gamaxsene/
 │   ├── __main__.py            # enables `python -m gamaxsene`
 │   ├── cli.py                 # argument parsing, file parsing, filtering, output, completion
 │   ├── completions/           # the bash and zsh completion scripts, shipped too
-│   └── examples/              # one .txt file per command, shipped inside the package
+│   ├── examples/              # one .txt file per command, shipped inside the package
+│   └── table/                 # table mode, described in table-mode.md
+│       ├── __init__.py        # format_text(text, options), the only public entry point
+│       ├── width.py           # display_width, truncation, sanitizing: no other imports
+│       ├── model.py           # Column, Kind, Align, Table, Profile
+│       ├── humanize.py        # sizes, durations, and the parsers that let them sort
+│       ├── theme.py           # colours, thresholds, bars, the ASCII fallback
+│       ├── detect.py          # input format detection and profile fingerprinting
+│       ├── parse/             # columnar (by position), structured (json/csv), infer
+│       ├── layout.py          # the fit / shrink / drop / cards algorithm
+│       ├── render.py          # clean, box, ascii, cards, markdown, csv, json
+│       ├── runner.py          # `gamaxsene run` and --watch
+│       └── profiles/          # df, ps, ss, docker, kubectl, systemctl, ...
 ├── tests/
 │   ├── test_cli.py            # parser, example files, CLI behaviour and completion
-│   └── test_docs.py           # the README's tables must match the example files
+│   ├── test_docs.py           # the README's tables must match the example files
+│   ├── test_table_*.py        # width, parsing, layout, rendering, CLI and golden files
+│   ├── fixtures/              # real command output, so tests never run df or ps
+│   └── golden/                # each fixture rendered at 40, 60, 80 and 120 columns
 ├── pyproject.toml             # package metadata, build backend, entry point, ruff config
 ├── .gitattributes             # keep the tree LF: the examples are read on Linux
 ├── .editorconfig
@@ -422,6 +541,7 @@ gamaxsene/
 - **Parsing**: each file is read line by line into `Example(description, commands)` objects; filtering is a case-insensitive word-start match against the description and the commands.
 - **Output**: colors are ANSI escape codes, enabled only when stdout is a terminal (`sys.stdout.isatty()`), so pipes, files and grep always get plain text.
 - **Completion**: the script printed by `--completion` is a real file in the package, not a string built in Python. On every TAB it calls the hidden `gamaxsene --complete <words>`, which prints one candidate per line. That call is handled before `argparse` runs, because the words arrive half-typed (`--no-c`, `-`) and `argparse` would try to read them as options.
+- **Table mode**: a command name always means the example lookup, so table mode starts only when standard input is a pipe, or when a table flag says so. Columns are found by character position rather than by `split()`, because real output defeats splitting — `df` has a `Mounted on` header, `ps aux` holds a whole command line in one column, and `docker ps` has both. Everything is measured in terminal cells, never characters, and colour is applied last so padding is never wrong by the length of an escape sequence. The design is written up in [table-mode.md](table-mode.md).
 - **Isolation**: pipx installs the tool in its own virtual environment, so it never conflicts with system Python packages.
 - **Versioning**: the version is defined once in `src/gamaxsene/__init__.py` and read by the build backend (hatchling). A test checks that `CHANGELOG.md` has a section for it and that the README's install line names the matching tag.
 
@@ -457,6 +577,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request, and
 
 - Publish to PyPI (`pipx install gamaxsene`)
 - More commands: `go`, `cargo`, `node`, `gdb`, `lvm`, `iperf3`, `ethtool`, `az`
+- Table profiles for the headerless commands: `du -sh *`, `last`, `lsof`
+- Table mode: highlight cells that changed since the last `--watch` refresh
 - Georgian descriptions
 
 ## Safety note

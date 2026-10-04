@@ -192,13 +192,14 @@ def test_complete_skips_keywords_already_on_the_line(capsys):
 
 def test_complete_options(capsys):
     _, got = complete(capsys, "--no")
-    assert got == ["--no-color"]
+    assert got == ["--no-bars", "--no-color", "--no-header", "--no-summary"]
 
 
-def test_complete_offers_every_public_option(capsys):
-    """--complete itself stays hidden: it is plumbing, not for typing by hand."""
-    _, got = complete(capsys, "-")
-    assert got == [
+#: Every option the CLI accepts, in the order completion offers them.
+#: Spelled out so adding or renaming a flag has to be a deliberate change.
+PUBLIC_OPTIONS = sorted(
+    [
+        # example lookup
         "--completion",
         "--help",
         "--list",
@@ -211,7 +212,38 @@ def test_complete_offers_every_public_option(capsys):
         "-h",
         "-l",
         "-s",
+        # table mode
+        "--as",
+        "--ascii",
+        "--bar-width",
+        "--box",
+        "--cards",
+        "--cols",
+        "--crit",
+        "--format",
+        "--input",
+        "--max-width",
+        "--no-bars",
+        "--no-header",
+        "--no-summary",
+        "--profiles",
+        "--raw",
+        "--relative",
+        "--sort",
+        "--symbols",
+        "--top",
+        "--warn",
+        "--watch",
+        "--where",
+        "--width",
     ]
+)
+
+
+def test_complete_offers_every_public_option(capsys):
+    """--complete itself stays hidden: it is plumbing, not for typing by hand."""
+    _, got = complete(capsys, "-")
+    assert got == PUBLIC_OPTIONS
     assert "--complete" not in got
 
 
