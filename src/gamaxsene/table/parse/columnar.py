@@ -28,6 +28,13 @@ from ..width import sanitize
 #: cheap enough for a 50,000-row input.
 SAMPLE = 200
 
+#: The words of a two-word header are separated by a single space -- "CONTAINER
+#: ID", "Mounted on", "Local Address:Port". A wider gap is a column boundary,
+#: whatever the data does: one long value (a 26-character systemd unit name
+#: under a 4-character UNIT header) would otherwise bridge the gap to LOAD and
+#: merge two real columns into one.
+MAX_HEADER_WORD_GAP = 2
+
 
 def _clean_lines(text: str) -> list[str]:
     lines = [sanitize(line).rstrip() for line in text.splitlines()]
@@ -91,8 +98,10 @@ def header_columns(header: str, data_lines: list[str], width: int) -> list[tuple
     for start, end in runs[1:]:
         prev_start, prev_end = merged[-1]
         gap = range(prev_end, start)
-        bridged = bool(gap) and any(
-            all(pos < len(line) and line[pos] != " " for pos in gap) for line in data_lines
+        bridged = (
+            bool(gap)
+            and len(gap) <= MAX_HEADER_WORD_GAP
+            and any(all(pos < len(line) and line[pos] != " " for pos in gap) for line in data_lines)
         )
         if bridged:
             merged[-1] = (prev_start, end)
@@ -109,6 +118,25 @@ def header_columns(header: str, data_lines: list[str], width: int) -> list[tuple
         else:
             out.append(span)
     return out or merged
+
+
+def _add_unnamed_first_column(
+    columns: list[tuple[int, int]], data_lines: list[str]
+) -> list[tuple[int, int]]:
+    """Give the row-label column a slot when the header does not name it.
+
+    `free -h` prints its header indented, because the column holding "Mem:"
+    and "Swap:" has no title. Without an explicit slot that label and the
+    first real value share one column, reading "Mem: 31Gi".
+    """
+    if not columns:
+        return columns
+    first_start = columns[0][0]
+    if first_start <= 0:
+        return columns
+    if not any(line[:first_start].strip() for line in data_lines):
+        return columns
+    return [(0, 0), *columns]
 
 
 def _regions(starts: list[int], width: int) -> list[tuple[int, int]]:
@@ -149,6 +177,7 @@ def parse(text: str, has_header: bool = True) -> tuple[list[str], list[list[str]
 
     if has_header:
         columns = header_columns(header_line, sample, width)
+        columns = _add_unnamed_first_column(columns, sample)
         if len(columns) > 1:
             return _parse_with_header(header_line, data_lines, columns, width)
 
@@ -157,11 +186,12 @@ def parse(text: str, has_header: bool = True) -> tuple[list[str], list[list[str]
     if not spans:
         return ([header_line] if has_header else []), [[line] for line in data_lines]
     spans[-1] = (spans[-1][0], None)
-    headers = (
-        [_slice(header_line, s, e) or f"col{i + 1}" for i, (s, e) in enumerate(spans)]
-        if has_header
-        else []
-    )
+    if has_header:
+        headers = [_slice(header_line, s, e) or f"col{i + 1}" for i, (s, e) in enumerate(spans)]
+    else:
+        # With --no-header there is nothing to name the columns after, so they
+        # get blank headers and the renderer leaves the header row out.
+        headers = [""] * len(spans)
     rows = [[_slice(line, s, e) for s, e in spans] for line in data_lines]
     return _dedupe(headers), rows
 
@@ -211,10 +241,18 @@ def _parse_with_header(
 
 
 def _dedupe(headers: list[str]) -> list[str]:
-    """Make header names unique, since they become dictionary keys."""
+    """Make header names unique, since they become dictionary keys.
+
+    Blank headers are left blank: with --no-header every column is unnamed,
+    and turning them into "", "_1", "_2" would print a header row made of
+    nothing but disambiguation.
+    """
     seen: dict[str, int] = {}
     out: list[str] = []
     for header in headers:
+        if not header:
+            out.append(header)
+            continue
         key = header
         if key in seen:
             seen[key] += 1

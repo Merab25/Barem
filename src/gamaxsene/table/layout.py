@@ -19,6 +19,7 @@ import shutil
 from dataclasses import dataclass, field
 
 from .humanize import (
+    decimals_in,
     human_duration,
     human_number,
     human_relative,
@@ -135,7 +136,9 @@ def format_cell(column: Column, raw: str, theme: Theme, relative: bool = False) 
         return Cell(text=human_size(number) if number is not None else value)
     if column.kind is Kind.NUMBER:
         number = parse_number(value)
-        return Cell(text=human_number(number) if number is not None else value)
+        if number is None:
+            return Cell(text=value)
+        return Cell(text=human_number(number, decimals_in(value)))
     if column.kind is Kind.DURATION:
         seconds = parse_duration(value)
         if seconds is None:
@@ -167,7 +170,9 @@ def _percent_cell(column: Column, value: str, theme: Theme) -> Cell:
     over = pct > 100
     level = theme.level(pct, column.warn, column.crit, column.invert)
     style = theme.level_style(level, over=over)
-    text = f"{pct:.0f}%" if pct == int(pct) else f"{pct:.1f}%"
+    # Keep the precision the command printed: rounding 0.027% to 0.0% throws
+    # away the only thing the cell was telling you.
+    text = f"{pct:.{decimals_in(value)}f}%"
     marker = "!" if level == "bad" and not theme.color else ""
     return Cell(
         text=text,

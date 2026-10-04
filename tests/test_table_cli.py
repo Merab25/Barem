@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from helpers import data_rows
 
 from gamaxsene import cli
 
@@ -88,8 +89,7 @@ def test_sort_with_a_leading_dash(monkeypatch, capsys):
     piped(monkeypatch, DF)
     code, out, _ = run(capsys, "--sort", "-size", "--width", "90", "--no-color")
     assert code == 0
-    rows = [line for line in out.splitlines() if line.startswith((" /", " tmpfs"))]
-    assert rows[0].split()[0] == "/dev/sdb1"
+    assert data_rows(out)[0].split()[0] == "/dev/sdb1"
 
 
 def test_top_and_where(monkeypatch, capsys):

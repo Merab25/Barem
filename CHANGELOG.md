@@ -6,7 +6,31 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [0.6.0] - 2026-10-04
+## [0.6.1] - 2026-10-04
+
+### Changed
+
+- Text, path and status columns are centred, with their headers centred over
+  them, and the Markdown export writes `:---:` for those columns. Numbers stay
+  right-aligned so digits still line up. Section 2.1 of the design had called
+  for left-aligned text; the note there records the change.
+
+### Fixed
+
+- `free -h` merged its first two columns, reading `Mem: 31Gi`. Its header is
+  indented because the column holding `Mem:` and `Swap:` has no title, so that
+  column now gets a slot of its own even though the header does not name it.
+- `systemctl list-units` merged UNIT with LOAD. A unit name longer than the
+  UNIT header ran across the gap to LOAD, and the rule that recognises
+  `CONTAINER ID` as one column treated the two as one. Word pairs are only
+  merged across a gap of one or two spaces now, which is what a two-word
+  header actually has.
+- Percentages and numbers keep the precision the command printed. `0.027%` was
+  being shown as `0.0%`, which threw away the only information in the cell,
+  and a column could mix `142.50` with `1,420`.
+- `--no-header` input was printed unchanged instead of being formatted: with no
+  header there were no column names, and a table with no columns fell through
+  to the raw-output path. Such columns now render without a header row at all.
 
 ### Added
 
@@ -181,7 +205,8 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Packaging with hatchling: the example files ship inside the wheel and are
   found with `importlib.resources`, wherever the package is installed.
 
-[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/Merab25/Gamaxsene/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Merab25/Gamaxsene/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/Merab25/Gamaxsene/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/Merab25/Gamaxsene/compare/v0.3.0...v0.4.0

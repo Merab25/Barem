@@ -212,7 +212,9 @@ def infer_columns(headers: list[str], rows: list[list[str]]) -> list[Column]:
         columns.append(
             Column(
                 key=key,
-                header=header.strip().upper() or f"COL{index + 1}",
+                # A blank header stays blank: --no-header input has nothing to
+                # call its columns, and "COL3" is worse than nothing.
+                header=header.strip().upper(),
                 kind=kind,
                 priority=_priority(index, total, kind, identity),
                 identity=identity,

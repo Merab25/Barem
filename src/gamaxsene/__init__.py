@@ -1,3 +1,3 @@
 """gamaxsene - real-world examples for Linux commands."""
 
-__version__ = "0.6.0"
+__version__ = "0.6.1"

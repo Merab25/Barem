@@ -10,6 +10,7 @@ The invariants in section 12 of the design are the ones that matter:
 from pathlib import Path
 
 import pytest
+from helpers import data_rows
 
 from gamaxsene.table import Options, format_text
 from gamaxsene.table.detect import build_table
@@ -188,7 +189,7 @@ def test_percent_bars_line_up():
     to the number, so "95%!" and " 25%" keep their digits aligned.
     """
     out = plain(fixture("df-h"), width=100)
-    rows = [line for line in out.splitlines() if line.startswith((" /", " tmpfs"))]
+    rows = data_rows(out)
     assert len(rows) == 4
     positions = {line.index("%") for line in rows}
     assert len(positions) == 1, rows
@@ -230,20 +231,19 @@ def test_values_over_100_percent_keep_their_number():
 
 def test_sort_by_real_value():
     out = plain(fixture("df-h"), width=100, sort="-size")
-    order = [line.split()[0] for line in out.splitlines() if line.startswith(" /")]
+    order = [line.split()[0] for line in data_rows(out)]
     assert order[0] == "/dev/sdb1"  # 1.8T, the largest
 
 
 def test_sort_ascending():
     out = plain(fixture("df-h"), width=100, sort="size")
-    first = [line.split()[0] for line in out.splitlines() if line.strip().startswith(("/", "tmp"))]
+    first = [line.split()[0] for line in data_rows(out)]
     assert first[0] in ("/dev/nvme0n1p1", "tmpfs")
 
 
 def test_top_limits_rows():
     out = plain(fixture("df-h"), width=100, sort="-use%", top=2)
-    data = [line for line in out.splitlines() if line.startswith((" /", " tmpfs"))]
-    assert len(data) == 2
+    assert len(data_rows(out)) == 2
     assert "2 filesystems" in out
 
 

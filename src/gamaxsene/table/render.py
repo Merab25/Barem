@@ -16,6 +16,15 @@ from .theme import Theme
 from .width import display_width, pad, truncate
 
 
+def _align_of(column) -> str:
+    """The pad() keyword for a column's alignment."""
+    if column.align is Align.RIGHT:
+        return "right"
+    if column.align is Align.CENTER:
+        return "center"
+    return "left"
+
+
 def _cell_text(cell: Cell, column, plan: Plan, theme: Theme, width: int) -> str:
     """One cell, padded to `width` and then painted."""
     if column.kind is Kind.PERCENT and plan.bars and cell.bar:
@@ -38,12 +47,7 @@ def _cell_text(cell: Cell, column, plan: Plan, theme: Theme, width: int) -> str:
     if column.kind is Kind.STATUS and plan.symbols and cell.symbol:
         text = f"{cell.symbol} {cell.text}"
     text = fit_text(column, text, width, theme)
-    align = (
-        "right"
-        if column.align is Align.RIGHT
-        else ("center" if column.align is Align.CENTER else "left")
-    )
-    padded = pad(text, width, align)
+    padded = pad(text, width, _align_of(column))
     if not cell.style:
         return padded
     # Paint only the value, keeping the padding plain, so colour never bleeds.
@@ -59,15 +63,17 @@ def render_clean(table: Table, plan: Plan, theme: Theme) -> str:
     columns, widths = plan.columns, plan.widths
     lines: list[str] = []
 
-    header_cells = []
-    for column in columns:
-        text = fit_text(column, column.header, widths[column.key], theme)
-        align = "right" if column.align is Align.RIGHT else "left"
-        header_cells.append(theme.header(pad(text, widths[column.key], align)))
-    lines.append(" " + (" " * GAP).join(header_cells).rstrip())
+    # With --no-header there are no names, so the header row and its rule are
+    # left out rather than printed blank.
+    if any(column.header for column in columns):
+        header_cells = []
+        for column in columns:
+            text = fit_text(column, column.header, widths[column.key], theme)
+            header_cells.append(theme.header(pad(text, widths[column.key], _align_of(column))))
+        lines.append(" " + (" " * GAP).join(header_cells).rstrip())
 
-    rule_width = sum(widths[c.key] for c in columns) + GAP * (len(columns) - 1)
-    lines.append(" " + theme.header(theme.rule_char() * min(rule_width, plan.width - 1)))
+        rule_width = sum(widths[c.key] for c in columns) + GAP * (len(columns) - 1)
+        lines.append(" " + theme.header(theme.rule_char() * min(rule_width, plan.width - 1)))
 
     for row in plan.cells:
         rendered = [
@@ -91,8 +97,7 @@ def render_box(table: Table, plan: Plan, theme: Theme) -> str:
     header = []
     for column in columns:
         text = fit_text(column, column.header, widths[column.key], theme)
-        align = "right" if column.align is Align.RIGHT else "left"
-        header.append(" " + theme.header(pad(text, widths[column.key], align)) + " ")
+        header.append(" " + theme.header(pad(text, widths[column.key], _align_of(column))) + " ")
     lines.append(box["v"] + box["v"].join(header) + box["v"])
     lines.append(rule(box["lt"], box["x"], box["rt"]))
 
@@ -155,11 +160,20 @@ def render_cards(table: Table, plan: Plan, theme: Theme) -> str:
     return "\n\n".join(blocks)
 
 
+def _md_align(column) -> str:
+    """Markdown carries alignment in its separator row."""
+    if column.align is Align.RIGHT:
+        return "---:"
+    if column.align is Align.CENTER:
+        return ":---:"
+    return "---"
+
+
 def render_markdown(table: Table, plan: Plan, theme: Theme) -> str:
     """A GitHub-flavoured table, for pasting into an issue or a README."""
     columns = plan.columns
     head = "| " + " | ".join(c.header for c in columns) + " |"
-    sep = "| " + " | ".join("---:" if c.align is Align.RIGHT else "---" for c in columns) + " |"
+    sep = "| " + " | ".join(_md_align(c) for c in columns) + " |"
     lines = [head, sep]
     for row in plan.cells:
         cells = []

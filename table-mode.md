@@ -66,7 +66,14 @@ $ df -h | gamaxsene
  4 filesystems · 2.3T total · 1.8T used (78%)
 ```
 
-- Text columns are left-aligned, numbers right-aligned, so the digits line up where the eye expects them.
+- Text columns are centred, numbers right-aligned, so the digits line up where the eye expects them.
+
+> **Changed after review.** This section originally called for left-aligned
+> text, and section 3 still lists `left` against the text kinds. Text, path and
+> status columns are centred as built; numbers stay right-aligned, since
+> centring them would undo the point of the column. The header is centred with
+> its column so it still sits over its own values, and the Markdown export
+> writes `:---:` for those columns.
 - Headers are dimmed and uppercased so they recede behind the data.
 - The summary line under the table is optional (`--no-summary`).
 

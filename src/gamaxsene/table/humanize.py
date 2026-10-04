@@ -82,11 +82,24 @@ def parse_number(text: str) -> float | None:
         return None
 
 
-def human_number(value: float) -> str:
-    """Thousands separators, and no trailing .0 on whole numbers."""
-    if value == int(value):
-        return f"{int(value):,}"
-    return f"{value:,.2f}"
+def decimals_in(text: str) -> int:
+    """How many digits the input printed after the decimal point.
+
+    Formatting keeps that precision rather than choosing its own, for two
+    reasons: rounding 0.027% to 0.0% loses the only information in the cell,
+    and a column mixing "142.50" with "1,420" reads as two different kinds of
+    number when the command printed both the same way.
+    """
+    cleaned = (text or "").strip().rstrip("%").replace(",", ".")
+    _, _, fraction = cleaned.partition(".")
+    return len(fraction) if fraction.isdigit() else 0
+
+
+def human_number(value: float, decimals: int = 0) -> str:
+    """Thousands separators, keeping the precision the input had."""
+    if decimals <= 0:
+        return f"{round(value):,}" if value == int(value) else f"{value:,.0f}"
+    return f"{value:,.{decimals}f}"
 
 
 def parse_duration(text: str) -> float | None:

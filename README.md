@@ -58,7 +58,7 @@ pipx install git+https://github.com/Merab25/Gamaxsene.git
 pipx creates an isolated virtual environment for the tool and puts the `gamaxsene` command on your `PATH`.
 
 ```bash
-pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.6.0   # a specific release
+pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.6.1   # a specific release
 pipx upgrade gamaxsene                                             # update
 pipx uninstall gamaxsene                                           # remove
 ```
@@ -173,7 +173,7 @@ The column that names the row is never dropped, and numbers are never truncated.
 
 ### Reading the output
 
-- **Text is left-aligned, numbers right-aligned**, so digits line up where the eye expects them.
+- **Text is centred, numbers right-aligned**, so digits still line up where the eye expects them.
 - **Paths are shortened in the middle** (`/var/lib/…/overlay2/diff`), because both ends carry meaning.
 - **Colour is never the only signal.** A critical value is also marked `!` whenever colour
   is off, so the output reads the same in a log file, under `NO_COLOR`, and for a

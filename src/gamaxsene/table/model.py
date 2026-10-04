@@ -39,10 +39,14 @@ NUMERIC_KINDS = frozenset({Kind.NUMBER, Kind.SIZE, Kind.PERCENT, Kind.DURATION})
 #: Columns the layout is allowed to shrink.
 FLEXIBLE_KINDS = frozenset({Kind.TEXT, Kind.PATH, Kind.STATUS})
 
+#: Text is centred and numbers stay right-aligned, so digits still line up.
+#: (Section 2.1 of the design had text left-aligned; centring is a later
+#: decision, and the header is centred with its column so it still sits over
+#: its own values.)
 _DEFAULT_ALIGN = {
-    Kind.TEXT: Align.LEFT,
-    Kind.PATH: Align.LEFT,
-    Kind.STATUS: Align.LEFT,
+    Kind.TEXT: Align.CENTER,
+    Kind.PATH: Align.CENTER,
+    Kind.STATUS: Align.CENTER,
     Kind.NUMBER: Align.RIGHT,
     Kind.SIZE: Align.RIGHT,
     Kind.PERCENT: Align.RIGHT,

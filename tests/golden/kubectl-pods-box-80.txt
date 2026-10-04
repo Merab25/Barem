@@ -1,11 +1,11 @@
 ┌────────────────────────┬───────┬──────────────────┬──────────┬───────┐
-│ NAME                   │ READY │ STATUS           │ RESTARTS │   AGE │
+│          NAME          │ READY │      STATUS      │ RESTARTS │   AGE │
 ├────────────────────────┼───────┼──────────────────┼──────────┼───────┤
-│ web-7d9f8b6c5d-abcde   │ 1/1   │ Running          │        0 │ 3d 4h │
-│ web-7d9f8b6c5d-fghij   │ 1/1   │ Running          │        2 │ 3d 4h │
-│ api-5c7b9d8f6a-klmno   │ 0/1   │ CrashLoopBackOff │       14 │   22m │
-│ cache-6b8d7f5c4e-pqrst │ 1/1   │ Running          │        0 │   12d │
-│ migrate-job-xyz        │ 0/1   │ Completed        │        0 │    5h │
+│  web-7d9f8b6c5d-abcde  │  1/1  │     Running      │        0 │ 3d 4h │
+│  web-7d9f8b6c5d-fghij  │  1/1  │     Running      │        2 │ 3d 4h │
+│  api-5c7b9d8f6a-klmno  │  0/1  │ CrashLoopBackOff │       14 │   22m │
+│ cache-6b8d7f5c4e-pqrst │  1/1  │     Running      │        0 │   12d │
+│    migrate-job-xyz     │  0/1  │    Completed     │        0 │    5h │
 └────────────────────────┴───────┴──────────────────┴──────────┴───────┘
 
  5 pods · 1 unhealthy
