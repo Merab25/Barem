@@ -1,0 +1,29 @@
+ /dev/nvme0n1p2
+   Size        468G
+   Used        112G
+   Avail       332G
+   Use%        25%  ██▌░░░░░░░
+   Mounted On  /
+
+ /dev/sdb1
+   Size        1.8T
+   Used        1.7T
+   Avail       43G
+   Use%        95%!  █████████▌
+   Mounted On  /data
+
+ /dev/nvme0n1p1
+   Size        512M
+   Used        62M
+   Avail       450M
+   Use%        12%  █▏░░░░░░░░
+   Mounted On  /boot/efi
+
+ tmpfs
+   Size        16G
+   Used        2.1M
+   Avail       16G
+   Use%        1%  ░░░░░░░░░░
+   Mounted On  /run
+
+ 4 filesystems · 2.3T total · 1.8T used…

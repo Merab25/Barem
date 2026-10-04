@@ -4,7 +4,7 @@ A profile is matched by its header fingerprint, because the pipe hands us
 bytes and not a command name. Fingerprints are sets of header words, and the
 longest matching fingerprint wins, so `docker ps` beats a looser match.
 
-Users can drop extra profiles into ~/.config/gamaxsene/profiles/ as small
+Users can drop extra profiles into ~/.config/barem/profiles/ as small
 Python modules exposing a module-level `PROFILE`.
 """
 
@@ -28,7 +28,7 @@ BUILTIN: list[Profile] = [
 def user_profile_dir() -> Path:
     """Where a user's own profiles live, honouring XDG_CONFIG_HOME."""
     base = os.environ.get("XDG_CONFIG_HOME") or os.path.join(Path.home(), ".config")
-    return Path(base) / "gamaxsene" / "profiles"
+    return Path(base) / "barem" / "profiles"
 
 
 def load_user_profiles() -> list[Profile]:

@@ -10,13 +10,13 @@ The invariants in section 12 of the design are the ones that matter:
 from pathlib import Path
 
 import pytest
-from helpers import data_rows
+from helpers import data_rows, header_line
 
-from gamaxsene.table import Options, format_text
-from gamaxsene.table.detect import build_table
-from gamaxsene.table.layout import CARD_THRESHOLD, CLEAN_GEOMETRY, plan
-from gamaxsene.table.theme import Theme
-from gamaxsene.table.width import display_width
+from barem.table import Options, format_text
+from barem.table.detect import build_table
+from barem.table.layout import CARD_THRESHOLD, CLEAN_GEOMETRY, plan
+from barem.table.theme import Theme
+from barem.table.width import display_width
 
 FIXTURES = Path(__file__).parent / "fixtures"
 NAMES = sorted(p.stem for p in FIXTURES.glob("*.txt")) if FIXTURES.is_dir() else []
@@ -122,10 +122,15 @@ def test_dropped_columns_are_reported():
 
 
 def test_clean_style_has_no_vertical_rules():
-    out = plain(fixture("df-h"), width=80)
+    out = plain(fixture("df-h"), width=80, style="clean")
     assert "│" not in out
     assert "┌" not in out
     assert "─" in out  # but it does have the rule under the header
+
+
+def test_box_is_the_default_style():
+    """Borders without asking; --clean is the way out of them."""
+    assert plain(fixture("df-h"), width=80).startswith("┌")
 
 
 def test_box_style_draws_a_frame():
@@ -143,7 +148,10 @@ def test_ascii_style_draws_no_unicode():
     out = plain(fixture("df-h"), width=80, style="ascii")
     for char in ("─", "│", "┌", "█", "░", "…", "·"):
         assert char not in out, char
-    assert "#" in out and "." in out and "-" in out
+    # the same borders as the default style, drawn in plain characters
+    assert out.startswith("+--")
+    assert "|" in out
+    assert "#" in out and "." in out
 
 
 def test_markdown_export():
@@ -274,7 +282,7 @@ def test_bad_filter_is_reported_not_fatal():
 
 def test_cols_chooses_and_orders():
     out = plain(fixture("df-h"), width=80, columns=["target", "use%"])
-    header = out.splitlines()[0]
+    header = header_line(out)
     assert header.index("MOUNTED ON") < header.index("USE%")
     assert "SIZE" not in header
 

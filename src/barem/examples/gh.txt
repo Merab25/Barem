@@ -121,7 +121,7 @@ gh workflow run ci.yml --ref main
 gh release create v0.2.0 --generate-notes
 
 # Upload a build artefact to a release
-gh release upload v0.2.0 dist/gamaxsene-0.2.0-py3-none-any.whl
+gh release upload v0.2.0 dist/barem-0.2.0-py3-none-any.whl
 
 # Call any REST endpoint
 gh api repos/Merab25/Gamaxsene --jq '.stargazers_count'

@@ -7,7 +7,7 @@ terminal cells rather than characters.
 
 import pytest
 
-from gamaxsene.table.width import (
+from barem.table.width import (
     display_width,
     pad,
     sanitize,

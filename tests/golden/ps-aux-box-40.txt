@@ -1,0 +1,49 @@
+ 1
+   User     root
+   %Cpu     0.0%  ░░░░░░░░░░
+   %Mem     0.1%  ░░░░░░░░░░
+   Vsz      168,404
+   Rss      11,952
+   Tty      ?
+   Stat     Ss
+   Start    09:14
+   Time     3.0s
+   Command  /sbin/init splash
+
+ 4,821
+   User     merab
+   %Cpu     94.3%!  █████████▍
+   %Mem     12.5%  █▎░░░░░░░░
+   Vsz      489,123
+   Rss      20,480
+   Tty      ?
+   Stat     Rl
+   Start    10:02
+   Time     12m 44s
+   Command  /usr/lib/firefox/firefox -c…
+
+ 1,337
+   User     postgres
+   %Cpu     2.1%  ▏░░░░░░░░░
+   %Mem     24.8%  ██▍░░░░░░░
+   Vsz      123,456
+   Rss      40,960
+   Tty      ?
+   Stat     Ss
+   Start    09:15
+   Time     1m 2s
+   Command  postgres: checkpointer
+
+ 2,048
+   User     www-data
+   %Cpu     34.0%  ███▍░░░░░░
+   %Mem     1.2%  ░░░░░░░░░░
+   Vsz      98,765
+   Rss      12,345
+   Tty      ?
+   Stat     Sl
+   Start    09:20
+   Time     45s
+   Command  nginx: worker process
+
+ 4 processes · 130.4% cpu · 38.6% mem

@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from helpers import data_rows
 
-from gamaxsene import cli
+from barem import cli
 
 FIXTURES = Path(__file__).parent / "fixtures"
 DF = (FIXTURES / "df-h.txt").read_text(encoding="utf-8")
@@ -41,7 +41,7 @@ def test_piped_input_is_formatted(monkeypatch, capsys):
 
 
 def test_a_command_name_still_means_examples(monkeypatch, capsys):
-    """`df -h | gamaxsene find` looks up examples; it does not format."""
+    """`df -h | barem find` looks up examples; it does not format."""
     piped(monkeypatch, DF)
     code, out, _ = run(capsys, "find", "size", "--no-color")
     assert code == 0
@@ -133,10 +133,10 @@ def test_as_forces_a_profile(monkeypatch, capsys):
 
 
 def test_width_env_var(monkeypatch, capsys):
-    monkeypatch.setenv("GAMAXSENE_WIDTH", "60")
+    monkeypatch.setenv("BAREM_WIDTH", "60")
     piped(monkeypatch, DF)
     _, out, _ = run(capsys, "--no-color")
-    from gamaxsene.table.width import display_width
+    from barem.table.width import display_width
 
     for line in out.splitlines():
         assert display_width(line) <= 60
@@ -159,7 +159,7 @@ def test_table_flags_do_not_need_a_pipe(monkeypatch, capsys):
 
 
 def test_split_command_keeps_the_commands_own_flags():
-    from gamaxsene.table.runner import split_command
+    from barem.table.runner import split_command
 
     assert split_command(["--width", "60", "df", "-h"]) == (["--width", "60"], ["df", "-h"])
     assert split_command(["df", "-i"]) == ([], ["df", "-i"])
@@ -167,7 +167,7 @@ def test_split_command_keeps_the_commands_own_flags():
 
 
 def test_split_command_honours_a_double_dash():
-    from gamaxsene.table.runner import split_command
+    from barem.table.runner import split_command
 
     assert split_command(["--", "df", "-h"]) == ([], ["df", "-h"])
 

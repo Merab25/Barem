@@ -63,12 +63,12 @@ jobs:
 
       - name: Smoke test the CLI
         run: |
-          gamaxsene --version
-          gamaxsene --list
-          gamaxsene find size
-          gamaxsene -s port --oneline | head -5
-          gamaxsene --completion bash
-          gamaxsene --completion zsh
+          barem --version
+          barem --list
+          barem find size
+          barem -s port --oneline | head -5
+          barem --completion bash
+          barem --completion zsh
 
       # Source the generated script and drive the completion function the way
       # a TAB press would, so a broken script fails here and not on a user's
@@ -76,14 +76,14 @@ jobs:
       - name: Smoke test bash completion
         shell: bash
         run: |
-          source <(gamaxsene --completion bash)
+          source <(barem --completion bash)
 
-          COMP_WORDS=(gamaxsene doc) COMP_CWORD=1 COMPREPLY=()
-          _gamaxsene
-          echo "gamaxsene doc -> ${COMPREPLY[*]}"
+          COMP_WORDS=(barem doc) COMP_CWORD=1 COMPREPLY=()
+          _barem
+          echo "barem doc -> ${COMPREPLY[*]}"
           [[ "${COMPREPLY[*]}" == "docker" ]]
 
-          COMP_WORDS=(gamaxsene tar extr) COMP_CWORD=2 COMPREPLY=()
-          _gamaxsene
-          echo "gamaxsene tar extr -> ${COMPREPLY[*]}"
+          COMP_WORDS=(barem tar extr) COMP_CWORD=2 COMPREPLY=()
+          _barem
+          echo "barem tar extr -> ${COMPREPLY[*]}"
           [[ "${COMPREPLY[*]}" == *extract* ]]

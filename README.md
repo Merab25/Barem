@@ -1,4 +1,4 @@
-# gamaxsene
+# barem
 
 [![CI](https://github.com/Merab25/Gamaxsene/actions/workflows/ci.yml/badge.svg)](https://github.com/Merab25/Gamaxsene/actions/workflows/ci.yml)
 ![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)
@@ -7,10 +7,10 @@
 
 **Real-world Linux command examples, right in your terminal.**
 
-`gamaxsene` (Georgian *გამახსენე* — "remind me") prints practical, copy-paste-ready examples for everyday Linux, networking and DevOps commands. Instead of scrolling through a long man page to remember how to exclude a folder in `find`, follow a service log in `journalctl` or forward a port with `ssh`, you ask:
+`barem` prints practical, copy-paste-ready examples for everyday Linux, networking and DevOps commands. Instead of scrolling through a long man page to remember how to exclude a folder in `find`, follow a service log in `journalctl` or forward a port with `ssh`, you ask:
 
 ```console
-$ gamaxsene find size
+$ barem find size
 ```
 
 ```text
@@ -32,10 +32,11 @@ It currently ships **157 commands** and **5,314 examples** — about 30 per comm
 
 - **Real-world examples**: realistic file names, paths and hosts instead of `<placeholder>` soup, ordered from the most common to the more advanced.
 - **Description first, command second**: every example is a `# description` line followed by the command, so it reads like a well-commented script.
-- **Keyword filtering**: `gamaxsene tar extract` shows only the examples that mention "extract".
-- **Search everything**: `gamaxsene -s port` searches the examples of every command at once.
+- **Keyword filtering**: `barem tar extract` shows only the examples that mention "extract".
+- **Search everything**: `barem -s port` searches the examples of every command at once.
 - **Tab completion**: bash and zsh completion for command names, keywords and options, built from the example files that are installed.
-- **Table mode**: pipe a command *into* `gamaxsene` and it formats the output — aligned columns, usage bars, and a layout that adapts to your terminal width. `df -h | gamaxsene`
+- **Table mode**: pipe a command *into* `barem` and it formats the output — bordered, aligned columns, usage bars, and a layout that adapts to your terminal width. `df -h | barem`
+- **One-command triage**: `barem help` runs the diagnostics you reach for first when something is off, and reports only what is actually wrong.
 - **Grep-friendly**: `--oneline` prints `command  # description` on one line, and colors switch off automatically when output goes to a pipe or file.
 - **Zero dependencies**: standard library only, Python 3.9+.
 - **Easy to extend**: adding a command means adding one plain text file.
@@ -55,31 +56,32 @@ Install straight from GitHub:
 pipx install git+https://github.com/Merab25/Gamaxsene.git
 ```
 
-pipx creates an isolated virtual environment for the tool and puts the `gamaxsene` command on your `PATH`.
+pipx creates an isolated virtual environment for the tool and puts the `barem` command on your `PATH`.
 
 ```bash
-pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.6.1   # a specific release
-pipx upgrade gamaxsene                                             # update
-pipx uninstall gamaxsene                                           # remove
+pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.7.0   # a specific release
+pipx upgrade barem                                             # update
+pipx uninstall barem                                           # remove
 ```
 
 ## Usage
 
 | Command | What it does |
 | --- | --- |
-| `gamaxsene --help` | How the tool works, usage examples and all available commands |
-| `gamaxsene find` | All examples for `find` |
-| `gamaxsene find size` | Only `find` examples that mention "size" |
-| `gamaxsene tar extract gz` | Several keywords: an example must match all of them |
-| `gamaxsene -s port` | Search the examples of every command |
-| `gamaxsene -l` | List commands with a summary and the number of examples |
-| `gamaxsene grep -1` | One example per line: `command  # description` |
-| `gamaxsene find --no-color` | Plain output (also `NO_COLOR=1`) |
-| `gamaxsene -V` | Show the version |
-| `gamaxsene --completion bash` | Print a completion script (also `zsh`) |
-| `python -m gamaxsene find` | Same as `gamaxsene find` |
-| `df -h \| gamaxsene` | Format piped output as a table (see [Table mode](#table-mode)) |
-| `gamaxsene run df -h` | Run the command, then format it |
+| `barem --help` | How the tool works, usage examples and all available commands |
+| `barem find` | All examples for `find` |
+| `barem find size` | Only `find` examples that mention "size" |
+| `barem tar extract gz` | Several keywords: an example must match all of them |
+| `barem -s port` | Search the examples of every command |
+| `barem -l` | List commands with a summary and the number of examples |
+| `barem grep -1` | One example per line: `command  # description` |
+| `barem find --no-color` | Plain output (also `NO_COLOR=1`) |
+| `barem -V` | Show the version |
+| `barem --completion bash` | Print a completion script (also `zsh`) |
+| `python -m barem find` | Same as `barem find` |
+| `df -h \| barem` | Format piped output as a table (see [Table mode](#table-mode)) |
+| `barem run df -h` | Run the command, then format it |
+| `barem help` | Run the diagnostics and report what is off (see [barem help](#barem-help)) |
 
 Keywords are case-insensitive and match the **start of a word**: `port` finds "port", "ports" and `--port`, but not "export" or "report".
 
@@ -88,30 +90,104 @@ Keywords are case-insensitive and match the **start of a word**: `port` finds "p
 The built-in keyword filter covers most cases, but the output is designed to work with standard tools too:
 
 ```bash
-gamaxsene find -1 | grep perm          # one line per example, grep sees command + description
-gamaxsene find | grep -A1 -i "delete"  # match a description, also print the command below it
-gamaxsene find | grep -B1 "exec"       # match a command, also print its description above it
-gamaxsene -s docker -1 | less          # page through a search
-gamaxsene curl json -1 > curl-json.sh  # save examples as a commented script
+barem find -1 | grep perm          # one line per example, grep sees command + description
+barem find | grep -A1 -i "delete"  # match a description, also print the command below it
+barem find | grep -B1 "exec"       # match a command, also print its description above it
+barem -s docker -1 | less          # page through a search
+barem curl json -1 > curl-json.sh  # save examples as a commented script
 ```
 
 Exit codes make it usable in scripts: `0` when examples were printed, `1` for an unknown command or no matches.
 
-## Table mode
+## barem help
 
-Pipe a command into `gamaxsene` and it formats the output instead of looking anything up:
+When something is off on a machine, the first few minutes are always the same handful of
+commands: is the disk full, has memory gone, did a unit fail, is there a default route,
+does DNS answer. `barem help` runs that list and reports **only what is actually wrong**.
 
 ```console
-$ df -h | gamaxsene
+$ barem help
 ```
 
 ```text
- FILESYSTEM      SIZE  USED  AVAIL              USE%  MOUNTED ON
- ───────────────────────────────────────────────────────────────
- /dev/nvme0n1p2  468G  112G   332G  ██▌░░░░░░░   25%  /
- /dev/sdb1       1.8T  1.7T    43G  █████████▌  95%!  /data
- /dev/nvme0n1p1  512M   62M   450M  █▏░░░░░░░░   12%  /boot/efi
- tmpfs            16G  2.1M    16G  ░░░░░░░░░░    1%  /run
+┌──────────────────┬────────┬────────────────────────────────────────────────────────────────┐
+│      CHECK       │ STATUS │                             DETAIL                             │
+├──────────────────┼────────┼────────────────────────────────────────────────────────────────┤
+│    disk space    │  bad   │                           /data 96%                            │
+│   failed units   │  bad   │              myapp-worker.service, nginx.service               │
+│      inodes      │  bad   │                  inodes exhausted: /data 100%                  │
+│  kernel errors   │  bad   │ kernel: blk_update_request: I/O error, dev sdb, sector 1234567 │
+│      memory      │  bad   │                   879M of 31G available (3%)                   │
+│ read-only mounts │  bad   │                        read-only: /data                        │
+│    clock sync    │  warn  │                     clock not synchronised                     │
+│       swap       │  warn  │                    7.6G of 8.0G used (95%)                     │
+└──────────────────┴────────┴────────────────────────────────────────────────────────────────┘
+
+ 6 critical · 2 to watch · 7 passed · barem help --all shows every check
+ next: df -h | barem --sort -use%
+ next: systemctl --failed | barem
+ next: df -i | barem
+ ...and 5 more to look at
+```
+
+On a healthy machine it says so in one line and shows nothing else:
+
+```console
+$ barem help
+ nothing wrong found · 15 passed · barem help --all shows every check
+```
+
+`barem check` and `barem doctor` do the same thing. Note that **`barem --help` still prints
+the usage text** — the diagnosis is the bare word, the usage is the flag.
+
+### What it checks
+
+Disk space and inodes, memory and swap, load against the core count, failed systemd units,
+read-only filesystems, OOM kills, kernel I/O errors, the default route, DNS, clock
+synchronisation, a pending reboot, zombie processes and open file descriptors.
+
+Each one also carries the command worth running next, and the worst three are printed under
+the table.
+
+### Using it in a script
+
+The exit code says what was found, so it drops into a cron job or a CI step:
+
+| Code | Meaning |
+| ---: | --- |
+| `0` | nothing wrong |
+| `1` | warnings only |
+| `2` | something critical |
+
+```bash
+barem help || echo "check the machine"
+barem help --all --format json          # every result, machine-readable
+```
+
+### What it will not do
+
+Every check is read-only, needs no root, and is given a four-second timeout, so running it
+can never make a bad situation worse — a hung NFS mount cannot hang the diagnosis. A check
+whose command is missing reports `skipped` rather than failing, which is what you get on a
+container without `systemctl` or a system without `journalctl`.
+
+## Table mode
+
+Pipe a command into `barem` and it formats the output instead of looking anything up:
+
+```console
+$ df -h | barem
+```
+
+```text
+┌────────────────┬──────┬──────┬───────┬──────────────────┬────────────┐
+│   FILESYSTEM   │ SIZE │ USED │ AVAIL │             USE% │ MOUNTED ON │
+├────────────────┼──────┼──────┼───────┼──────────────────┼────────────┤
+│ /dev/nvme0n1p2 │ 468G │ 112G │  332G │ ██▌░░░░░░░  25%  │     /      │
+│   /dev/sdb1    │ 1.8T │ 1.7T │   43G │ █████████▌  95%! │   /data    │
+│ /dev/nvme0n1p1 │ 512M │  62M │  450M │ █▏░░░░░░░░  12%  │ /boot/efi  │
+│     tmpfs      │  16G │ 2.1M │   16G │ ░░░░░░░░░░   1%  │    /run    │
+└────────────────┴──────┴──────┴───────┴──────────────────┴────────────┘
 
  4 filesystems · 2.3T total · 1.8T used (80%)
 ```
@@ -121,14 +197,14 @@ column means — a size, a percentage, a status, a path — and lays it out to t
 your terminal. The commands stay the source of truth; this is only a nicer view of them.
 
 ```bash
-df -i | gamaxsene                            # inode usage, with bars
-ps aux | gamaxsene --sort -%mem --top 10     # replaces an awk and sort pipeline
-ss -tlnp | gamaxsene                         # listening sockets, aligned
-docker ps | gamaxsene --symbols              # ● up, ✖ exited
-kubectl get pods | gamaxsene --where 'status ~ Crash'
-free -h | gamaxsene --box                    # borders, for pasting into a ticket
-mount | gamaxsene --format md                # a Markdown table
-gamaxsene run --watch 2 df -h                # re-run and redraw every 2 seconds
+df -i | barem                            # inode usage, with bars
+ps aux | barem --sort -%mem --top 10     # replaces an awk and sort pipeline
+ss -tlnp | barem                         # listening sockets, aligned
+docker ps | barem --symbols              # ● up, ✖ exited
+kubectl get pods | barem --where 'status ~ Crash'
+free -h | barem --clean                  # no borders, the lighter layout
+mount | barem --format md                # a Markdown table
+barem run --watch 2 df -h                # re-run and redraw every 2 seconds
 ```
 
 ### Options
@@ -141,15 +217,15 @@ gamaxsene run --watch 2 df -h                # re-run and redraw every 2 seconds
 | `--cols fs,use%,target` | Choose and order columns |
 | `--where 'use% > 80'` | Keep matching rows; also `< >= <= == != ~` (regex) |
 | `--format md\|csv\|tsv\|json` | Export instead of rendering |
-| `--box` / `--ascii` / `--cards` | Borders / no Unicode / one block per row |
-| `--width N` / `--max-width N` | Assume a width, or cap it (`GAMAXSENE_WIDTH` also works) |
+| `--clean` / `--ascii` / `--cards` | No borders / plain characters / one block per row |
+| `--width N` / `--max-width N` | Assume a width, or cap it (`BAREM_WIDTH` also works) |
 | `--no-bars` / `--bar-width N` | Numbers without bars, or a different bar size |
 | `--warn 80 --crit 95` | Move the thresholds; 90% is critical for a disk, normal for a CPU |
 | `--symbols` | Add `●`, `◐`, `✖` to status cells |
 | `--relative` | Durations as "3 min ago" rather than "3m" |
 | `--input csv` | Force the input format instead of detecting it |
 | `--no-summary` / `--raw` | Drop the line under the table / print the input untouched |
-| `gamaxsene run CMD` | Run the command, so its name is known for certain |
+| `barem run CMD` | Run the command, so its name is known for certain |
 | `--watch 2` | With `run`, re-run and redraw in place |
 
 ### How it adapts
@@ -173,6 +249,7 @@ The column that names the row is never dropped, and numbers are never truncated.
 
 ### Reading the output
 
+- **Borders by default**, because they make the columns unmissable; `--clean` drops them.
 - **Text is centred, numbers right-aligned**, so digits still line up where the eye expects them.
 - **Paths are shortened in the middle** (`/var/lib/…/overlay2/diff`), because both ends carry meaning.
 - **Colour is never the only signal.** A critical value is also marked `!` whenever colour
@@ -192,33 +269,33 @@ Profiles give correct column types without `--as`: `df`, `df -i`, `lsblk`, `lsbl
 
 Anything else still works: column types are inferred from the data, which is the path
 that runs for every command nobody wrote a profile for. JSON, JSON lines, CSV, TSV and
-`key=value` input are detected automatically, so `ip -j addr | gamaxsene` and
-`cat /etc/os-release | gamaxsene` both do something sensible.
+`key=value` input are detected automatically, so `ip -j addr | barem` and
+`cat /etc/os-release | barem` both do something sensible.
 
-Add your own profiles as small Python modules in `~/.config/gamaxsene/profiles/`,
+Add your own profiles as small Python modules in `~/.config/barem/profiles/`,
 each exposing a `PROFILE`.
 
 ## Shell completion
 
-`gamaxsene --completion bash` and `gamaxsene --completion zsh` print a completion script. Install it once:
+`barem --completion bash` and `barem --completion zsh` print a completion script. Install it once:
 
 ```bash
 # bash
 mkdir -p ~/.local/share/bash-completion/completions
-gamaxsene --completion bash > ~/.local/share/bash-completion/completions/gamaxsene
+barem --completion bash > ~/.local/share/bash-completion/completions/barem
 
 # zsh, into any directory on your $fpath
-gamaxsene --completion zsh > "${fpath[1]}/_gamaxsene"
+barem --completion zsh > "${fpath[1]}/_barem"
 rm -f ~/.zcompdump && compinit
 ```
 
 Open a new terminal, and TAB completes command names, keywords and options:
 
 ```console
-$ gamaxsene doc<TAB>        # docker
-$ gamaxsene git reb<TAB>    # rebase
-$ gamaxsene tar extr<TAB>   # extract  extracting
-$ gamaxsene --no<TAB>       # --no-color
+$ barem doc<TAB>        # docker
+$ barem git reb<TAB>    # rebase
+$ barem tar extr<TAB>   # extract  extracting
+$ barem --no<TAB>       # --no-color
 ```
 
 Candidates come from the example files that are installed rather than from a list baked into the script, so a command or keyword you add is completed without regenerating anything. A keyword already on the line is not offered again.
@@ -226,7 +303,7 @@ Candidates come from the example files that are installed rather than from a lis
 To try it in the current shell only, without installing:
 
 ```bash
-source <(gamaxsene --completion bash)
+source <(barem --completion bash)
 ```
 
 ## Available commands
@@ -458,11 +535,11 @@ source <(gamaxsene --completion bash)
 | `redis-cli` | 50 | Inspect and operate a Redis server from the terminal |
 | `sqlite3` | 42 | Query and manage SQLite database files |
 
-Run `gamaxsene -l` for the live list.
+Run `barem -l` for the live list.
 
 ## Example file format
 
-Each command is one text file in [`src/gamaxsene/examples/`](src/gamaxsene/examples), named after the command (`find.txt`, `docker.txt`, ...):
+Each command is one text file in [`src/barem/examples/`](src/barem/examples), named after the command (`find.txt`, `docker.txt`, ...):
 
 ```text
 ## Search for files and directories by name, type, size, time and permissions
@@ -475,14 +552,14 @@ find /var/www -type d -exec chmod 755 {} +
 find /var/www -type f -exec chmod 644 {} +
 ```
 
-- `## ...` on the first line is the one-line summary shown by `gamaxsene -l`.
+- `## ...` on the first line is the one-line summary shown by `barem -l`.
 - `# ...` starts a new example with its description.
 - The following line(s) are the command. Several lines under one description belong to the same example.
 - Blank lines are ignored.
 
 ## Adding a command
 
-1. Create `src/gamaxsene/examples/<command>.txt` using the format above.
+1. Create `src/barem/examples/<command>.txt` using the format above.
 2. Aim for about 30 examples: the most common use first, then the important options, then advanced and combined usage.
 3. Use realistic values (`/var/log/nginx/access.log`, `user@server`, `192.168.1.10`) instead of `<file>` placeholders, so examples can be copied and edited quickly.
 4. Keep each command on one line.
@@ -497,14 +574,15 @@ The new command shows up automatically in `--list`, `--help`, `--search` and tab
 ## Project structure
 
 ```text
-gamaxsene/
+barem/
 ├── .github/
 │   ├── workflows/ci.yml       # CI: lint, then build + install the wheel and test on 3.9-3.13
 │   └── dependabot.yml         # keeps the pinned GitHub Actions current
-├── src/gamaxsene/
+├── src/barem/
 │   ├── __init__.py            # package version (single source of truth)
-│   ├── __main__.py            # enables `python -m gamaxsene`
+│   ├── __main__.py            # enables `python -m barem`
 │   ├── cli.py                 # argument parsing, file parsing, filtering, output, completion
+│   ├── diagnose.py            # `barem help`: the first-try checks and how they are judged
 │   ├── completions/           # the bash and zsh completion scripts, shipped too
 │   ├── examples/              # one .txt file per command, shipped inside the package
 │   └── table/                 # table mode, described in table-mode.md
@@ -517,12 +595,13 @@ gamaxsene/
 │       ├── parse/             # columnar (by position), structured (json/csv), infer
 │       ├── layout.py          # the fit / shrink / drop / cards algorithm
 │       ├── render.py          # clean, box, ascii, cards, markdown, csv, json
-│       ├── runner.py          # `gamaxsene run` and --watch
+│       ├── runner.py          # `barem run` and --watch
 │       └── profiles/          # df, ps, ss, docker, kubectl, systemctl, ...
 ├── tests/
 │   ├── test_cli.py            # parser, example files, CLI behaviour and completion
 │   ├── test_docs.py           # the README's tables must match the example files
 │   ├── test_table_*.py        # width, parsing, layout, rendering, CLI and golden files
+│   ├── test_diagnose.py       # every check judged against real command output
 │   ├── fixtures/              # real command output, so tests never run df or ps
 │   └── golden/                # each fixture rendered at 40, 60, 80 and 120 columns
 ├── pyproject.toml             # package metadata, build backend, entry point, ruff config
@@ -536,25 +615,25 @@ gamaxsene/
 
 ## How it works
 
-- **Entry point**: `pyproject.toml` declares `gamaxsene = "gamaxsene.cli:main"` under `[project.scripts]`. When the package is installed, pip/pipx generate a small `gamaxsene` executable that calls `main()`.
+- **Entry point**: `pyproject.toml` declares `barem = "barem.cli:main"` under `[project.scripts]`. When the package is installed, pip/pipx generate a small `barem` executable that calls `main()`.
 - **Bundled data**: the example files live inside the package, so they are included in the wheel. At runtime `importlib.resources` finds them wherever the package was installed, instead of relying on hard-coded paths.
 - **Parsing**: each file is read line by line into `Example(description, commands)` objects; filtering is a case-insensitive word-start match against the description and the commands.
 - **Output**: colors are ANSI escape codes, enabled only when stdout is a terminal (`sys.stdout.isatty()`), so pipes, files and grep always get plain text.
-- **Completion**: the script printed by `--completion` is a real file in the package, not a string built in Python. On every TAB it calls the hidden `gamaxsene --complete <words>`, which prints one candidate per line. That call is handled before `argparse` runs, because the words arrive half-typed (`--no-c`, `-`) and `argparse` would try to read them as options.
+- **Completion**: the script printed by `--completion` is a real file in the package, not a string built in Python. On every TAB it calls the hidden `barem --complete <words>`, which prints one candidate per line. That call is handled before `argparse` runs, because the words arrive half-typed (`--no-c`, `-`) and `argparse` would try to read them as options.
 - **Table mode**: a command name always means the example lookup, so table mode starts only when standard input is a pipe, or when a table flag says so. Columns are found by character position rather than by `split()`, because real output defeats splitting — `df` has a `Mounted on` header, `ps aux` holds a whole command line in one column, and `docker ps` has both. Everything is measured in terminal cells, never characters, and colour is applied last so padding is never wrong by the length of an escape sequence. The design is written up in [table-mode.md](table-mode.md).
 - **Isolation**: pipx installs the tool in its own virtual environment, so it never conflicts with system Python packages.
-- **Versioning**: the version is defined once in `src/gamaxsene/__init__.py` and read by the build backend (hatchling). A test checks that `CHANGELOG.md` has a section for it and that the README's install line names the matching tag.
+- **Versioning**: the version is defined once in `src/barem/__init__.py` and read by the build backend (hatchling). A test checks that `CHANGELOG.md` has a section for it and that the README's install line names the matching tag.
 
 ## Development
 
 ```bash
 git clone https://github.com/Merab25/Gamaxsene.git
-cd Gamaxsene
+cd Barem
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"    # editable install: code and example changes apply immediately
 
-gamaxsene find             # try it
+barem find             # try it
 pytest                     # run the tests
 ruff check .               # lint
 ruff format .              # format
@@ -575,7 +654,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request, and
 
 ## Roadmap
 
-- Publish to PyPI (`pipx install gamaxsene`)
+- Publish to PyPI (`pipx install barem`)
 - More commands: `go`, `cargo`, `node`, `gdb`, `lvm`, `iperf3`, `ethtool`, `az`
 - Table profiles for the headerless commands: `du -sh *`, `last`, `lsof`
 - Table mode: highlight cells that changed since the last `--watch` refresh

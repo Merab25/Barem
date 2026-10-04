@@ -6,8 +6,8 @@ output. Each of those failures gets a test here.
 
 import pytest
 
-from gamaxsene.table.detect import build_table, detect_format, parse_input
-from gamaxsene.table.humanize import (
+from barem.table.detect import build_table, detect_format, parse_input
+from barem.table.humanize import (
     human_duration,
     human_size,
     parse_duration,
@@ -15,9 +15,9 @@ from gamaxsene.table.humanize import (
     parse_size,
     sort_value,
 )
-from gamaxsene.table.model import Kind
-from gamaxsene.table.parse import columnar
-from gamaxsene.table.theme import status_group
+from barem.table.model import Kind
+from barem.table.parse import columnar
+from barem.table.theme import status_group
 
 DF = """Filesystem      Size  Used Avail Use% Mounted on
 /dev/nvme0n1p2  468G  112G  332G  25% /

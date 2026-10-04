@@ -31,7 +31,7 @@ git commit --amend --no-edit
 git log --oneline --graph --decorate --all
 
 # History of one file with changes
-git log -p -- src/gamaxsene/cli.py
+git log -p -- src/barem/cli.py
 
 # Search commit messages
 git log --grep="fix" --oneline
@@ -55,7 +55,7 @@ git diff --name-only main..feature
 git blame -L 10,30 cli.py
 
 # Show a file as it was 2 commits ago
-git show HEAD~2:src/gamaxsene/cli.py
+git show HEAD~2:src/barem/cli.py
 
 # Create a branch and switch to it
 git switch -c feature/search

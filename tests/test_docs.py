@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from gamaxsene import __version__, cli
+from barem import __version__, cli
 
 ROOT = Path(__file__).resolve().parent.parent
 README = ROOT / "README.md"

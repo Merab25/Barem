@@ -6,6 +6,53 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-05
+
+### Changed
+
+- **The tool is now called `barem`.** The command, the Python package, the
+  completion scripts and the width environment variable (`BAREM_WIDTH`) all
+  follow. The GitHub repository keeps its own name, so the install URL is
+  unchanged — only `pipx install` puts a `barem` on your PATH instead.
+  Upgrading in place therefore leaves the old command behind:
+  `pipx uninstall gamaxsene` after installing the new one.
+- **Tables are drawn with borders by default.** `--clean` gives the previous
+  borderless layout, and `--ascii` now draws the same borders in `+---+` for a
+  terminal that cannot manage the box-drawing characters.
+
+### Added
+
+- **`barem help`** runs the diagnostics you reach for first when something is
+  off, and reports only what is actually wrong:
+
+      barem help              # just the problems
+      barem help --all        # every check, including the ones that passed
+
+  Fifteen checks: disk space and inodes, memory and swap, load against the core
+  count, failed systemd units, read-only filesystems, OOM kills, kernel I/O
+  errors, the default route, DNS, clock synchronisation, a pending reboot,
+  zombie processes and open file descriptors. Each one carries the command
+  worth running next, and the worst three are printed under the table.
+
+  The exit code is usable in a script: `0` clean, `1` warnings only, `2`
+  something critical. `--format json` gives the whole result machine-readably.
+
+  Every check is read-only, needs no root, and has a four-second timeout, so
+  running it cannot make a bad situation worse and a hung mount cannot hang the
+  diagnosis. A check whose command is missing reports `skipped`, which is what
+  a container without `systemctl` gets.
+
+  `barem check` and `barem doctor` are the same command. `barem --help` still
+  prints the usage text — the diagnosis is the bare word, the usage is the flag.
+- `table.render_table()`, so a table built in memory gets the same borders,
+  widths, colours and responsive layout as piped output. `barem help` uses it.
+
+### Fixed
+
+- The `df` percent column is found by its header rather than by position,
+  because `df -P` calls it Capacity and `df -Pi` calls it IUse%, and a fixed
+  index misreads anything that is not GNU coreutils exactly.
+
 ## [0.6.1] - 2026-10-04
 
 ### Changed
@@ -34,11 +81,11 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- **Table mode.** Piping a command into `gamaxsene` now formats its output as a
+- **Table mode.** Piping a command into `barem` now formats its output as a
   readable table that adapts to the terminal width, instead of looking anything
-  up: `df -h | gamaxsene`, `ps aux | gamaxsene --sort -%mem --top 10`. The
+  up: `df -h | barem`, `ps aux | barem --sort -%mem --top 10`. The
   design is written up in [table-mode.md](table-mode.md) and implemented under
-  `src/gamaxsene/table/`.
+  `src/barem/table/`.
   - Columns are found by character position, not by `split()`, which real
     output defeats: `df` has a `Mounted on` header, `ps aux` keeps a whole
     command line in one column, `docker ps` has both plus a STATUS column
@@ -61,9 +108,9 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - `--sort`, `--top`, `--where`, `--cols`, `--format md|csv|tsv|json`,
     `--box`, `--ascii`, `--cards`, `--width`, `--bar-width`, `--warn`,
     `--crit`, `--symbols`, `--relative`, `--input`, `--raw`, `--profiles`.
-  - `gamaxsene run df -h` runs the command itself, so its name is known for
+  - `barem run df -h` runs the command itself, so its name is known for
     certain rather than guessed, and `--watch 2` re-runs and redraws in place.
-  - User profiles load from `~/.config/gamaxsene/profiles/`.
+  - User profiles load from `~/.config/barem/profiles/`.
 - Tests for table mode: unit tests for the width functions first, parser tests
   for each way `split()` fails, the width and alignment invariants across every
   fixture, style and width, hostile input (embedded ANSI, CJK, a 4000-character
@@ -163,7 +210,7 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Tab completion for bash and zsh. `gamaxsene --completion bash` (or `zsh`)
+- Tab completion for bash and zsh. `barem --completion bash` (or `zsh`)
   prints a script to install; TAB then completes command names, keywords and
   options. Candidates are read from the example files that are installed, so a
   command or keyword added later is completed without regenerating anything.
@@ -195,17 +242,18 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- First release: the `gamaxsene` command, 37 Linux commands and 1,236
+- First release: the `barem` command, 37 Linux commands and 1,236
   copy-paste-ready examples.
-- Keyword filtering (`gamaxsene find size`), search across every command
-  (`gamaxsene -s port`), a command listing (`-l`) and grep-friendly one-line
+- Keyword filtering (`barem find size`), search across every command
+  (`barem -s port`), a command listing (`-l`) and grep-friendly one-line
   output (`-1`).
 - Colors that switch off automatically when output is not a terminal, and
   exit codes that make the tool usable in scripts.
 - Packaging with hatchling: the example files ship inside the wheel and are
   found with `importlib.resources`, wherever the package is installed.
 
-[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/Merab25/Gamaxsene/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/Merab25/Gamaxsene/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Merab25/Gamaxsene/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/Merab25/Gamaxsene/compare/v0.4.0...v0.5.0

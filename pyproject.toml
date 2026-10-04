@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "gamaxsene"
+name = "barem"
 dynamic = ["version"]
 description = "Real-world, copy-paste-ready examples for Linux commands, right in your terminal"
 readme = "README.md"
@@ -38,16 +38,16 @@ Repository = "https://github.com/Merab25/Gamaxsene"
 Issues = "https://github.com/Merab25/Gamaxsene/issues"
 Changelog = "https://github.com/Merab25/Gamaxsene/blob/main/CHANGELOG.md"
 
-# Creates the `gamaxsene` terminal command -> runs main() in src/gamaxsene/cli.py
+# Creates the `barem` terminal command -> runs main() in src/barem/cli.py
 [project.scripts]
-gamaxsene = "gamaxsene.cli:main"
+barem = "barem.cli:main"
 
-# Version lives in one place: src/gamaxsene/__init__.py
+# Version lives in one place: src/barem/__init__.py
 [tool.hatch.version]
-path = "src/gamaxsene/__init__.py"
+path = "src/barem/__init__.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/gamaxsene"]
+packages = ["src/barem"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -73,7 +73,8 @@ select = [
 [tool.ruff.lint.per-file-ignores]
 # argparse has no public API for "every option you accept", and completion
 # has to know exactly that, so option_names() reads parser._actions.
-"src/gamaxsene/cli.py" = ["SLF001"]
-# The table fixtures are literal command output, pasted as it is printed.
-# Wrapping those lines would change what the parser is being tested against.
+"src/barem/cli.py" = ["SLF001"]
+# These fixtures are literal command output, pasted as it is printed.
+# Wrapping those lines would change what is being tested against.
 "tests/test_table_parse.py" = ["E501"]
+"tests/test_diagnose.py" = ["E501"]

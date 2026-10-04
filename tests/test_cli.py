@@ -1,11 +1,11 @@
-"""Tests for gamaxsene. Run with: pytest"""
+"""Tests for barem. Run with: pytest"""
 
 import shutil
 import subprocess
 
 import pytest
 
-from gamaxsene import cli
+from barem import cli
 
 NAMES = cli.available()
 
@@ -139,7 +139,7 @@ def test_help(capsys):
         cli.main(["--help"])
     assert exc.value.code == 0
     out = capsys.readouterr().out
-    assert "gamaxsene find size" in out
+    assert "barem find size" in out
     assert "available commands" in out
 
 
@@ -218,6 +218,7 @@ PUBLIC_OPTIONS = sorted(
         "--bar-width",
         "--box",
         "--cards",
+        "--clean",
         "--cols",
         "--crit",
         "--format",
@@ -236,6 +237,8 @@ PUBLIC_OPTIONS = sorted(
         "--watch",
         "--where",
         "--width",
+        # barem help
+        "--all",
     ]
 )
 
@@ -263,7 +266,7 @@ def test_completion_script_is_printed(capsys, shell):
     code = cli.main(["--completion", shell])
     out, _ = capsys.readouterr()
     assert code == 0
-    assert "_gamaxsene" in out
+    assert "_barem" in out
     assert "--complete" in out  # the script asks the CLI for its candidates
 
 

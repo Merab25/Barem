@@ -216,7 +216,9 @@ def render(
 
     if plan.cards:
         body = render_cards(table, plan, theme)
-    elif style == "box":
+    elif style in ("box", "ascii"):
+        # Borders are the default, so the ASCII style is the same layout with
+        # +---+ instead of the box-drawing characters.
         body = render_box(table, plan, theme)
     else:
         body = render_clean(table, plan, theme)

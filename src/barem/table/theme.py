@@ -71,6 +71,10 @@ STATUS_GOOD = frozenset(
         "bound",
         "loaded",
         "synchronized",
+        # the words `barem help` reports its own results with
+        "pass",
+        "passed",
+        "clear",
     }
 )
 STATUS_BUSY = frozenset(
@@ -93,6 +97,9 @@ STATUS_BUSY = frozenset(
         "degraded",
         "paused",
         "created",
+        "warn",
+        "warning",
+        "watch",
     }
 )
 STATUS_BAD = frozenset(
@@ -117,6 +124,10 @@ STATUS_BAD = frozenset(
         "offline",
         "lost",
         "stopped",
+        "bad",
+        "critical",
+        "crit",
+        "problem",
     }
 )
 

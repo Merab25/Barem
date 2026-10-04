@@ -1,7 +1,7 @@
 # Table mode — design document
 
 > Status: implemented in 0.6.0. Phases 1-8 of section 13 are all in, under
-> `src/gamaxsene/table/`, with the module layout of section 11 and the tests of
+> `src/barem/table/`, with the module layout of section 11 and the tests of
 > section 12 (fixtures, golden files per width, and the width invariant).
 >
 > Not done, because section 15 left them open on purpose: a sticky identity
@@ -22,10 +22,10 @@
 Table mode turns the raw, hard-to-read output of standard Linux commands into a clean, readable table that adapts to the width of the terminal.
 
 ```bash
-df -i | gamaxsene
-ps aux | gamaxsene --sort %mem --top 10
-ss -tlnp | gamaxsene
-docker ps | gamaxsene
+df -i | barem
+ps aux | barem --sort %mem --top 10
+ss -tlnp | barem
+docker ps | barem
 ```
 
 The tool reads the text from standard input, works out which command produced it, splits it into columns, decides what each column means (a size, a percentage, a status, a path), and prints it with alignment, colors and usage bars that match the meaning.
@@ -54,7 +54,7 @@ Table mode fixes all three without replacing the commands. They stay the source 
 The default has **no vertical lines and no box corners**. Columns are separated by two spaces, and a single light rule sits under the header. This is the layout that reads best and cannot break if a character width is miscalculated.
 
 ```text
-$ df -h | gamaxsene
+$ df -h | barem
 
  FILESYSTEM       SIZE   USED   AVAIL  USE%               MOUNTED ON
  ──────────────────────────────────────────────────────────────────
@@ -240,7 +240,7 @@ This is the core of the feature and the part worth explaining in an interview.
 ```python
 width = (
     args.width  # explicit --width wins
-    or int(os.environ.get("GAMAXSENE_WIDTH", 0))
+    or int(os.environ.get("BAREM_WIDTH", 0))
     or shutil.get_terminal_size(fallback=(80, 24)).columns
 )
 width = max(width, 20)
@@ -343,7 +343,7 @@ The pipe gives us bytes, not the command name. In order:
 
 1. `--as df` — explicit, always wins.
 2. **Header fingerprint.** A dictionary maps a set of header words to a profile: `{"filesystem", "size", "used", "avail"}` → `df`, `{"user", "pid", "%cpu", "%mem"}` → `ps aux`, `{"container id", "image", "status", "ports"}` → `docker ps`. This handles the realistic cases, because these headers are stable.
-3. **Wrapper mode.** `gamaxsene run df -i` runs the command itself, so the name is known with certainty, and it is also how `--watch` works.
+3. **Wrapper mode.** `barem run df -i` runs the command itself, so the name is known with certainty, and it is also how `--watch` works.
 4. **Generic fallback.** No profile matched: column kinds are guessed from the data (all values match a size pattern → `size`; all end in `%` → `percent`; the header is `%cpu` → percent), which still produces a clean table.
 
 The generic path must be good, because it is what runs on the commands nobody wrote a profile for.
@@ -352,7 +352,7 @@ The generic path must be good, because it is what runs on the commands nobody wr
 
 ## 9. Profiles
 
-A profile is a small Python module in `src/gamaxsene/table/profiles/`, one per command:
+A profile is a small Python module in `src/barem/table/profiles/`, one per command:
 
 ```python
 DF = Profile(
@@ -370,7 +370,7 @@ DF = Profile(
 )
 ```
 
-Users can add their own profiles in `~/.config/gamaxsene/profiles/`, matching how personal examples work.
+Users can add their own profiles in `~/.config/barem/profiles/`, matching how personal examples work.
 
 ### Profiles to write first
 
@@ -381,7 +381,7 @@ Users can add their own profiles in `~/.config/gamaxsene/profiles/`, matching ho
 ## 10. Command-line interface
 
 ```text
-usage: gamaxsene [--as NAME] [--sort COL] [--top N] [--cols LIST] [--where EXPR]
+usage: barem [--as NAME] [--sort COL] [--top N] [--cols LIST] [--where EXPR]
                  [--format STYLE] [--box|--ascii|--cards] [--width N] [--max-width N]
                  [--no-bars|--bar-width N] [--warn N] [--crit N] [--no-color]
                  [--no-summary] [--raw] [--watch SECONDS]
@@ -398,14 +398,14 @@ usage: gamaxsene [--as NAME] [--sort COL] [--top N] [--cols LIST] [--where EXPR]
 | `--watch 2` | Re-run (wrapper mode) every 2 seconds, redrawing in place |
 | `--raw` | Print the untouched input, for checking what was changed |
 
-`--sort`, `--top` and `--where` are what turn it from a prettifier into a tool: `ps aux | gamaxsene --sort -%mem --top 10` replaces a long `awk` and `sort` pipeline.
+`--sort`, `--top` and `--where` are what turn it from a prettifier into a tool: `ps aux | barem --sort -%mem --top 10` replaces a long `awk` and `sort` pipeline.
 
 ---
 
 ## 11. Code layout
 
 ```text
-src/gamaxsene/table/
+src/barem/table/
 ├── __init__.py       # render(text, options) -> str, the single public entry point
 ├── width.py          # display_width, truncate_end, truncate_middle, sanitize
 ├── model.py          # Column, Kind, Align, Row, Table dataclasses
@@ -446,13 +446,13 @@ Each phase is useful on its own and can be committed and demonstrated separately
 | Phase | Content | Done when |
 | --- | --- | --- |
 | 1 | `width.py` + `model.py` + the clean renderer with fixed columns | A hard-coded table prints with correct alignment at any width |
-| 2 | Columnar parser + kind inference | `df -h \| gamaxsene` works with no profile |
+| 2 | Columnar parser + kind inference | `df -h \| barem` works with no profile |
 | 3 | Responsive layout: shrink, truncate, drop, cards | Resizing the terminal to 40 columns still gives readable output |
 | 4 | `theme.py`: colors, thresholds, percentage bars, sizes | `df` and `ps` look like the examples in section 2 |
 | 5 | Profiles for `df`, `ps`, `ss`, `docker ps` + fingerprint detection | Correct column kinds without `--as` |
-| 6 | `--sort`, `--top`, `--where`, `--cols` | `ps aux \| gamaxsene --sort -%mem --top 10` |
-| 7 | Structured input (json, csv), `--format md\|csv\|json` | `docker inspect \| gamaxsene` |
-| 8 | Wrapper mode `gamaxsene run`, `--watch`, user profiles | `gamaxsene run --watch 2 df -h` |
+| 6 | `--sort`, `--top`, `--where`, `--cols` | `ps aux \| barem --sort -%mem --top 10` |
+| 7 | Structured input (json, csv), `--format md\|csv\|json` | `docker inspect \| barem` |
+| 8 | Wrapper mode `barem run`, `--watch`, user profiles | `barem run --watch 2 df -h` |
 
 ---
 

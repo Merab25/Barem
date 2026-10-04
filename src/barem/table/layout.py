@@ -50,14 +50,14 @@ PCT_NUMBER_WIDTH = 4
 def terminal_width(explicit: int | None = None, max_width: int | None = None) -> int:
     """How many cells we may use.
 
-    An explicit --width wins, then GAMAXSENE_WIDTH, then the real terminal.
+    An explicit --width wins, then BAREM_WIDTH, then the real terminal.
     When stdout is redirected, get_terminal_size already falls back to 80,
     which is the right default for a file or another pipe.
     """
     width = explicit or 0
     if not width:
         try:
-            width = int(os.environ.get("GAMAXSENE_WIDTH", 0))
+            width = int(os.environ.get("BAREM_WIDTH", 0))
         except ValueError:
             width = 0
     if not width:

@@ -1,0 +1,37 @@
+[
+  {
+    "name": "web-7d9f8b6c5d-abcde",
+    "ready": "1/1",
+    "status": "Running",
+    "restarts": "0",
+    "age": "3d 4h"
+  },
+  {
+    "name": "web-7d9f8b6c5d-fghij",
+    "ready": "1/1",
+    "status": "Running",
+    "restarts": "2",
+    "age": "3d 4h"
+  },
+  {
+    "name": "api-5c7b9d8f6a-klmno",
+    "ready": "0/1",
+    "status": "CrashLoopBackOff",
+    "restarts": "14",
+    "age": "22m"
+  },
+  {
+    "name": "cache-6b8d7f5c4e-pqrst",
+    "ready": "1/1",
+    "status": "Running",
+    "restarts": "0",
+    "age": "12d"
+  },
+  {
+    "name": "migrate-job-xyz",
+    "ready": "0/1",
+    "status": "Completed",
+    "restarts": "0",
+    "age": "5h"
+  }
+]

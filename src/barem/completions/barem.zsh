@@ -1,23 +1,23 @@
-#compdef gamaxsene
+#compdef barem
 
-# zsh completion for gamaxsene
+# zsh completion for barem
 #
 # Install it once, in a directory that is on your $fpath:
-#   gamaxsene --completion zsh > "${fpath[1]}/_gamaxsene"
+#   barem --completion zsh > "${fpath[1]}/_barem"
 #   rm -f ~/.zcompdump && compinit
 #
 # Or load it in the current shell only:
-#   source <(gamaxsene --completion zsh)
+#   source <(barem --completion zsh)
 
-_gamaxsene() {
+_barem() {
     local -a candidates
 
     # words[2,CURRENT] is every word after the program name, up to and
-    # including the one being typed. `gamaxsene --complete` filters the
+    # including the one being typed. `barem --complete` filters the
     # candidates by that last word, so command names, keywords and options
     # all come from the installed example files rather than from a list
     # baked into this script.
-    candidates=(${(f)"$(gamaxsene --complete "${(@)words[2,CURRENT]}" 2>/dev/null)"})
+    candidates=(${(f)"$(barem --complete "${(@)words[2,CURRENT]}" 2>/dev/null)"})
 
     # Splitting on newlines leaves a single empty element when there was no
     # output at all; drop it so zsh does not offer an empty match.
@@ -26,4 +26,4 @@ _gamaxsene() {
     (( ${#candidates} )) && compadd -- ${candidates}
 }
 
-_gamaxsene "$@"
+_barem "$@"

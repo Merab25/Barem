@@ -1,7 +1,7 @@
 """Wrapper mode: run the command ourselves, so its name is known.
 
 A pipe hands us bytes and no command name, so the profile has to be guessed
-from the header. `gamaxsene run df -i` removes the guess, and is also what
+from the header. `barem run df -i` removes the guess, and is also what
 makes `--watch` possible, since watching means re-running.
 """
 
@@ -15,7 +15,7 @@ import time
 from . import Options, format_text
 
 #: Table-mode flags that take a value. Needed to find where the wrapped
-#: command starts, since `gamaxsene run df -h` must not have its -h eaten.
+#: command starts, since `barem run df -h` must not have its -h eaten.
 VALUE_FLAGS = frozenset(
     {
         "--as",

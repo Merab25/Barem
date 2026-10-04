@@ -31,7 +31,7 @@ python3 -m pip install 'git+https://github.com/Merab25/Gamaxsene.git'
 python3 -m pip install 'git+https://github.com/Merab25/Gamaxsene.git@v0.3.0'
 
 # Install a local wheel
-python3 -m pip install ./dist/gamaxsene-0.3.0-py3-none-any.whl
+python3 -m pip install ./dist/barem-0.3.0-py3-none-any.whl
 
 # Upgrade a package
 python3 -m pip install -U requests

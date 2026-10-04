@@ -1,0 +1,29 @@
+ 127.0.0.1:5432
+   State          LISTEN
+   Recv-Q         0
+   Send-Q         4,096
+   Peer Address…  0.0.0.0:*
+   Process        users:(("postgres",pi…
+
+ 0.0.0.0:80
+   State          LISTEN
+   Recv-Q         0
+   Send-Q         511
+   Peer Address…  0.0.0.0:*
+   Process        users:(("nginx",pid=2…
+
+ 0.0.0.0:22
+   State          LISTEN
+   Recv-Q         0
+   Send-Q         128
+   Peer Address…  0.0.0.0:*
+   Process        users:(("sshd",pid=90…
+
+ 127.0.0.53%lo:53
+   State          LISTEN
+   Recv-Q         0
+   Send-Q         4,096
+   Peer Address…  0.0.0.0:*
+   Process        users:(("systemd-reso…
+
+ 4 sockets

@@ -1,7 +1,7 @@
 """Table mode: turn command output into a readable, responsive table.
 
-    df -h | gamaxsene
-    ps aux | gamaxsene --sort -%mem --top 10
+    df -h | barem
+    ps aux | barem --sort -%mem --top 10
 
 The single public entry point is `format_text`, which never raises: if the
 input cannot be parsed it is returned unchanged with a note, because a
@@ -20,9 +20,10 @@ from .humanize import sort_value
 from .model import Table
 from .theme import Theme, colors_available, unicode_available
 
-__all__ = ["FORMATS", "STYLES", "Options", "format_text"]
+__all__ = ["FORMATS", "STYLES", "Options", "format_text", "render_table"]
 
-STYLES = ("clean", "box", "ascii", "cards")
+#: "box" is the default; "ascii" is the same layout in plain characters.
+STYLES = ("box", "clean", "ascii", "cards")
 FORMATS = ("md", "csv", "tsv", "json")
 
 #: --where 'use% > 80', 'status ~ Exited', 'name != tmpfs'
@@ -35,7 +36,8 @@ class Options:
 
     profile: str | None = None
     input_format: str | None = None
-    style: str = "clean"
+    #: Borders by default; --clean drops them for the lighter layout.
+    style: str = "box"
     export: str | None = None
     width: int | None = None
     max_width: int | None = None
@@ -180,7 +182,7 @@ def format_text(text: str, options: Options | None = None) -> str:
     try:
         return _format(text, options)
     except Exception as error:  # fail soft, always
-        note = f"gamaxsene: could not format input ({type(error).__name__})"
+        note = f"barem: could not format input ({type(error).__name__})"
         return text.rstrip("\n") + "\n" + note
 
 
@@ -197,6 +199,16 @@ def _format(text: str, options: Options) -> str:
     if table is None or not table.columns:
         return text.rstrip("\n")
 
+    return render_table(table, options)
+
+
+def render_table(table: Table, options: Options | None = None) -> str:
+    """Render a Table that was built in memory rather than parsed from text.
+
+    `barem help` assembles its results as a Table directly, so it gets the
+    same borders, widths, colours and responsive layout as piped output.
+    """
+    options = options or Options()
     notes: list[str] = []
     filtered = False
     if options.where:
@@ -218,7 +230,7 @@ def _format(text: str, options: Options) -> str:
     theme = _theme(options)
     style = options.export or options.style
     width = layout.terminal_width(options.width, options.max_width)
-    geom = layout.BOX_GEOMETRY if style == "box" else layout.CLEAN_GEOMETRY
+    geom = layout.BOX_GEOMETRY if style in ("box", "ascii") else layout.CLEAN_GEOMETRY
     plan = layout.plan(
         table,
         theme,

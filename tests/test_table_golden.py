@@ -12,8 +12,8 @@ from pathlib import Path
 
 import pytest
 
-from gamaxsene.table import Options, format_text
-from gamaxsene.table.width import display_width
+from barem.table import Options, format_text
+from barem.table.width import display_width
 
 FIXTURES = Path(__file__).parent / "fixtures"
 GOLDEN = Path(__file__).parent / "golden"
@@ -21,17 +21,21 @@ GOLDEN = Path(__file__).parent / "golden"
 #: 40 lands in card mode, 60 forces shrinking and dropping, 80 is the common
 #: default and 120 is a wide window where everything fits.
 WIDTHS = (40, 60, 80, 120)
+#: The default style gets the full sweep; the others get a representative
+#: case each, which is enough to catch a renderer regression.
 CASES = [
     *[
-        (name, width, "clean")
+        (name, width, "box")
         for name in sorted(p.stem for p in FIXTURES.glob("*.txt"))
         for width in WIDTHS
     ],
-    ("df-h", 80, "box"),
+    *[(name, 80, "clean") for name in sorted(p.stem for p in FIXTURES.glob("*.txt"))],
+    ("df-h", 60, "clean"),
+    ("ps-aux", 100, "clean"),
     ("df-h", 80, "ascii"),
     ("df-h", 80, "md"),
-    ("kubectl-pods", 80, "box"),
-    ("ps-aux", 100, "clean"),
+    ("df-h", 80, "csv"),
+    ("kubectl-pods", 80, "json"),
 ]
 
 

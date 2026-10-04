@@ -1,4 +1,4 @@
-"""Command-line interface for gamaxsene.
+"""Command-line interface for barem.
 
 Each Linux command has one text file in the `examples/` folder, for example
 `examples/find.txt`. This module finds those files, parses them into
@@ -16,9 +16,13 @@ import textwrap
 from dataclasses import dataclass, field
 from importlib import resources
 
-from . import __version__, table
+from . import __version__
+from . import table as table_mod
 
 EXTENSION = ".txt"
+
+#: `barem help` runs the diagnosis; `--help` still prints the usage text.
+DIAGNOSE_WORDS = ("help", "check", "doctor")
 
 #: Flags whose value may legitimately start with a dash: `--sort -size` means
 #: descending. argparse would read that as another option, so these are
@@ -52,13 +56,13 @@ so the output is easy to read, copy and grep."""
 
 USAGE_EXAMPLES = """\
 examples:
-  gamaxsene find                   all examples for find
-  gamaxsene find size              only examples that mention "size"
-  gamaxsene tar extract gz         several keywords: all of them must match
-  gamaxsene -s port                search the examples of every command
-  gamaxsene -l                     list available commands
-  gamaxsene find -1 | grep perm    one example per line, grep-friendly
-  gamaxsene find | grep -A1 perm   plain grep: description + command"""
+  barem find                   all examples for find
+  barem find size              only examples that mention "size"
+  barem tar extract gz         several keywords: all of them must match
+  barem -s port                search the examples of every command
+  barem -l                     list available commands
+  barem find -1 | grep perm    one example per line, grep-friendly
+  barem find | grep -A1 perm   plain grep: description + command"""
 
 
 @dataclass
@@ -92,7 +96,7 @@ class Sheet:
 
 def examples_dir():
     """Location of the bundled example files, wherever the package is installed."""
-    return resources.files("gamaxsene").joinpath("examples")
+    return resources.files("barem").joinpath("examples")
 
 
 def available() -> list[str]:
@@ -201,7 +205,7 @@ def render_list(style: Style) -> str:
         sheet = load(name)
         count = style.muted(f"({len(sheet.examples)})")
         lines.append(f"  {style.command(name.ljust(width))}  {sheet.title} {count}")
-    lines += ["", "Usage: gamaxsene <command> [keyword ...]"]
+    lines += ["", "Usage: barem <command> [keyword ...]"]
     return "\n".join(lines)
 
 
@@ -236,7 +240,7 @@ def completion_script(shell: str) -> str:
     """The completion script for `shell`, shipped inside the package."""
     # One joinpath per segment: on Python 3.9 a zipped package hands back a
     # zipfile.Path, whose joinpath only took a single argument back then.
-    path = resources.files("gamaxsene").joinpath("completions").joinpath(f"gamaxsene.{shell}")
+    path = resources.files("barem").joinpath("completions").joinpath(f"barem.{shell}")
     return path.read_text(encoding="utf-8").rstrip("\n")
 
 
@@ -295,7 +299,7 @@ def build_parser() -> argparse.ArgumentParser:
         " ".join(available()), width=72, initial_indent="  ", subsequent_indent="  "
     )
     parser = argparse.ArgumentParser(
-        prog="gamaxsene",
+        prog="barem",
         description=DESCRIPTION,
         epilog=f"{USAGE_EXAMPLES}\n\navailable commands:\n{commands}",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -336,7 +340,7 @@ def _add_table_arguments(parser: argparse.ArgumentParser) -> None:
     """
     group = parser.add_argument_group(
         "table mode",
-        "format piped output: df -h | gamaxsene, or gamaxsene run df -h",
+        "format piped output: df -h | barem, or barem run df -h",
     )
     group.add_argument(
         "--as",
@@ -360,12 +364,15 @@ def _add_table_arguments(parser: argparse.ArgumentParser) -> None:
     group.add_argument(
         "--format",
         dest="export",
-        choices=table.FORMATS,
+        choices=table_mod.FORMATS,
         metavar="STYLE",
         help="export instead of rendering: md, csv, tsv or json",
     )
     style = group.add_mutually_exclusive_group()
-    style.add_argument("--box", action="store_true", help="draw borders around every cell")
+    style.add_argument(
+        "--box", action="store_true", help="draw borders around every cell (default)"
+    )
+    style.add_argument("--clean", action="store_true", help="no borders, just an underlined header")
     style.add_argument("--ascii", action="store_true", help="no Unicode, for old terminals")
     style.add_argument("--cards", action="store_true", help="one block per row, for narrow windows")
     group.add_argument("--width", type=int, metavar="N", help="assume this terminal width")
@@ -404,13 +411,19 @@ def _add_table_arguments(parser: argparse.ArgumentParser) -> None:
     group.add_argument(
         "--input",
         dest="input_format",
-        choices=table.detect.INPUT_FORMATS,
+        choices=table_mod.detect.INPUT_FORMATS,
         metavar="FMT",
         help="force the input format instead of detecting it",
     )
     group.add_argument("--no-header", action="store_true", help="the input has no header row")
     group.add_argument("--no-summary", action="store_true", help="omit the line under the table")
     group.add_argument("--raw", action="store_true", help="print the input unchanged")
+    group.add_argument(
+        "--all",
+        dest="all_checks",
+        action="store_true",
+        help="with `barem help`, list the checks that passed as well",
+    )
     group.add_argument(
         "--watch", type=float, metavar="SECONDS", help="with 'run', re-run and redraw every SECONDS"
     )
@@ -440,16 +453,17 @@ def join_dash_values(argv: list[str]) -> list[str]:
     return out
 
 
-def table_options(args: argparse.Namespace) -> table.Options:
+def table_options(args: argparse.Namespace) -> table_mod.Options:
     """Translate parsed arguments into table-mode options."""
-    style = "clean"
-    if args.box:
-        style = "box"
+    # Borders are the default; --clean, --ascii and --cards each replace them.
+    style = "box"
+    if args.clean:
+        style = "clean"
     elif args.ascii:
         style = "ascii"
     elif args.cards:
         style = "cards"
-    return table.Options(
+    return table_mod.Options(
         profile=args.profile,
         input_format=args.input_format,
         style=style,
@@ -502,8 +516,29 @@ def read_stdin() -> str | None:
         return None
 
 
+def run_diagnose(argv: list[str]) -> int:
+    """`barem help`: run the first-try diagnostics and report what is off."""
+    from . import diagnose
+
+    parser = build_parser()
+    args = parser.parse_args(join_dash_values(argv))
+    results = diagnose.run_checks()
+    table = diagnose.build_table(results, show_all=args.all_checks)
+
+    options = table_options(args)
+    if not table.rows and not args.all_checks:
+        # Nothing to show is the good case, so say so rather than printing an
+        # empty table. The summary already opens with the verdict.
+        style = Style(colors_enabled(args.no_color))
+        emit(" " + style.title(table.summary))
+        return diagnose.exit_code(results)
+
+    emit(table_mod.render_table(table, options))
+    return diagnose.exit_code(results)
+
+
 def run_wrapper(argv: list[str]) -> int:
-    """`gamaxsene run df -h`: run the command, then format its output."""
+    """`barem run df -h`: run the command, then format its output."""
     from .table import runner
 
     own, command = runner.split_command(argv)
@@ -532,6 +567,12 @@ def main(argv: list[str] | None = None) -> int:
     if argv and argv[0] == "run":
         return run_wrapper(argv[1:])
 
+    # `barem help` is the diagnosis, not the usage text -- that stays on
+    # `--help`. `check` and `doctor` do the same thing, for whichever word
+    # comes to mind first.
+    if argv and argv[0] in DIAGNOSE_WORDS:
+        return run_diagnose(argv[1:])
+
     parser = build_parser()
     args = parser.parse_intermixed_args(join_dash_values(argv))
     style = Style(colors_enabled(args.no_color))
@@ -543,10 +584,10 @@ def main(argv: list[str] | None = None) -> int:
         return emit(completion_script(args.completion))
 
     if args.profiles:
-        names = table.profile_names()
+        names = table_mod.profile_names()
         lines = [style.title(f"Known table profiles ({len(names)}):"), ""]
         lines += [f"  {style.command(name)}" for name in names]
-        lines += ["", "Force one with: df -h | gamaxsene --as df"]
+        lines += ["", "Force one with: df -h | barem --as df"]
         return emit("\n".join(lines))
 
     if wants_table(args):
@@ -556,7 +597,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if not text.strip():
             return 0
-        rendered = table.format_text(text, table_options(args))
+        rendered = table_mod.format_text(text, table_options(args))
         return emit(rendered) if rendered else 0
 
     if args.list:
@@ -580,7 +621,7 @@ def main(argv: list[str] | None = None) -> int:
         suggestions = difflib.get_close_matches(name, names, n=3)
         if suggestions:
             print(f"Did you mean: {', '.join(suggestions)}?", file=sys.stderr)
-        print("Run 'gamaxsene --list' to see all commands.", file=sys.stderr)
+        print("Run 'barem --list' to see all commands.", file=sys.stderr)
         return 1
 
     sheet = load(name)
