@@ -1,6 +1,6 @@
 # barem
 
-[![CI](https://github.com/Merab25/Gamaxsene/actions/workflows/ci.yml/badge.svg)](https://github.com/Merab25/Gamaxsene/actions/workflows/ci.yml)
+[![CI](https://github.com/Merab25/Barem/actions/workflows/ci.yml/badge.svg)](https://github.com/Merab25/Barem/actions/workflows/ci.yml)
 ![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 ![Dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen)
@@ -53,13 +53,13 @@ pipx ensurepath        # then open a new terminal
 Install straight from GitHub:
 
 ```bash
-pipx install git+https://github.com/Merab25/Gamaxsene.git
+pipx install git+https://github.com/Merab25/Barem.git
 ```
 
 pipx creates an isolated virtual environment for the tool and puts the `barem` command on your `PATH`.
 
 ```bash
-pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.11.0   # a specific release
+pipx install git+https://github.com/Merab25/Barem.git@v0.11.0   # a specific release
 pipx upgrade barem                                             # update
 pipx uninstall barem                                           # remove
 ```
@@ -684,7 +684,7 @@ barem/
 ## Development
 
 ```bash
-git clone https://github.com/Merab25/Gamaxsene.git
+git clone https://github.com/Merab25/Barem.git
 cd Barem
 python3 -m venv .venv
 source .venv/bin/activate

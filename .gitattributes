@@ -1,4 +1,4 @@
-# gamaxsene ships shell examples that are read on Linux: keep LF in the
+# barem ships shell examples that are read on Linux: keep LF in the
 # repository and in the working tree, so a checkout or wheel built on
 # Windows does not hand out CRLF example files.
 * text=auto eol=lf

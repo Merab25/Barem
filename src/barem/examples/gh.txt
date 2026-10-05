@@ -10,13 +10,13 @@ gh auth status
 gh auth setup-git
 
 # Clone a repository
-gh repo clone Merab25/Gamaxsene
+gh repo clone Merab25/Barem
 
 # Create a repository from the current directory
 gh repo create my-project --public --source=. --remote=origin --push
 
 # Show a repository's details
-gh repo view Merab25/Gamaxsene
+gh repo view Merab25/Barem
 
 # Open it in a browser
 gh repo view --web
@@ -124,7 +124,7 @@ gh release create v0.2.0 --generate-notes
 gh release upload v0.2.0 dist/barem-0.2.0-py3-none-any.whl
 
 # Call any REST endpoint
-gh api repos/Merab25/Gamaxsene --jq '.stargazers_count'
+gh api repos/Merab25/Barem --jq '.stargazers_count'
 
 # Paginate a list endpoint
-gh api --paginate repos/Merab25/Gamaxsene/commits --jq '.[].sha'
+gh api --paginate repos/Merab25/Barem/commits --jq '.[].sha'

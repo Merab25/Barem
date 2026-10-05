@@ -6,7 +6,7 @@ or a better example, and neither needs any Python.
 ## Setting up
 
 ```bash
-git clone https://github.com/Merab25/Gamaxsene.git
+git clone https://github.com/Merab25/Barem.git
 cd Barem
 python3 -m venv .venv
 source .venv/bin/activate

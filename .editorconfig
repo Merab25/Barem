@@ -15,7 +15,7 @@ indent_size = 2
 
 # Example files are shell commands: a stray trailing space is harmless, but
 # indentation is never meaningful here, so leave the content exactly as typed.
-[src/gamaxsene/examples/*.txt]
+[src/barem/examples/*.txt]
 trim_trailing_whitespace = true
 
 [*.md]

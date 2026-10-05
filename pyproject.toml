@@ -33,10 +33,10 @@ classifiers = [
 dev = ["pytest", "build", "ruff"]
 
 [project.urls]
-Homepage = "https://github.com/Merab25/Gamaxsene"
-Repository = "https://github.com/Merab25/Gamaxsene"
-Issues = "https://github.com/Merab25/Gamaxsene/issues"
-Changelog = "https://github.com/Merab25/Gamaxsene/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/Merab25/Barem"
+Repository = "https://github.com/Merab25/Barem"
+Issues = "https://github.com/Merab25/Barem/issues"
+Changelog = "https://github.com/Merab25/Barem/blob/main/CHANGELOG.md"
 
 # Creates the `barem` terminal command -> runs main() in src/barem/cli.py
 [project.scripts]

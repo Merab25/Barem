@@ -25,10 +25,10 @@ python3 -m pip install -e .
 python3 -m pip install -e '.[dev]'
 
 # Install from git
-python3 -m pip install 'git+https://github.com/Merab25/Gamaxsene.git'
+python3 -m pip install 'git+https://github.com/Merab25/Barem.git'
 
 # Install from git at a tag
-python3 -m pip install 'git+https://github.com/Merab25/Gamaxsene.git@v0.3.0'
+python3 -m pip install 'git+https://github.com/Merab25/Barem.git@v0.3.0'
 
 # Install a local wheel
 python3 -m pip install ./dist/barem-0.3.0-py3-none-any.whl
