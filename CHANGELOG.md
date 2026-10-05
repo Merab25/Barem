@@ -6,6 +6,30 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-10-05
+
+### Changed
+
+- **The usage bar is 20 cells, twice as long as before**, so a percentage is
+  readable at a glance rather than a smudge. The colour still carries the
+  severity, and the blocks are still accurate to an eighth of a cell, which
+  at this length puts the bar within half a percent of the number.
+  `--bar-width N` sets another length, and `0` turns the bars off.
+- **The bar length and the padding are now given up before any data is.**
+  Twenty cells of bar and two spaces a side cost more room than an 80-column
+  window has, so the layout tries every setting from the most generous down
+  and keeps the one that concedes least: at 120 columns you get the full bar
+  and the roomy cells, at 80 a shorter bar and tighter cells, and in both
+  cases every column the window can hold. A column is dropped only once the
+  decoration has nothing left to give.
+
+### Performance
+
+- The width measurements are kept while a table is being laid out, since the
+  same columns are measured repeatedly as the layout backs off, and the cells
+  are built once per bar length rather than once per attempt. Formatting 400
+  rows of `ps aux` takes about as long as it did with one layout attempt.
+
 ## [0.9.0] - 2026-10-05
 
 ### Changed
@@ -318,7 +342,8 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Packaging with hatchling: the example files ship inside the wheel and are
   found with `importlib.resources`, wherever the package is installed.
 
-[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/Merab25/Gamaxsene/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/Merab25/Gamaxsene/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Merab25/Gamaxsene/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/Merab25/Gamaxsene/compare/v0.6.1...v0.7.0

@@ -59,7 +59,7 @@ pipx install git+https://github.com/Merab25/Gamaxsene.git
 pipx creates an isolated virtual environment for the tool and puts the `barem` command on your `PATH`.
 
 ```bash
-pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.9.0   # a specific release
+pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.10.0   # a specific release
 pipx upgrade barem                                             # update
 pipx uninstall barem                                           # remove
 ```
@@ -111,19 +111,19 @@ $ barem help
 ```
 
 ```text
-   +----------------+------+------+-------+-------------------+------------+
-   |   FILESYSTEM   | SIZE | USED | AVAIL |             USE%  | MOUNTED ON |
-   +----------------+------+------+-------+-------------------+------------+
-   | /dev/nvme0n1p2 | 468G | 112G |  332G | ██▌░░░░░░░   25%  |     /      |
-   +----------------+------+------+-------+-------------------+------------+
-   |   /dev/sdb1    | 1.8T | 1.7T |   43G | █████████▌   95%! |   /data    |
-   +----------------+------+------+-------+-------------------+------------+
-   | /dev/nvme0n1p1 | 512M |  62M |  450M | █▏░░░░░░░░   12%  | /boot/efi  |
-   +----------------+------+------+-------+-------------------+------------+
-   |     tmpfs      |  16G | 2.1M |   16G | ░░░░░░░░░░    1%  |    /run    |
-   +----------------+------+------+-------+-------------------+------------+
++----------------+------+------+-------+-------------------------+------------+
+|   FILESYSTEM   | SIZE | USED | AVAIL |                   USE%  | MOUNTED ON |
++----------------+------+------+-------+-------------------------+------------+
+| /dev/nvme0n1p2 | 468G | 112G |  332G | ████░░░░░░░░░░░░   25%  |     /      |
++----------------+------+------+-------+-------------------------+------------+
+|   /dev/sdb1    | 1.8T | 1.7T |   43G | ███████████████▏   95%! |   /data    |
++----------------+------+------+-------+-------------------------+------------+
+| /dev/nvme0n1p1 | 512M |  62M |  450M | █▉░░░░░░░░░░░░░░   12%  | /boot/efi  |
++----------------+------+------+-------+-------------------------+------------+
+|     tmpfs      |  16G | 2.1M |   16G | ▏░░░░░░░░░░░░░░░    1%  |    /run    |
++----------------+------+------+-------+-------------------------+------------+
 
-    4 filesystems · 2.3T total · 1.8T used (80%)
+ 4 filesystems · 2.3T total · 1.8T used (80%)
 ```
 
 On a healthy machine it says so in one line and shows nothing else:
@@ -176,19 +176,19 @@ $ df -h | barem
 ```
 
 ```text
-   +----------------+------+------+-------+-------------------+------------+
-   |   FILESYSTEM   | SIZE | USED | AVAIL |             USE%  | MOUNTED ON |
-   +----------------+------+------+-------+-------------------+------------+
-   | /dev/nvme0n1p2 | 468G | 112G |  332G | ██▌░░░░░░░   25%  |     /      |
-   +----------------+------+------+-------+-------------------+------------+
-   |   /dev/sdb1    | 1.8T | 1.7T |   43G | █████████▌   95%! |   /data    |
-   +----------------+------+------+-------+-------------------+------------+
-   | /dev/nvme0n1p1 | 512M |  62M |  450M | █▏░░░░░░░░   12%  | /boot/efi  |
-   +----------------+------+------+-------+-------------------+------------+
-   |     tmpfs      |  16G | 2.1M |   16G | ░░░░░░░░░░    1%  |    /run    |
-   +----------------+------+------+-------+-------------------+------------+
++----------------+------+------+-------+-------------------------+------------+
+|   FILESYSTEM   | SIZE | USED | AVAIL |                   USE%  | MOUNTED ON |
++----------------+------+------+-------+-------------------------+------------+
+| /dev/nvme0n1p2 | 468G | 112G |  332G | ████░░░░░░░░░░░░   25%  |     /      |
++----------------+------+------+-------+-------------------------+------------+
+|   /dev/sdb1    | 1.8T | 1.7T |   43G | ███████████████▏   95%! |   /data    |
++----------------+------+------+-------+-------------------------+------------+
+| /dev/nvme0n1p1 | 512M |  62M |  450M | █▉░░░░░░░░░░░░░░   12%  | /boot/efi  |
++----------------+------+------+-------+-------------------------+------------+
+|     tmpfs      |  16G | 2.1M |   16G | ▏░░░░░░░░░░░░░░░    1%  |    /run    |
++----------------+------+------+-------+-------------------------+------------+
 
-    4 filesystems · 2.3T total · 1.8T used (80%)
+ 4 filesystems · 2.3T total · 1.8T used (80%)
 ```
 
 It works out which command produced the text, splits it into columns, decides what each
@@ -252,17 +252,21 @@ border styles:
 And seven ways to draw a percentage:
 
 ```text
---pct blocks   ███░░░░░░░░░   25%      solid blocks, accurate to an eighth of a cell
---pct shade    ▓▓▓░░░░░░░░░   25%      a shaded track, quieter than solid blocks
---pct bracket  [###.........]   25%    a bracketed meter, works on any terminal
---pct dots     ●●●○○○○○○○○○   25%      filled and hollow dots
---pct line     ━━━┄┄┄┄┄┄┄┄┄   25%      a simple rule, drawn and undrawn
---pct pipes    |||.........   25%      plain pipes and dots, for any terminal
---pct number   25%                     the number on its own, no bar
+--pct blocks   █████░░░░░░░░░░░░░░░   25%      solid blocks, accurate to an eighth of a cell
+--pct shade    ▓▓▓▓▓░░░░░░░░░░░░░░░   25%      a shaded track, quieter than solid blocks
+--pct bracket  [#####...............]   25%    a bracketed meter, [####....]
+--pct dots     ●●●●●○○○○○○○○○○○○○○○   25%      filled and hollow dots
+--pct line     ━━━━━┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄   25%      a simple rule, drawn and undrawn
+--pct pipes    |||||...............   25%      plain pipes and dots, for any terminal
+--pct number   25%                             the number on its own, no bar
 ```
 
-`--bar-width N` sets the bar length, `--pad N` the spacing inside every cell, `--row-gap N`
-blank lines between rows, and `--left` turns off the centring.
+The bar is 20 cells by default; `--bar-width N` changes it, `--pad N` the spacing inside
+every cell, `--row-gap N` blank lines between rows, and `--left` turns off the centring.
+
+A long bar and a roomy cell are the first things given up when the window is narrow: at 80
+columns the bar shortens and the padding tightens by itself rather than a column being
+dropped, so you still see everything.
 
 ### How it adapts
 

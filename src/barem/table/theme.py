@@ -206,7 +206,7 @@ class Theme:
     symbols: bool = False
     warn: float = 70.0
     crit: float = 90.0
-    bar_width: int = 12
+    bar_width: int = 20
     bars: bool = True
     #: border and percentage styles, from the styles registry
     border: styles.Border = field(default_factory=lambda: styles.BOX)

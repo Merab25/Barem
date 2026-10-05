@@ -425,9 +425,9 @@ def _add_table_arguments(parser: argparse.ArgumentParser) -> None:
     group.add_argument(
         "--bar-width",
         type=int,
-        default=10,
+        default=20,
         metavar="N",
-        help="cells in a usage bar (default 10, 0 to disable)",
+        help="cells in a usage bar (default 20, 0 to disable)",
     )
     group.add_argument("--symbols", action="store_true", help="add a symbol to status cells")
     group.add_argument(

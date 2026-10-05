@@ -283,21 +283,36 @@ def plan(
     relative: bool = False,
     geom: Geometry = CLEAN_GEOMETRY,
     wrap_cells: bool = True,
+    cells: list[dict[str, Cell]] | None = None,
 ) -> Plan:
     """Decide the layout for this table at this width.
 
     The order of concessions is what makes the output stay useful: shrink
     text, then drop bars and symbols, then drop columns, then give up on a
     table altogether.
+
+    `cells` is for a caller trying several layouts of the same table: the
+    cells only depend on the theme's bar width, so they can be built once
+    and handed in rather than rebuilt for every attempt.
     """
-    cells = build_cells(table, theme, relative)
+    cells = build_cells(table, theme, relative) if cells is None else cells
     columns = list(table.columns)
     bars = theme.bars
     symbols = theme.symbols
     nums = percent_number_widths(columns, cells)
 
+    measured: dict[tuple, dict[str, int]] = {}
+
     def measure(cols, bars_, symbols_):
-        return natural_widths(cols, cells, bars_, symbols_, nums, theme.bar_style.spacing)
+        # The same set of columns is measured several times over as the
+        # layout backs off, and measuring walks every row, so the answers are
+        # kept. Widths are never mutated in place, only copied by _shrink.
+        key = (tuple(c.key for c in cols), bars_, symbols_)
+        if key not in measured:
+            measured[key] = natural_widths(
+                cols, cells, bars_, symbols_, nums, theme.bar_style.spacing
+            )
+        return dict(measured[key])
 
     def done(cols, widths, bars_, symbols_, dropped=()):
         return Plan(

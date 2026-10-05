@@ -53,7 +53,7 @@ class Options:
     width: int | None = None
     max_width: int | None = None
     bars: bool = True
-    bar_width: int = 12
+    bar_width: int = 20
     symbols: bool = False
     #: None means "leave it to the profile"; a number overrides it everywhere.
     warn: float | None = None
@@ -252,8 +252,9 @@ def render_table(table: Table, options: Options | None = None) -> str:
     return _render.render(table, plan, theme, style=style, summary=options.summary)
 
 
-def _plan_at(table: Table, theme: Theme, options: Options, width: int, pad: int):
-    """The layout this table gets at one padding setting."""
+def _plan_at(table, theme: Theme, options: Options, width: int, pad: int, bar: int, cells=None):
+    """The layout this table gets at one padding and bar-length setting."""
+    theme.pad, theme.bar_width = pad, bar
     cell_pad, sep, frame = theme.border.geometry(pad, layout.GAP)
     geom = layout.Geometry(cell_pad=cell_pad, sep=sep, frame=frame)
     return layout.plan(
@@ -264,37 +265,51 @@ def _plan_at(table: Table, theme: Theme, options: Options, width: int, pad: int)
         relative=options.relative,
         geom=geom,
         wrap_cells=options.wrap,
+        cells=cells,
     )
 
 
 def _concessions(plan) -> tuple[int, int, int]:
-    """How much this layout had to give up, worst first.
+    """How much a layout had to give up, worst first.
 
-    Cards cost the most, then every column dropped, then the bars. Padding is
-    not in the tuple because padding is the thing being traded away for it.
+    Cards cost the most, then every column dropped, then the bars going
+    altogether. Padding and bar length are not in the tuple: they are what is
+    being traded away to avoid the things that are.
     """
     return (int(plan.cards), len(plan.dropped), int(not plan.bars))
 
 
 def _best_plan(table: Table, theme: Theme, options: Options, width: int):
-    """Lay the table out, giving up padding before giving up data.
+    """Lay the table out, giving up decoration before giving up data.
 
-    Generous padding is what makes a wide table readable, but in a narrow
-    window those extra spaces per cell cost whole columns, or the bars. So
-    the padding is tried as asked and then reduced, and the first setting
-    that concedes least wins. The theme is updated to match, because the
-    renderer has to draw exactly the padding the layout budgeted for.
+    A long bar and a roomy cell are what make a wide table readable, but in a
+    narrow window they cost whole columns. So both shrink before any data
+    does: every setting is tried from the most generous down, the padding
+    going first because two spaces a side across six columns buys more room
+    than four cells of bar, and the layout that concedes least wins. The
+    theme is left holding the winning settings, because the renderer has to
+    draw exactly what the layout budgeted for.
     """
-    asked = theme.pad
-    best = _plan_at(table, theme, options, width, asked)
-    if asked <= 1 or _concessions(best) == (0, 0, 0):
-        return best
-    for pad in range(asked - 1, 0, -1):
-        trial = _plan_at(table, theme, options, width, pad)
-        if _concessions(trial) < _concessions(best):
-            best, theme.pad = trial, pad
-        if _concessions(best) == (0, 0, 0):
+    asked_pad, asked_bar = theme.pad, theme.bar_width
+    pads = list(range(asked_pad, 0, -1)) or [0]
+    bars = [b for b in (asked_bar, 16, 12, 10, 8, 6) if 0 < b <= asked_bar] or [asked_bar]
+
+    best, best_cost, chosen = None, None, (asked_pad, asked_bar)
+    for bar in bars:
+        # The cells depend on the bar length but not on the padding, so they
+        # are built once here and reused across the padding attempts.
+        theme.bar_width = bar
+        cells = layout.build_cells(table, theme, options.relative)
+        for pad in pads:
+            trial = _plan_at(table, theme, options, width, pad, bar, cells=cells)
+            cost = _concessions(trial)
+            if best_cost is None or cost < best_cost:
+                best, best_cost, chosen = trial, cost, (pad, bar)
+            if best_cost == (0, 0, 0):
+                break
+        if best_cost == (0, 0, 0):
             break
+    theme.pad, theme.bar_width = chosen
     return best
 
 
