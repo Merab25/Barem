@@ -507,7 +507,7 @@ def table_options(args: argparse.Namespace) -> table_mod.Options:
         profile=args.profile,
         input_format=args.input_format,
         style=style,
-        bar_chars=args.bar_chars or "blocks",
+        bar_chars=args.bar_chars or "pipes",
         pad=2 if args.pad is None else args.pad,
         row_gap=0 if args.row_gap is None else args.row_gap,
         center=not args.left,
@@ -599,7 +599,7 @@ def style_gallery(args: argparse.Namespace) -> str:
         options = table_mod.Options(
             style="clean", bar_chars=name, summary=False, columns=["use%", "target"], **base
         )
-        mark = "   (the default)" if name == "blocks" else ""
+        mark = "   (the default)" if name == "pipes" else ""
         out.append(f"  --pct {name}   ({bar.about}){mark}")
         for line in table_mod.format_text(STYLE_SAMPLE, options).splitlines():
             out.append("  " + line)

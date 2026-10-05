@@ -1,7 +1,7 @@
      FILESYSTEM    SIZE  USED  AVAIL                        USE%   MOUNTED ON
-   /dev/nvme0n1p2  468G  112G   332G  █████░░░░░░░░░░░░░░░   25%       /
-     /dev/sdb1     1.8T  1.7T    43G  ███████████████████░   95%!    /data
-   /dev/nvme0n1p1  512M   62M   450M  ██▍░░░░░░░░░░░░░░░░░   12%   /boot/efi
-       tmpfs        16G  2.1M    16G  ▏░░░░░░░░░░░░░░░░░░░    1%      /run
+   /dev/nvme0n1p2  468G  112G   332G  |||||                  25%       /
+     /dev/sdb1     1.8T  1.7T    43G  |||||||||||||||||||    95%!    /data
+   /dev/nvme0n1p1  512M   62M   450M  ||                     12%   /boot/efi
+       tmpfs        16G  2.1M    16G  |                       1%      /run
 
    4 filesystems · 2.3T total · 1.8T used (80%)

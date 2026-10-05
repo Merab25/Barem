@@ -59,7 +59,7 @@ pipx install git+https://github.com/Merab25/Gamaxsene.git
 pipx creates an isolated virtual environment for the tool and puts the `barem` command on your `PATH`.
 
 ```bash
-pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.10.0   # a specific release
+pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.11.0   # a specific release
 pipx upgrade barem                                             # update
 pipx uninstall barem                                           # remove
 ```
@@ -114,13 +114,13 @@ $ barem help
 +----------------+------+------+-------+-------------------------+------------+
 |   FILESYSTEM   | SIZE | USED | AVAIL |                   USE%  | MOUNTED ON |
 +----------------+------+------+-------+-------------------------+------------+
-| /dev/nvme0n1p2 | 468G | 112G |  332G | ████░░░░░░░░░░░░   25%  |     /      |
+| /dev/nvme0n1p2 | 468G | 112G |  332G | ||||               25%  |     /      |
 +----------------+------+------+-------+-------------------------+------------+
-|   /dev/sdb1    | 1.8T | 1.7T |   43G | ███████████████▏   95%! |   /data    |
+|   /dev/sdb1    | 1.8T | 1.7T |   43G | |||||||||||||||    95%! |   /data    |
 +----------------+------+------+-------+-------------------------+------------+
-| /dev/nvme0n1p1 | 512M |  62M |  450M | █▉░░░░░░░░░░░░░░   12%  | /boot/efi  |
+| /dev/nvme0n1p1 | 512M |  62M |  450M | ||                 12%  | /boot/efi  |
 +----------------+------+------+-------+-------------------------+------------+
-|     tmpfs      |  16G | 2.1M |   16G | ▏░░░░░░░░░░░░░░░    1%  |    /run    |
+|     tmpfs      |  16G | 2.1M |   16G | |                   1%  |    /run    |
 +----------------+------+------+-------+-------------------------+------------+
 
  4 filesystems · 2.3T total · 1.8T used (80%)
@@ -179,13 +179,13 @@ $ df -h | barem
 +----------------+------+------+-------+-------------------------+------------+
 |   FILESYSTEM   | SIZE | USED | AVAIL |                   USE%  | MOUNTED ON |
 +----------------+------+------+-------+-------------------------+------------+
-| /dev/nvme0n1p2 | 468G | 112G |  332G | ████░░░░░░░░░░░░   25%  |     /      |
+| /dev/nvme0n1p2 | 468G | 112G |  332G | ||||               25%  |     /      |
 +----------------+------+------+-------+-------------------------+------------+
-|   /dev/sdb1    | 1.8T | 1.7T |   43G | ███████████████▏   95%! |   /data    |
+|   /dev/sdb1    | 1.8T | 1.7T |   43G | |||||||||||||||    95%! |   /data    |
 +----------------+------+------+-------+-------------------------+------------+
-| /dev/nvme0n1p1 | 512M |  62M |  450M | █▉░░░░░░░░░░░░░░   12%  | /boot/efi  |
+| /dev/nvme0n1p1 | 512M |  62M |  450M | ||                 12%  | /boot/efi  |
 +----------------+------+------+-------+-------------------------+------------+
-|     tmpfs      |  16G | 2.1M |   16G | ▏░░░░░░░░░░░░░░░    1%  |    /run    |
+|     tmpfs      |  16G | 2.1M |   16G | |                   1%  |    /run    |
 +----------------+------+------+-------+-------------------------+------------+
 
  4 filesystems · 2.3T total · 1.8T used (80%)
@@ -249,19 +249,22 @@ border styles:
 | `clean` | no lines but a rule under the header |
 | `minimal` | nothing but aligned columns |
 
-And seven ways to draw a percentage:
+And eight ways to draw a percentage:
 
 ```text
+--pct pipes    |||||                  25%      upright pipes with nothing behind them   (the default)
 --pct blocks   █████░░░░░░░░░░░░░░░   25%      solid blocks, accurate to an eighth of a cell
 --pct shade    ▓▓▓▓▓░░░░░░░░░░░░░░░   25%      a shaded track, quieter than solid blocks
 --pct bracket  [#####...............]   25%    a bracketed meter, [####....]
 --pct dots     ●●●●●○○○○○○○○○○○○○○○   25%      filled and hollow dots
 --pct line     ━━━━━┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄   25%      a simple rule, drawn and undrawn
---pct pipes    |||||...............   25%      plain pipes and dots, for any terminal
+--pct ticks    |||||...............   25%      as pipes, on a dotted track
 --pct number   25%                             the number on its own, no bar
 ```
 
-The bar is 20 cells by default; `--bar-width N` changes it, `--pad N` the spacing inside
+A percentage is drawn as 20 upright pipes by default, with nothing behind them, so a
+glance down the column shows which rows are full. `--pct` picks another of the eight
+looks. The bar is 20 cells long; `--bar-width N` changes it, `--pad N` the spacing inside
 every cell, `--row-gap N` blank lines between rows, and `--left` turns off the centring.
 
 A long bar and a roomy cell are the first things given up when the window is narrow: at 80

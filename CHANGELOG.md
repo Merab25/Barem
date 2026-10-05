@@ -6,6 +6,25 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-10-05
+
+### Changed
+
+- **A percentage is drawn as upright pipes with nothing behind them**, twenty
+  of them for 100%:
+
+      |||||                  25%
+      |||||||||||||||||||    95%!
+
+  The shaded track the bars used to sit on was more ink than information, and
+  the pipes still carry the colour that says how serious the number is. The
+  old look is `--pct blocks`, the dotted track is `--pct ticks`, and
+  `barem --styles` shows all eight.
+- **A percentage that is not zero always draws at least one cell.** Rounding
+  1% of twenty cells gives nothing, which reads as "unused" rather than
+  "barely used"; one pipe says "a little" and the number beside it says how
+  little.
+
 ## [0.10.0] - 2026-10-05
 
 ### Changed
@@ -342,7 +361,8 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Packaging with hatchling: the example files ship inside the wheel and are
   found with `importlib.resources`, wherever the package is installed.
 
-[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/Merab25/Gamaxsene/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/Merab25/Gamaxsene/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/Merab25/Gamaxsene/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Merab25/Gamaxsene/compare/v0.7.0...v0.8.0

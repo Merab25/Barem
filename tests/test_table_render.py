@@ -176,7 +176,8 @@ def test_ascii_style_draws_no_unicode():
     # the same borders as the default style, drawn in plain characters
     assert out.startswith("+--")
     assert "|" in out
-    assert "#" in out and "." in out
+    # the bars too: pipes are already ASCII, so they are kept as they are
+    assert "||" in out
 
 
 def test_markdown_export():

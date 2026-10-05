@@ -288,7 +288,17 @@ LINE = Bar(
 
 PIPES = Bar(
     "pipes",
-    "plain pipes and dots, for any terminal",
+    "upright pipes with nothing behind them",
+    full="|",
+    # A space, not a dot: the empty part of the bar is meant to be absent,
+    # not drawn. The cell is still a fixed width, so the numbers line up.
+    empty=" ",
+    ascii_only=True,
+)
+
+TICKS = Bar(
+    "ticks",
+    "as pipes, on a dotted track",
     full="|",
     empty=".",
     ascii_only=True,
@@ -296,9 +306,12 @@ PIPES = Bar(
 
 NUMBER = Bar("number", "the number on its own, no bar", bare=True)
 
-BARS: dict[str, Bar] = {b.name: b for b in (BLOCKS, SHADE, BRACKET, DOTS, LINE, PIPES, NUMBER)}
+BARS: dict[str, Bar] = {
+    b.name: b for b in (PIPES, BLOCKS, SHADE, BRACKET, DOTS, LINE, TICKS, NUMBER)
+}
 
 ASCII_BAR = {
+    "ticks": "ticks",
     "blocks": "bracket",
     "shade": "bracket",
     "dots": "bracket",
@@ -310,7 +323,8 @@ ASCII_BAR = {
 
 
 def bar_style(name: str, unicode_ok: bool = True) -> Bar:
-    style = BARS.get(name, BLOCKS)
+    """Look a percentage style up, falling back to its ASCII twin if needed."""
+    style = BARS.get(name, PIPES)
     if not unicode_ok and not style.ascii_only and not style.bare:
         style = BARS[ASCII_BAR.get(style.name, "bracket")]
     return style

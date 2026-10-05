@@ -40,7 +40,7 @@ class Options:
     #: Borders by default; see barem --styles for the alternatives.
     style: str = "dashes-grid"
     #: How percentages are drawn: blocks, shade, bracket, dots, line, pipes, number.
-    bar_chars: str = "blocks"
+    bar_chars: str = "pipes"
     #: Spaces inside each cell, either side of the value.
     pad: int = 2
     #: Blank lines between two data rows.

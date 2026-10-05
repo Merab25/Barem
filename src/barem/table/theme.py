@@ -210,7 +210,7 @@ class Theme:
     bars: bool = True
     #: border and percentage styles, from the styles registry
     border: styles.Border = field(default_factory=lambda: styles.BOX)
-    bar_style: styles.Bar = field(default_factory=lambda: styles.BLOCKS)
+    bar_style: styles.Bar = field(default_factory=lambda: styles.PIPES)
     #: spaces inside each cell, either side of its value
     pad: int = 1
     #: blank lines between two data rows, for a table you read across
@@ -316,5 +316,10 @@ class Theme:
             track = style.full * full + partial + style.empty * max(0, rest)
         else:
             filled = round(fraction * width)
+            # A style without partial glyphs would round 1% away to nothing,
+            # which reads as "unused". One cell says "a little", and the
+            # number beside it says how little.
+            if fraction > 0 and filled == 0:
+                filled = 1
             track = style.full * filled + style.empty * (width - filled)
         return f"{style.open_bracket}{track}{style.close_bracket}"
