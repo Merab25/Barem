@@ -59,7 +59,7 @@ pipx install git+https://github.com/Merab25/Barem.git
 pipx creates an isolated virtual environment for the tool and puts the `barem` command on your `PATH`.
 
 ```bash
-pipx install git+https://github.com/Merab25/Barem.git@v0.11.0   # a specific release
+pipx install git+https://github.com/Merab25/Barem.git@v0.11.1   # a specific release
 pipx upgrade barem                                             # update
 pipx uninstall barem                                           # remove
 ```

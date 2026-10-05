@@ -6,6 +6,19 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-10-05
+
+### Fixed
+
+- **Every link now names the repository as it is called today**, `Merab25/Barem`:
+  the CI badge, the `pipx install` lines, the clone commands, the project URLs
+  in `pyproject.toml`, the compare links here, and the `gh` and `pip` example
+  files that use this repository as their example. GitHub's redirect had been
+  hiding them.
+- `.editorconfig` kept LF line endings for `src/gamaxsene/examples`, a path
+  that has not existed since the package became `barem`, so the example files
+  were not covered by the rule they exist for.
+
 ## [0.11.0] - 2026-10-05
 
 ### Changed
@@ -361,7 +374,8 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Packaging with hatchling: the example files ship inside the wheel and are
   found with `importlib.resources`, wherever the package is installed.
 
-[Unreleased]: https://github.com/Merab25/Barem/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/Merab25/Barem/compare/v0.11.1...HEAD
+[0.11.1]: https://github.com/Merab25/Barem/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/Merab25/Barem/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/Merab25/Barem/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/Merab25/Barem/compare/v0.8.0...v0.9.0
