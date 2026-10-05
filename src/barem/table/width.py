@@ -123,6 +123,72 @@ def truncate(text: str, width: int, middle: bool = False, ellipsis: str = ELLIPS
     return (truncate_middle if middle else truncate_end)(text, width, ellipsis)
 
 
+def wrap(text: str, width: int) -> list[str]:
+    """Break `text` into lines of at most `width` cells, losing nothing.
+
+    Used instead of truncating, so a long path or command line is shown in
+    full across as many lines as it needs. Breaks at spaces first, then after
+    a slash, which keeps a path readable; a single unbroken token longer than
+    the column is cut by width as a last resort.
+    """
+    if width <= 0:
+        return [""]
+    text = text.strip()
+    if not text:
+        return [""]
+    if display_width(text) <= width:
+        return [text]
+
+    lines: list[str] = []
+    current = ""
+
+    def flush() -> None:
+        nonlocal current
+        if current:
+            lines.append(current)
+            current = ""
+
+    for needs_space, token in _breakable_tokens(text):
+        joiner = " " if current and needs_space else ""
+        candidate = current + joiner + token
+        if display_width(candidate) <= width:
+            current = candidate
+            continue
+        flush()
+        # The piece on its own line, hard-split if even that does not fit.
+        while display_width(token) > width:
+            head = _slice_to_width(token, width)
+            if not head:
+                break
+            lines.append(head)
+            token = token[len(head) :]
+        current = token
+    flush()
+    return lines or [""]
+
+
+#: A long value may be broken after any of these, keeping the character on
+#: the line before the break, so a wrapped path still reads as a path and a
+#: wrapped argument list still reads as a list. Without them
+#: `users:(("postgres",pid=1337,fd=7))` is cut mid-word wherever the column
+#: happens to run out.
+_BREAK_AFTER = re.compile(r"(?<=[/,;:=&|])")
+
+
+def _breakable_tokens(text: str) -> list[tuple[bool, str]]:
+    """(needs a space before it, piece) for every breakable piece of `text`.
+
+    Only the first piece of each whitespace-separated word needs a space put
+    back; the rest follow a delimiter that is already on the previous piece.
+    """
+    out: list[tuple[bool, str]] = []
+    for index, word in enumerate(text.split()):
+        pieces = [piece for piece in _BREAK_AFTER.split(word) if piece]
+        for position, piece in enumerate(pieces):
+            out.append((index > 0 and position == 0, piece))
+    return out
+
+
 def pad(text: str, width: int, align: str = "left") -> str:
     """Pad to `width` cells. Values wider than `width` are returned unchanged."""
     gap = width - display_width(text)

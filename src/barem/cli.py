@@ -37,7 +37,10 @@ TABLE_INTENT = (
     "cols",
     "where",
     "export",
+    "style",
+    "bar_chars",
     "box",
+    "clean",
     "ascii",
     "cards",
     "input_format",
@@ -368,13 +371,38 @@ def _add_table_arguments(parser: argparse.ArgumentParser) -> None:
         metavar="STYLE",
         help="export instead of rendering: md, csv, tsv or json",
     )
-    style = group.add_mutually_exclusive_group()
-    style.add_argument(
-        "--box", action="store_true", help="draw borders around every cell (default)"
+    group.add_argument(
+        "--style",
+        choices=table_mod.STYLES,
+        metavar="NAME",
+        help="border style: " + ", ".join(table_mod.STYLES) + " (default: box)",
     )
-    style.add_argument("--clean", action="store_true", help="no borders, just an underlined header")
-    style.add_argument("--ascii", action="store_true", help="no Unicode, for old terminals")
-    style.add_argument("--cards", action="store_true", help="one block per row, for narrow windows")
+    group.add_argument(
+        "--pct",
+        dest="bar_chars",
+        choices=table_mod.BAR_STYLES,
+        metavar="NAME",
+        help="how percentages are drawn: " + ", ".join(table_mod.BAR_STYLES),
+    )
+    group.add_argument(
+        "--styles",
+        action="store_true",
+        help="show every border and percentage style with a sample",
+    )
+    group.add_argument(
+        "--pad", type=int, metavar="N", help="spaces inside each cell, either side (default 1)"
+    )
+    group.add_argument(
+        "--no-wrap",
+        action="store_true",
+        help="cut a value that does not fit instead of wrapping it",
+    )
+    # Shorthands for the styles people reach for most.
+    shorthand = group.add_mutually_exclusive_group()
+    shorthand.add_argument("--box", action="store_true", help="same as --style box (default)")
+    shorthand.add_argument("--clean", action="store_true", help="same as --style clean")
+    shorthand.add_argument("--cards", action="store_true", help="same as --style cards")
+    shorthand.add_argument("--ascii", action="store_true", help="plain characters only, no Unicode")
     group.add_argument("--width", type=int, metavar="N", help="assume this terminal width")
     group.add_argument(
         "--max-width",
@@ -455,18 +483,21 @@ def join_dash_values(argv: list[str]) -> list[str]:
 
 def table_options(args: argparse.Namespace) -> table_mod.Options:
     """Translate parsed arguments into table-mode options."""
-    # Borders are the default; --clean, --ascii and --cards each replace them.
-    style = "box"
-    if args.clean:
-        style = "clean"
-    elif args.ascii:
-        style = "ascii"
-    elif args.cards:
-        style = "cards"
+    # --style wins; the shorthands cover the common choices.
+    style = args.style or "box"
+    if not args.style:
+        if args.clean:
+            style = "clean"
+        elif args.cards:
+            style = "cards"
     return table_mod.Options(
         profile=args.profile,
         input_format=args.input_format,
         style=style,
+        bar_chars=args.bar_chars or "blocks",
+        pad=1 if args.pad is None else args.pad,
+        wrap=not args.no_wrap,
+        unicode=not args.ascii,
         export=args.export,
         width=args.width,
         max_width=args.max_width,
@@ -476,7 +507,6 @@ def table_options(args: argparse.Namespace) -> table_mod.Options:
         warn=args.warn,
         crit=args.crit,
         color=False if args.no_color else None,
-        unicode=not args.ascii,
         summary=not args.no_summary,
         sort=args.sort,
         top=args.top,
@@ -514,6 +544,51 @@ def read_stdin() -> str | None:
     except Exception:
         # pytest replaces stdin with an object that refuses to be read.
         return None
+
+
+#: The sample every style is demonstrated with, so they are comparable.
+STYLE_SAMPLE = """Filesystem      Size  Used Avail Use% Mounted on
+/dev/nvme0n1p2  468G  112G  332G  25% /
+/dev/sdb1       1.8T  1.7T   43G  95% /data
+tmpfs            16G  2.1M   16G   1% /run
+"""
+
+
+def style_gallery(args: argparse.Namespace) -> str:
+    """Render the same table in every style, so one can be picked by eye."""
+    from .table import styles as style_registry
+
+    width = args.width or 74
+    out: list[str] = []
+    base = {
+        "color": False if args.no_color else None,
+        "width": width,
+        "pad": 1 if args.pad is None else args.pad,
+    }
+
+    out.append("BORDER STYLES   --style NAME")
+    out.append("")
+    for name, border in style_registry.BORDERS.items():
+        options = table_mod.Options(style=name, summary=False, **base)
+        out.append(f"  --style {name}   ({border.about})")
+        for line in table_mod.format_text(STYLE_SAMPLE, options).splitlines():
+            out.append("  " + line)
+        out.append("")
+
+    out.append("PERCENTAGE STYLES   --pct NAME")
+    out.append("")
+    for name, bar in style_registry.BARS.items():
+        options = table_mod.Options(
+            style="clean", bar_chars=name, summary=False, columns=["use%", "target"], **base
+        )
+        out.append(f"  --pct {name}   ({bar.about})")
+        for line in table_mod.format_text(STYLE_SAMPLE, options).splitlines():
+            out.append("  " + line)
+        out.append("")
+
+    out.append("Also: --pad N for the spacing inside cells, --no-wrap to cut")
+    out.append("instead of wrapping, and --bar-width N for the bar length.")
+    return "\n".join(out)
 
 
 def run_diagnose(argv: list[str]) -> int:
@@ -582,6 +657,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.completion:
         return emit(completion_script(args.completion))
+
+    if args.styles:
+        return emit(style_gallery(args))
 
     if args.profiles:
         names = table_mod.profile_names()

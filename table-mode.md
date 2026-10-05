@@ -262,6 +262,16 @@ The column that identifies the row (`identity: true` in the profile, such as the
 
 ### 6.3 Truncation rules
 
+> **As built (v0.8.0): wrapping replaced truncation as the default.** Cutting a
+> value loses information the command gave us, which the first rule above
+> forbids, so a text cell too wide for its column is now wrapped onto as many
+> lines as it needs — breaking at spaces first, then after `/ , ; : = & |` so a
+> path still reads as a path. The rules below are what `--no-wrap` does, and
+> they still govern every column whose `truncate` is not `none`. The identity
+> column also keeps its full width until the layout has run out of columns to
+> drop instead.
+
+
 - `text`: cut at the end, add `…` (`very long container nam…`).
 - `path`: cut in the middle (`/var/lib/…/overlay2/diff`), keeping at least the first segment and the last segment, since both ends carry the meaning.
 - `number`, `size`, `percent`, `duration`: never truncated; the layout takes the space elsewhere.

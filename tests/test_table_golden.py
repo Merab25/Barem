@@ -32,7 +32,11 @@ CASES = [
     *[(name, 80, "clean") for name in sorted(p.stem for p in FIXTURES.glob("*.txt"))],
     ("df-h", 60, "clean"),
     ("ps-aux", 100, "clean"),
-    ("df-h", 80, "ascii"),
+    # one sample of every other border style, so a renderer change shows up
+    *[
+        (("df-h"), 80, name)
+        for name in ("rounded", "double", "grid", "dashes", "dashes-grid", "simple", "minimal")
+    ],
     ("df-h", 80, "md"),
     ("df-h", 80, "csv"),
     ("kubectl-pods", 80, "json"),

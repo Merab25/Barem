@@ -14,7 +14,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from . import detect, layout
+from . import detect, layout, styles
 from . import render as _render
 from .humanize import sort_value
 from .model import Table
@@ -22,8 +22,9 @@ from .theme import Theme, colors_available, unicode_available
 
 __all__ = ["FORMATS", "STYLES", "Options", "format_text", "render_table"]
 
-#: "box" is the default; "ascii" is the same layout in plain characters.
-STYLES = ("box", "clean", "ascii", "cards")
+#: Border styles come from the registry; "cards" is the narrow-window layout.
+STYLES = (*styles.border_names(), "cards")
+BAR_STYLES = styles.bar_names()
 FORMATS = ("md", "csv", "tsv", "json")
 
 #: --where 'use% > 80', 'status ~ Exited', 'name != tmpfs'
@@ -36,13 +37,19 @@ class Options:
 
     profile: str | None = None
     input_format: str | None = None
-    #: Borders by default; --clean drops them for the lighter layout.
+    #: Borders by default; see barem --styles for the alternatives.
     style: str = "box"
+    #: How percentages are drawn: blocks, shade, bracket, dots, line, pipes, number.
+    bar_chars: str = "blocks"
+    #: Spaces inside each cell, either side of the value.
+    pad: int = 1
+    #: Wrap a value that does not fit rather than cutting it.
+    wrap: bool = True
     export: str | None = None
     width: int | None = None
     max_width: int | None = None
     bars: bool = True
-    bar_width: int = 10
+    bar_width: int = 12
     symbols: bool = False
     #: None means "leave it to the profile"; a number overrides it everywhere.
     warn: float | None = None
@@ -63,17 +70,22 @@ def _theme(options: Options) -> Theme:
     use_color = colors_available() if options.color is None else options.color
     # Degrade cleanly: a terminal that cannot encode the blocks gets ASCII
     # rather than a UnicodeEncodeError part way through the table.
-    use_unicode = options.unicode and options.style != "ascii" and unicode_available()
+    use_unicode = options.unicode and unicode_available()
     forced = options.warn is not None or options.crit is not None
+    border = styles.border(options.style, unicode_ok=use_unicode)
+    bar = styles.bar_style(options.bar_chars, unicode_ok=use_unicode)
     return Theme(
         color=use_color and options.style not in FORMATS,
         unicode=use_unicode,
-        symbols=options.symbols or options.style == "ascii",
+        symbols=options.symbols,
         warn=70.0 if options.warn is None else options.warn,
         crit=90.0 if options.crit is None else options.crit,
         force_thresholds=forced,
         bar_width=max(0, options.bar_width),
-        bars=options.bars and options.bar_width > 0,
+        bars=options.bars and options.bar_width > 0 and not bar.bare,
+        border=border,
+        bar_style=bar,
+        pad=max(0, options.pad),
     )
 
 
@@ -230,7 +242,8 @@ def render_table(table: Table, options: Options | None = None) -> str:
     theme = _theme(options)
     style = options.export or options.style
     width = layout.terminal_width(options.width, options.max_width)
-    geom = layout.BOX_GEOMETRY if style in ("box", "ascii") else layout.CLEAN_GEOMETRY
+    cell_pad, sep, frame = theme.border.geometry(theme.pad, layout.GAP)
+    geom = layout.Geometry(cell_pad=cell_pad, sep=sep, frame=frame)
     plan = layout.plan(
         table,
         theme,
@@ -238,6 +251,7 @@ def render_table(table: Table, options: Options | None = None) -> str:
         force_cards=options.style == "cards",
         relative=options.relative,
         geom=geom,
+        wrap_cells=options.wrap,
     )
     return _render.render(table, plan, theme, style=style, summary=options.summary)
 

@@ -59,7 +59,7 @@ pipx install git+https://github.com/Merab25/Gamaxsene.git
 pipx creates an isolated virtual environment for the tool and puts the `barem` command on your `PATH`.
 
 ```bash
-pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.7.0   # a specific release
+pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.8.0   # a specific release
 pipx upgrade barem                                             # update
 pipx uninstall barem                                           # remove
 ```
@@ -110,24 +110,16 @@ $ barem help
 ```
 
 ```text
-┌──────────────────┬────────┬────────────────────────────────────────────────────────────────┐
-│      CHECK       │ STATUS │                             DETAIL                             │
-├──────────────────┼────────┼────────────────────────────────────────────────────────────────┤
-│    disk space    │  bad   │                           /data 96%                            │
-│   failed units   │  bad   │              myapp-worker.service, nginx.service               │
-│      inodes      │  bad   │                  inodes exhausted: /data 100%                  │
-│  kernel errors   │  bad   │ kernel: blk_update_request: I/O error, dev sdb, sector 1234567 │
-│      memory      │  bad   │                   879M of 31G available (3%)                   │
-│ read-only mounts │  bad   │                        read-only: /data                        │
-│    clock sync    │  warn  │                     clock not synchronised                     │
-│       swap       │  warn  │                    7.6G of 8.0G used (95%)                     │
-└──────────────────┴────────┴────────────────────────────────────────────────────────────────┘
+┌────────────────┬──────┬──────┬───────┬───────────────────┬────────────┐
+│   FILESYSTEM   │ SIZE │ USED │ AVAIL │             USE%  │ MOUNTED ON │
+├────────────────┼──────┼──────┼───────┼───────────────────┼────────────┤
+│ /dev/nvme0n1p2 │ 468G │ 112G │  332G │ ██▌░░░░░░░   25%  │     /      │
+│   /dev/sdb1    │ 1.8T │ 1.7T │   43G │ █████████▌   95%! │   /data    │
+│ /dev/nvme0n1p1 │ 512M │  62M │  450M │ █▏░░░░░░░░   12%  │ /boot/efi  │
+│     tmpfs      │  16G │ 2.1M │   16G │ ░░░░░░░░░░    1%  │    /run    │
+└────────────────┴──────┴──────┴───────┴───────────────────┴────────────┘
 
- 6 critical · 2 to watch · 7 passed · barem help --all shows every check
- next: df -h | barem --sort -use%
- next: systemctl --failed | barem
- next: df -i | barem
- ...and 5 more to look at
+ 4 filesystems · 2.3T total · 1.8T used (80%)
 ```
 
 On a healthy machine it says so in one line and shows nothing else:
@@ -180,14 +172,14 @@ $ df -h | barem
 ```
 
 ```text
-┌────────────────┬──────┬──────┬───────┬──────────────────┬────────────┐
-│   FILESYSTEM   │ SIZE │ USED │ AVAIL │             USE% │ MOUNTED ON │
-├────────────────┼──────┼──────┼───────┼──────────────────┼────────────┤
-│ /dev/nvme0n1p2 │ 468G │ 112G │  332G │ ██▌░░░░░░░  25%  │     /      │
-│   /dev/sdb1    │ 1.8T │ 1.7T │   43G │ █████████▌  95%! │   /data    │
-│ /dev/nvme0n1p1 │ 512M │  62M │  450M │ █▏░░░░░░░░  12%  │ /boot/efi  │
-│     tmpfs      │  16G │ 2.1M │   16G │ ░░░░░░░░░░   1%  │    /run    │
-└────────────────┴──────┴──────┴───────┴──────────────────┴────────────┘
+┌────────────────┬──────┬──────┬───────┬───────────────────┬────────────┐
+│   FILESYSTEM   │ SIZE │ USED │ AVAIL │             USE%  │ MOUNTED ON │
+├────────────────┼──────┼──────┼───────┼───────────────────┼────────────┤
+│ /dev/nvme0n1p2 │ 468G │ 112G │  332G │ ██▌░░░░░░░   25%  │     /      │
+│   /dev/sdb1    │ 1.8T │ 1.7T │   43G │ █████████▌   95%! │   /data    │
+│ /dev/nvme0n1p1 │ 512M │  62M │  450M │ █▏░░░░░░░░   12%  │ /boot/efi  │
+│     tmpfs      │  16G │ 2.1M │   16G │ ░░░░░░░░░░    1%  │    /run    │
+└────────────────┴──────┴──────┴───────┴───────────────────┴────────────┘
 
  4 filesystems · 2.3T total · 1.8T used (80%)
 ```
@@ -202,7 +194,8 @@ ps aux | barem --sort -%mem --top 10     # replaces an awk and sort pipeline
 ss -tlnp | barem                         # listening sockets, aligned
 docker ps | barem --symbols              # ● up, ✖ exited
 kubectl get pods | barem --where 'status ~ Crash'
-free -h | barem --clean                  # no borders, the lighter layout
+free -h | barem --style rounded          # pick a border style
+df -h | barem --pct dots --pad 2         # pick a percentage style and more spacing
 mount | barem --format md                # a Markdown table
 barem run --watch 2 df -h                # re-run and redraw every 2 seconds
 ```
@@ -217,7 +210,11 @@ barem run --watch 2 df -h                # re-run and redraw every 2 seconds
 | `--cols fs,use%,target` | Choose and order columns |
 | `--where 'use% > 80'` | Keep matching rows; also `< >= <= == != ~` (regex) |
 | `--format md\|csv\|tsv\|json` | Export instead of rendering |
-| `--clean` / `--ascii` / `--cards` | No borders / plain characters / one block per row |
+| `--style NAME` | Border style; `barem --styles` shows all nine with a sample |
+| `--pct NAME` | How percentages are drawn; `barem --styles` shows all seven |
+| `--pad N` | Spaces inside each cell, either side (default 1) |
+| `--no-wrap` | Cut a value that does not fit instead of wrapping it |
+| `--clean` / `--cards` / `--ascii` | Shorthand for `--style clean`, `--style cards`, no Unicode |
 | `--width N` / `--max-width N` | Assume a width, or cap it (`BAREM_WIDTH` also works) |
 | `--no-bars` / `--bar-width N` | Numbers without bars, or a different bar size |
 | `--warn 80 --crit 95` | Move the thresholds; 90% is critical for a disk, normal for a CPU |
@@ -228,13 +225,45 @@ barem run --watch 2 df -h                # re-run and redraw every 2 seconds
 | `barem run CMD` | Run the command, so its name is known for certain |
 | `--watch 2` | With `run`, re-run and redraw in place |
 
+### Picking a look
+
+`barem --styles` renders the same table in every style so you can choose by eye. Nine
+border styles:
+
+| `--style` | What it draws |
+| --- | --- |
+| `box` | square corners, a line under the header — **the default** |
+| `rounded` | as box, with rounded corners |
+| `double` | double lines, the heaviest look |
+| `grid` | a line between every row, for tables you read across |
+| `dashes` | plain `+---+` and `\|`, works on any terminal |
+| `dashes-grid` | as dashes, with a line between every row |
+| `simple` | column lines and a header rule, no frame |
+| `clean` | no lines but a rule under the header |
+| `minimal` | nothing but aligned columns |
+
+And seven ways to draw a percentage:
+
+```text
+--pct blocks   ███░░░░░░░░░   25%      solid blocks, accurate to an eighth of a cell
+--pct shade    ▓▓▓░░░░░░░░░   25%      a shaded track, quieter than solid blocks
+--pct bracket  [###.........]   25%    a bracketed meter, works on any terminal
+--pct dots     ●●●○○○○○○○○○   25%      filled and hollow dots
+--pct line     ━━━┄┄┄┄┄┄┄┄┄   25%      a simple rule, drawn and undrawn
+--pct pipes    |||.........   25%      plain pipes and dots, for any terminal
+--pct number   25%                     the number on its own, no bar
+```
+
+`--bar-width N` sets the bar length, and `--pad N` the spacing inside every cell.
+
 ### How it adapts
 
-Nothing in the output is fixed to 80 columns. As the window narrows, the table gives
-things up in the order that keeps the most useful information longest: text columns
-shrink, then the bars go, then whole columns are dropped — and dropped ones are listed
-under the table. Below about 50 columns a table cannot work at all, so each row becomes
-a small block instead:
+Nothing in the output is fixed to 80 columns, and nothing is thrown away. As the window
+narrows the table gives things up in the order that keeps the most useful information
+longest: text columns shrink (wrapping, never cutting), then the bars go, then whole
+columns are dropped — and dropped ones are named under the table so you know to ask for
+them with `--cols`. Below about 50 columns a table cannot work at all, so each row
+becomes a small block instead:
 
 ```text
  /dev/sdb1
@@ -245,13 +274,21 @@ a small block instead:
    Mounted On  /data
 ```
 
-The column that names the row is never dropped, and numbers are never truncated.
+The column that names the row is never dropped, and it keeps its full width until the
+layout has run out of columns it could drop instead — giving up a column you can ask
+back with `--cols` beats wrapping every name across two lines. Numbers are never
+wrapped or cut either.
 
 ### Reading the output
 
-- **Borders by default**, because they make the columns unmissable; `--clean` drops them.
+- **Borders by default**, because they make the columns unmissable. `--style` picks another look,
+  `--styles` shows them all side by side, and `--pad N` changes the spacing inside cells.
+- **Nothing is cropped.** A value too wide for its column is wrapped onto as many lines as it
+  needs, breaking at spaces first and then after `/ , ; : =` so a path still reads as a path.
+  `--no-wrap` goes back to cutting with an `…`.
+- **The row's name stands out**: the identifying column is emphasised, and it is the last
+  thing the layout narrows, so a name is not wrapped to save a cell somewhere less important.
 - **Text is centred, numbers right-aligned**, so digits still line up where the eye expects them.
-- **Paths are shortened in the middle** (`/var/lib/…/overlay2/diff`), because both ends carry meaning.
 - **Colour is never the only signal.** A critical value is also marked `!` whenever colour
   is off, so the output reads the same in a log file, under `NO_COLOR`, and for a
   colourblind reader.
@@ -590,11 +627,12 @@ barem/
 │       ├── width.py           # display_width, truncation, sanitizing: no other imports
 │       ├── model.py           # Column, Kind, Align, Table, Profile
 │       ├── humanize.py        # sizes, durations, and the parsers that let them sort
+│       ├── styles.py          # the border and percentage style registries
 │       ├── theme.py           # colours, thresholds, bars, the ASCII fallback
 │       ├── detect.py          # input format detection and profile fingerprinting
 │       ├── parse/             # columnar (by position), structured (json/csv), infer
 │       ├── layout.py          # the fit / shrink / drop / cards algorithm
-│       ├── render.py          # clean, box, ascii, cards, markdown, csv, json
+│       ├── render.py          # one bordered engine, plus cards, markdown, csv, json
 │       ├── runner.py          # `barem run` and --watch
 │       └── profiles/          # df, ps, ss, docker, kubectl, systemctl, ...
 ├── tests/

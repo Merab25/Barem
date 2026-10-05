@@ -3,27 +3,32 @@
    Recv-Q         0
    Send-Q         4,096
    Peer Address…  0.0.0.0:*
-   Process        users:(("postgres",pi…
+   Process        users:(("postgres",
+                  pid=1337,fd=7))
 
  0.0.0.0:80
    State          LISTEN
    Recv-Q         0
    Send-Q         511
    Peer Address…  0.0.0.0:*
-   Process        users:(("nginx",pid=2…
+   Process        users:(("nginx",pid=
+                  2048,fd=6))
 
  0.0.0.0:22
    State          LISTEN
    Recv-Q         0
    Send-Q         128
    Peer Address…  0.0.0.0:*
-   Process        users:(("sshd",pid=90…
+   Process        users:(("sshd",pid=
+                  900,fd=3))
 
  127.0.0.53%lo:53
    State          LISTEN
    Recv-Q         0
    Send-Q         4,096
    Peer Address…  0.0.0.0:*
-   Process        users:(("systemd-reso…
+   Process        users:
+                  (("systemd-resolve",
+                  pid=640,fd=14))
 
  4 sockets

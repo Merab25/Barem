@@ -1,7 +1,7 @@
  1
    User     root
-   %Cpu     0.0%  ░░░░░░░░░░
-   %Mem     0.1%  ░░░░░░░░░░
+   %Cpu     0.0%  ░░░░░░░░░░░░
+   %Mem     0.1%  ░░░░░░░░░░░░
    Vsz      168,404
    Rss      11,952
    Tty      ?
@@ -12,20 +12,21 @@
 
  4,821
    User     merab
-   %Cpu     94.3%!  █████████▍
-   %Mem     12.5%  █▎░░░░░░░░
+   %Cpu     94.3%!  ███████████▎
+   %Mem     12.5%  █▌░░░░░░░░░░
    Vsz      489,123
    Rss      20,480
    Tty      ?
    Stat     Rl
    Start    10:02
    Time     12m 44s
-   Command  /usr/lib/firefox/firefox -c…
+   Command  /usr/lib/firefox/firefox
+            -contentproc
 
  1,337
    User     postgres
-   %Cpu     2.1%  ▏░░░░░░░░░
-   %Mem     24.8%  ██▍░░░░░░░
+   %Cpu     2.1%  ▎░░░░░░░░░░░
+   %Mem     24.8%  ██▉░░░░░░░░░
    Vsz      123,456
    Rss      40,960
    Tty      ?
@@ -36,8 +37,8 @@
 
  2,048
    User     www-data
-   %Cpu     34.0%  ███▍░░░░░░
-   %Mem     1.2%  ░░░░░░░░░░
+   %Cpu     34.0%  ████░░░░░░░░
+   %Mem     1.2%  ▏░░░░░░░░░░░
    Vsz      98,765
    Rss      12,345
    Tty      ?

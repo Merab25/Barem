@@ -1,10 +1,14 @@
 ┌────────────┬──────────────────────────┬──────────┬───────┐
 │   IMAGE    │          STATUS          │  PORTS   │ NAMES │
 ├────────────┼──────────────────────────┼──────────┼───────┤
-│ nginx:alp… │        Up 2 hours        │ 0.0.0.0… │  web  │
-│ postgres:… │   Up 3 days (healthy)    │ 5432/tcp │  db   │
+│   nginx:   │        Up 2 hours        │ 0.0.0.0: │  web  │
+│   alpine   │                          │ 8080->80 │       │
+│            │                          │   /tcp   │       │
+│ postgres:  │   Up 3 days (healthy)    │ 5432/tcp │  db   │
+│     16     │                          │          │       │
 │  redis:7   │ Exited (137) 5 hours ago │          │ cache │
 └────────────┴──────────────────────────┴──────────┴───────┘
 
- hidden: command, created, container id (use --cols to forc…
+ hidden: command, created, container id (use --cols to
+ force)
  3 containers · 2 up · 1 not running

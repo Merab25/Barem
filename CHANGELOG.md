@@ -6,6 +6,44 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-05
+
+### Added
+
+- **Nine border styles and seven ways to draw a percentage**, chosen with
+  `--style` and `--pct`. `barem --styles` renders the same table in all of
+  them so you can pick by eye:
+
+      barem --styles                 # the gallery
+      df -h | barem --style grid     # a line between every row
+      df -h | barem --pct dots       # ●●●○○○○○○  25%
+
+  Borders: `box` (the default), `rounded`, `double`, `grid`, `dashes`,
+  `dashes-grid`, `simple`, `clean`, `minimal`. Percentages: `blocks` (the
+  default), `shade`, `bracket`, `dots`, `line`, `pipes`, `number`. Both are
+  registries, so a new look is a dictionary entry rather than a change to the
+  renderer, and each one has an ASCII twin that `--ascii` falls back to.
+- **`--pad N`** sets the spacing inside every cell, either side (default 1).
+
+### Changed
+
+- **Nothing is cropped any more.** A value too wide for its column is wrapped
+  onto as many lines as it needs instead of being cut with an `…`, breaking at
+  spaces first and then after `/ , ; : = & |` so a path still reads as a path
+  and `users:(("postgres",pid=1337,fd=7))` stays legible. `--no-wrap` restores
+  the old behaviour.
+- **The column that names the row keeps its full width** until the layout has
+  run out of columns it could drop instead: giving up a column you can ask back
+  with `--cols` beats wrapping every name across two lines. It is also
+  emphasised, so the eye finds it first.
+- **A percentage header sits over its number** rather than at the cell edge,
+  so `USE%` is directly above `25%`.
+- **More room around a percentage**: two spaces between the bar and the
+  number, and the number, bar and critical marker are each a fixed width, so
+  every row lines up whatever the values are.
+- `ps` keeps at least eight cells for `USER`, so `postgres` and `www-data` are
+  no longer split across two lines, and `STAT` keeps four so its header is not.
+
 ## [0.7.0] - 2026-10-05
 
 ### Changed
@@ -252,7 +290,8 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Packaging with hatchling: the example files ship inside the wheel and are
   found with `importlib.resources`, wherever the package is installed.
 
-[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/Merab25/Gamaxsene/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/Merab25/Gamaxsene/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/Merab25/Gamaxsene/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Merab25/Gamaxsene/compare/v0.5.0...v0.6.0

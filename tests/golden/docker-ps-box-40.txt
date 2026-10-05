@@ -19,6 +19,7 @@
    Image         redis:7
    Command       "docker-entrypoint.s"
    Created       3 days ago
-   Status        Exited (137) 5 hours a…
+   Status        Exited (137) 5 hours
+                 ago
 
  3 containers · 2 up · 1 not running

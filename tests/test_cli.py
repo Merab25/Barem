@@ -192,7 +192,7 @@ def test_complete_skips_keywords_already_on_the_line(capsys):
 
 def test_complete_options(capsys):
     _, got = complete(capsys, "--no")
-    assert got == ["--no-bars", "--no-color", "--no-header", "--no-summary"]
+    assert got == ["--no-bars", "--no-color", "--no-header", "--no-summary", "--no-wrap"]
 
 
 #: Every option the CLI accepts, in the order completion offers them.
@@ -237,6 +237,12 @@ PUBLIC_OPTIONS = sorted(
         "--watch",
         "--where",
         "--width",
+        # style choices
+        "--style",
+        "--styles",
+        "--pct",
+        "--pad",
+        "--no-wrap",
         # barem help
         "--all",
     ]

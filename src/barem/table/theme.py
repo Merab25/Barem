@@ -12,6 +12,8 @@ import os
 import sys
 from dataclasses import dataclass, field
 
+from . import styles
+
 # Eighth blocks give the bar about 1.25% precision, so 94% and 99% differ.
 FULL_BLOCK = "█"
 PARTIAL_BLOCKS = ["", "▏", "▎", "▍", "▌", "▋", "▊", "▉"]
@@ -200,8 +202,15 @@ class Theme:
     symbols: bool = False
     warn: float = 70.0
     crit: float = 90.0
-    bar_width: int = 10
+    bar_width: int = 12
     bars: bool = True
+    #: border and percentage styles, from the styles registry
+    border: styles.Border = field(default_factory=lambda: styles.BOX)
+    bar_style: styles.Bar = field(default_factory=lambda: styles.BLOCKS)
+    #: spaces inside each cell, either side of its value
+    pad: int = 1
+    #: the row-identifying column is emphasised so it stands out
+    emphasise_identity: bool = True
     #: True when the user named thresholds on the command line, which then
     #: override a profile's per-column values. 90% full is critical for a disk
     #: but ordinary for a CPU, so profiles set their own -- until asked not to.
@@ -224,7 +233,7 @@ class Theme:
         return self.paint(text, "dim")
 
     def rule_char(self) -> str:
-        return RULE if self.unicode else ASCII_RULE
+        return self.border.h or (RULE if self.unicode else ASCII_RULE)
 
     def ellipsis(self) -> str:
         return "…" if self.unicode else "~"
@@ -273,20 +282,26 @@ class Theme:
         The width never varies between rows, so the numbers beside the bars
         always start at the same column.
         """
+        style = self.bar_style
+        if style.bare:
+            return ""
         width = self.bar_width if width is None else width
         if width <= 0:
             return ""
         fraction = max(0.0, min(1.0, fraction))
-        if not self.unicode:
-            filled = round(fraction * width)
-            return ASCII_FULL * filled + ASCII_EMPTY * (width - filled)
 
         exact = fraction * width
         full = int(exact)
-        remainder = exact - full
-        eighths = int(remainder * 8)
         if full >= width:
-            return FULL_BLOCK * width
-        partial = PARTIAL_BLOCKS[eighths]
-        rest = width - full - (1 if partial else 0)
-        return FULL_BLOCK * full + partial + EMPTY_BLOCK * max(0, rest)
+            track = style.full * width
+        elif style.partials:
+            # Sub-cell precision, so 94% and 99% do not look identical.
+            steps = len(style.partials) + 1
+            index = int((exact - full) * steps)
+            partial = style.partials[index - 1] if index else ""
+            rest = width - full - (1 if partial else 0)
+            track = style.full * full + partial + style.empty * max(0, rest)
+        else:
+            filled = round(fraction * width)
+            track = style.full * filled + style.empty * (width - filled)
+        return f"{style.open_bracket}{track}{style.close_bracket}"

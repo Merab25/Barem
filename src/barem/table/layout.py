@@ -118,6 +118,10 @@ class Plan:
     width: int = 80
     #: (number width, marker width) reserved inside each percent column.
     num_widths: dict[str, tuple[int, int]] = field(default_factory=dict)
+    #: Wrap a value that does not fit, rather than cutting it.
+    wrap: bool = True
+    #: Spaces between columns in the styles that draw no lines.
+    gap: int = GAP
 
 
 # -- cell formatting ---------------------------------------------------------
@@ -225,12 +229,13 @@ def _cell_width(
     bars: bool,
     symbols: bool,
     num_width: tuple[int, int] = (PCT_NUMBER_WIDTH, 0),
+    spacing: int = 2,
 ) -> int:
     """How many cells this value needs, including its bar or symbol."""
     width = display_width(cell.text) + display_width(cell.marker)
     if column.kind is Kind.PERCENT and bars and cell.bar:
         number, marker = num_width
-        return display_width(cell.bar) + 1 + number + marker
+        return display_width(cell.bar) + spacing + number + marker
     if column.kind is Kind.STATUS and symbols and cell.symbol:
         width += display_width(cell.symbol) + 1
     return width
@@ -242,6 +247,7 @@ def natural_widths(
     bars: bool,
     symbols: bool,
     num_widths: dict[str, tuple[int, int]] | None = None,
+    spacing: int = 2,
 ) -> dict[str, int]:
     """The width each column needs to show everything untruncated."""
     num_widths = num_widths or {}
@@ -252,7 +258,7 @@ def natural_widths(
         for row in cells:
             cell = row.get(column.key)
             if cell is not None:
-                widest = max(widest, _cell_width(cell, column, bars, symbols, num_width))
+                widest = max(widest, _cell_width(cell, column, bars, symbols, num_width, spacing))
         if column.max_width:
             widest = min(widest, column.max_width)
         widths[column.key] = max(widest, 1)
@@ -276,6 +282,7 @@ def plan(
     force_cards: bool = False,
     relative: bool = False,
     geom: Geometry = CLEAN_GEOMETRY,
+    wrap_cells: bool = True,
 ) -> Plan:
     """Decide the layout for this table at this width.
 
@@ -290,7 +297,7 @@ def plan(
     nums = percent_number_widths(columns, cells)
 
     def measure(cols, bars_, symbols_):
-        return natural_widths(cols, cells, bars_, symbols_, nums)
+        return natural_widths(cols, cells, bars_, symbols_, nums, theme.bar_style.spacing)
 
     def done(cols, widths, bars_, symbols_, dropped=()):
         return Plan(
@@ -321,35 +328,50 @@ def plan(
     if _total(widths, columns, geom) <= width:
         return done(columns, widths, bars, symbols)
 
-    # 3. Shrink the flexible columns, widest first, so one long path does not
-    #    starve every other column.
-    widths = _shrink(columns, widths, width, geom)
-    if _total(widths, columns, geom) <= width:
-        return done(columns, widths, bars, symbols)
+    def attempt(protect: bool) -> Plan | None:
+        """Steps 3-5 at one level of concession, or None if none of it fits."""
+        bars_, symbols_ = bars, symbols
 
-    # 4. Drop the cell extras: bars first, then status symbols. Numbers stay.
-    for drop_bars, drop_symbols in ((True, False), (True, True)):
-        if drop_bars and not bars and drop_symbols and not symbols:
-            continue
-        trial_bars = bars and not drop_bars
-        trial_symbols = symbols and not drop_symbols
-        widths = _shrink(columns, measure(columns, trial_bars, trial_symbols), width, geom)
-        if _total(widths, columns, geom) <= width:
-            return done(columns, widths, trial_bars, trial_symbols)
-        bars, symbols = trial_bars, trial_symbols
+        # 3. Shrink the flexible columns, widest first, so one long path does
+        #    not starve every other column.
+        trial = _shrink(columns, measure(columns, bars_, symbols_), width, geom, protect)
+        if _total(trial, columns, geom) <= width:
+            return done(columns, trial, bars_, symbols_)
 
-    # 5. Drop whole columns, least important first.
-    dropped: list[Column] = []
-    kept = list(columns)
-    while len(kept) > 1:
-        candidate = _drop_candidate(kept)
-        if candidate is None:
-            break
-        kept.remove(candidate)
-        dropped.append(candidate)
-        widths = _shrink(kept, measure(kept, bars, symbols), width, geom)
-        if _total(widths, kept, geom) <= width:
-            return done(kept, widths, bars, symbols, dropped)
+        # 4. Drop the cell extras: bars first, then status symbols. Numbers stay.
+        for drop_bars, drop_symbols in ((True, False), (True, True)):
+            if drop_bars and not bars_ and drop_symbols and not symbols_:
+                continue
+            trial_bars = bars_ and not drop_bars
+            trial_symbols = symbols_ and not drop_symbols
+            trial = _shrink(
+                columns, measure(columns, trial_bars, trial_symbols), width, geom, protect
+            )
+            if _total(trial, columns, geom) <= width:
+                return done(columns, trial, trial_bars, trial_symbols)
+            bars_, symbols_ = trial_bars, trial_symbols
+
+        # 5. Drop whole columns, least important first.
+        dropped: list[Column] = []
+        kept = list(columns)
+        while len(kept) > 1:
+            candidate = _drop_candidate(kept)
+            if candidate is None:
+                break
+            kept.remove(candidate)
+            dropped.append(candidate)
+            trial = _shrink(kept, measure(kept, bars_, symbols_), width, geom, protect)
+            if _total(trial, kept, geom) <= width:
+                return done(kept, trial, bars_, symbols_, dropped)
+        return None
+
+    # Try everything first without narrowing the column that names the row:
+    # dropping a column people can ask back with --cols beats wrapping every
+    # name across two lines. Only if that fails does the name give ground.
+    for protect in (True, False):
+        attempted = attempt(protect)
+        if attempted is not None:
+            return attempted
 
     # 6. Even the essential columns will not fit: cards.
     return Plan(
@@ -365,15 +387,23 @@ def plan(
 
 
 def _shrink(
-    columns: list[Column], widths: dict[str, int], budget: int, geom: Geometry = CLEAN_GEOMETRY
+    columns: list[Column],
+    widths: dict[str, int],
+    budget: int,
+    geom: Geometry = CLEAN_GEOMETRY,
+    protect_identity: bool = False,
 ) -> dict[str, int]:
     """Take width from the flexible columns until the table fits.
 
     Lowest priority first, and within that the widest column first, so the
-    space comes off whatever has the most to spare.
+    space comes off whatever has the most to spare. With `protect_identity`
+    the column that names the row keeps its full width and the caller is
+    told, by a total that is still too wide, to give up a column instead.
     """
     widths = dict(widths)
     flexible = [c for c in columns if c.flexible and c.truncate is not Trunc.NONE]
+    if protect_identity:
+        flexible = [c for c in flexible if not c.identity]
     if not flexible:
         return widths
 
@@ -385,9 +415,12 @@ def _shrink(
         shrinkable = [c for c in flexible if widths[c.key] > c.min_width]
         if not shrinkable:
             break
-        # Least important first; within that, whatever is widest has the most
-        # to spare, so one long path never starves the rest.
-        target = min(shrinkable, key=lambda c: (-c.priority, -widths[c.key]))
+        # The column that names the row is given up last, however wide it is:
+        # it is what the eye looks for, and wrapping a name across two lines
+        # to save one cell elsewhere is a bad trade. After that, least
+        # important first, and within that whatever is widest has the most to
+        # spare, so one long path never starves the rest.
+        target = min(shrinkable, key=lambda c: (c.identity, -c.priority, -widths[c.key]))
         widths[target.key] -= 1
         excess -= 1
     return widths

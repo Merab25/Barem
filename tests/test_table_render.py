@@ -20,7 +20,7 @@ from barem.table.width import display_width
 
 FIXTURES = Path(__file__).parent / "fixtures"
 NAMES = sorted(p.stem for p in FIXTURES.glob("*.txt")) if FIXTURES.is_dir() else []
-STYLES = ("clean", "box", "ascii", "cards")
+STYLES = ("box", "rounded", "double", "grid", "dashes", "simple", "clean", "cards")
 WIDTHS = (40, 60, 80, 120)
 
 
@@ -145,7 +145,7 @@ def test_ascii_style_draws_no_unicode():
     Data is not transliterated -- a Cyrillic file name stays as it is, since
     rewriting a value would be lying about it.
     """
-    out = plain(fixture("df-h"), width=80, style="ascii")
+    out = plain(fixture("df-h"), width=80, unicode=False)
     for char in ("─", "│", "┌", "█", "░", "…", "·"):
         assert char not in out, char
     # the same borders as the default style, drawn in plain characters
