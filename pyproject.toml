@@ -50,9 +50,10 @@ path = "src/barem/__init__.py"
 packages = ["src/barem"]
 
 [tool.hatch.build.targets.sdist]
-# The source archive is for building and for reading the tests; local editor
-# settings are neither, and they carry absolute paths from one machine.
-exclude = [".claude"]
+# The source archive is for building and for reading the tests. Local editor
+# settings are neither, and they carry absolute paths from one machine; the
+# demo recording is half a megabyte that the README loads by URL anyway.
+exclude = [".claude", "docs"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

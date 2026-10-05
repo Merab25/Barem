@@ -8,6 +8,12 @@
 
 **Real-world Linux command examples, right in your terminal.**
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Merab25/Barem/main/docs/barem-demo.gif"
+       alt="barem looking up examples and formatting piped command output as a table"
+       width="900">
+</p>
+
 `barem` prints practical, copy-paste-ready examples for everyday Linux, networking and DevOps commands. Instead of scrolling through a long man page to remember how to exclude a folder in `find`, follow a service log in `journalctl` or forward a port with `ssh`, you ask:
 
 ```console

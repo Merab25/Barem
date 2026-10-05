@@ -9,3 +9,8 @@ LICENSE text eol=lf
 *.toml text eol=lf
 *.yml  text eol=lf
 *.md   text eol=lf
+
+# text=auto already detects these, but the demo recording is the one file
+# in the repository that a line-ending rewrite would silently corrupt.
+*.gif  binary
+*.png  binary
