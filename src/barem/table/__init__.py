@@ -38,11 +38,15 @@ class Options:
     profile: str | None = None
     input_format: str | None = None
     #: Borders by default; see barem --styles for the alternatives.
-    style: str = "box"
+    style: str = "dashes-grid"
     #: How percentages are drawn: blocks, shade, bracket, dots, line, pipes, number.
     bar_chars: str = "blocks"
     #: Spaces inside each cell, either side of the value.
-    pad: int = 1
+    pad: int = 2
+    #: Blank lines between two data rows.
+    row_gap: int = 0
+    #: Sit the table in the middle of the terminal.
+    center: bool = True
     #: Wrap a value that does not fit rather than cutting it.
     wrap: bool = True
     export: str | None = None
@@ -86,6 +90,8 @@ def _theme(options: Options) -> Theme:
         border=border,
         bar_style=bar,
         pad=max(0, options.pad),
+        row_gap=max(0, options.row_gap),
+        center=options.center,
     )
 
 
@@ -242,9 +248,15 @@ def render_table(table: Table, options: Options | None = None) -> str:
     theme = _theme(options)
     style = options.export or options.style
     width = layout.terminal_width(options.width, options.max_width)
-    cell_pad, sep, frame = theme.border.geometry(theme.pad, layout.GAP)
+    plan = _best_plan(table, theme, options, width)
+    return _render.render(table, plan, theme, style=style, summary=options.summary)
+
+
+def _plan_at(table: Table, theme: Theme, options: Options, width: int, pad: int):
+    """The layout this table gets at one padding setting."""
+    cell_pad, sep, frame = theme.border.geometry(pad, layout.GAP)
     geom = layout.Geometry(cell_pad=cell_pad, sep=sep, frame=frame)
-    plan = layout.plan(
+    return layout.plan(
         table,
         theme,
         width,
@@ -253,7 +265,37 @@ def render_table(table: Table, options: Options | None = None) -> str:
         geom=geom,
         wrap_cells=options.wrap,
     )
-    return _render.render(table, plan, theme, style=style, summary=options.summary)
+
+
+def _concessions(plan) -> tuple[int, int, int]:
+    """How much this layout had to give up, worst first.
+
+    Cards cost the most, then every column dropped, then the bars. Padding is
+    not in the tuple because padding is the thing being traded away for it.
+    """
+    return (int(plan.cards), len(plan.dropped), int(not plan.bars))
+
+
+def _best_plan(table: Table, theme: Theme, options: Options, width: int):
+    """Lay the table out, giving up padding before giving up data.
+
+    Generous padding is what makes a wide table readable, but in a narrow
+    window those extra spaces per cell cost whole columns, or the bars. So
+    the padding is tried as asked and then reduced, and the first setting
+    that concedes least wins. The theme is updated to match, because the
+    renderer has to draw exactly the padding the layout budgeted for.
+    """
+    asked = theme.pad
+    best = _plan_at(table, theme, options, width, asked)
+    if asked <= 1 or _concessions(best) == (0, 0, 0):
+        return best
+    for pad in range(asked - 1, 0, -1):
+        trial = _plan_at(table, theme, options, width, pad)
+        if _concessions(trial) < _concessions(best):
+            best, theme.pad = trial, pad
+        if _concessions(best) == (0, 0, 0):
+            break
+    return best
 
 
 def profile_names() -> list[str]:

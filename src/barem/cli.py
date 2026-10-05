@@ -375,7 +375,7 @@ def _add_table_arguments(parser: argparse.ArgumentParser) -> None:
         "--style",
         choices=table_mod.STYLES,
         metavar="NAME",
-        help="border style: " + ", ".join(table_mod.STYLES) + " (default: box)",
+        help="border style: " + ", ".join(table_mod.STYLES) + " (default: dashes-grid)",
     )
     group.add_argument(
         "--pct",
@@ -390,7 +390,18 @@ def _add_table_arguments(parser: argparse.ArgumentParser) -> None:
         help="show every border and percentage style with a sample",
     )
     group.add_argument(
-        "--pad", type=int, metavar="N", help="spaces inside each cell, either side (default 1)"
+        "--pad", type=int, metavar="N", help="spaces inside each cell, either side (default 2)"
+    )
+    group.add_argument(
+        "--row-gap",
+        type=int,
+        metavar="N",
+        help="blank lines between rows, for a table you read across (default 0)",
+    )
+    group.add_argument(
+        "--left",
+        action="store_true",
+        help="align the table to the left margin instead of centring it",
     )
     group.add_argument(
         "--no-wrap",
@@ -399,7 +410,7 @@ def _add_table_arguments(parser: argparse.ArgumentParser) -> None:
     )
     # Shorthands for the styles people reach for most.
     shorthand = group.add_mutually_exclusive_group()
-    shorthand.add_argument("--box", action="store_true", help="same as --style box (default)")
+    shorthand.add_argument("--box", action="store_true", help="same as --style box")
     shorthand.add_argument("--clean", action="store_true", help="same as --style clean")
     shorthand.add_argument("--cards", action="store_true", help="same as --style cards")
     shorthand.add_argument("--ascii", action="store_true", help="plain characters only, no Unicode")
@@ -484,9 +495,11 @@ def join_dash_values(argv: list[str]) -> list[str]:
 def table_options(args: argparse.Namespace) -> table_mod.Options:
     """Translate parsed arguments into table-mode options."""
     # --style wins; the shorthands cover the common choices.
-    style = args.style or "box"
+    style = args.style or "dashes-grid"
     if not args.style:
-        if args.clean:
+        if args.box:
+            style = "box"
+        elif args.clean:
             style = "clean"
         elif args.cards:
             style = "cards"
@@ -495,7 +508,9 @@ def table_options(args: argparse.Namespace) -> table_mod.Options:
         input_format=args.input_format,
         style=style,
         bar_chars=args.bar_chars or "blocks",
-        pad=1 if args.pad is None else args.pad,
+        pad=2 if args.pad is None else args.pad,
+        row_gap=0 if args.row_gap is None else args.row_gap,
+        center=not args.left,
         wrap=not args.no_wrap,
         unicode=not args.ascii,
         export=args.export,
@@ -563,14 +578,17 @@ def style_gallery(args: argparse.Namespace) -> str:
     base = {
         "color": False if args.no_color else None,
         "width": width,
-        "pad": 1 if args.pad is None else args.pad,
+        "pad": 2 if args.pad is None else args.pad,
+        # The gallery is a list to read down, so every sample sits flush left.
+        "center": False,
     }
 
     out.append("BORDER STYLES   --style NAME")
     out.append("")
     for name, border in style_registry.BORDERS.items():
         options = table_mod.Options(style=name, summary=False, **base)
-        out.append(f"  --style {name}   ({border.about})")
+        mark = "   (the default)" if name == "dashes-grid" else ""
+        out.append(f"  --style {name}   ({border.about}){mark}")
         for line in table_mod.format_text(STYLE_SAMPLE, options).splitlines():
             out.append("  " + line)
         out.append("")
@@ -581,13 +599,16 @@ def style_gallery(args: argparse.Namespace) -> str:
         options = table_mod.Options(
             style="clean", bar_chars=name, summary=False, columns=["use%", "target"], **base
         )
-        out.append(f"  --pct {name}   ({bar.about})")
+        mark = "   (the default)" if name == "blocks" else ""
+        out.append(f"  --pct {name}   ({bar.about}){mark}")
         for line in table_mod.format_text(STYLE_SAMPLE, options).splitlines():
             out.append("  " + line)
         out.append("")
 
-    out.append("Also: --pad N for the spacing inside cells, --no-wrap to cut")
-    out.append("instead of wrapping, and --bar-width N for the bar length.")
+    out.append("Also: --pad N for the spacing inside cells, --row-gap N for")
+    out.append("blank lines between rows, --left to stop centring the table,")
+    out.append("--no-wrap to cut instead of wrapping, --bar-width N for the")
+    out.append("bar length.")
     return "\n".join(out)
 
 

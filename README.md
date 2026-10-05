@@ -59,7 +59,7 @@ pipx install git+https://github.com/Merab25/Gamaxsene.git
 pipx creates an isolated virtual environment for the tool and puts the `barem` command on your `PATH`.
 
 ```bash
-pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.8.0   # a specific release
+pipx install git+https://github.com/Merab25/Gamaxsene.git@v0.9.0   # a specific release
 pipx upgrade barem                                             # update
 pipx uninstall barem                                           # remove
 ```
@@ -80,6 +80,7 @@ pipx uninstall barem                                           # remove
 | `barem --completion bash` | Print a completion script (also `zsh`) |
 | `python -m barem find` | Same as `barem find` |
 | `df -h \| barem` | Format piped output as a table (see [Table mode](#table-mode)) |
+| `barem --styles` | Show every border and percentage style with a sample |
 | `barem run df -h` | Run the command, then format it |
 | `barem help` | Run the diagnostics and report what is off (see [barem help](#barem-help)) |
 
@@ -110,16 +111,19 @@ $ barem help
 ```
 
 ```text
-┌────────────────┬──────┬──────┬───────┬───────────────────┬────────────┐
-│   FILESYSTEM   │ SIZE │ USED │ AVAIL │             USE%  │ MOUNTED ON │
-├────────────────┼──────┼──────┼───────┼───────────────────┼────────────┤
-│ /dev/nvme0n1p2 │ 468G │ 112G │  332G │ ██▌░░░░░░░   25%  │     /      │
-│   /dev/sdb1    │ 1.8T │ 1.7T │   43G │ █████████▌   95%! │   /data    │
-│ /dev/nvme0n1p1 │ 512M │  62M │  450M │ █▏░░░░░░░░   12%  │ /boot/efi  │
-│     tmpfs      │  16G │ 2.1M │   16G │ ░░░░░░░░░░    1%  │    /run    │
-└────────────────┴──────┴──────┴───────┴───────────────────┴────────────┘
+   +----------------+------+------+-------+-------------------+------------+
+   |   FILESYSTEM   | SIZE | USED | AVAIL |             USE%  | MOUNTED ON |
+   +----------------+------+------+-------+-------------------+------------+
+   | /dev/nvme0n1p2 | 468G | 112G |  332G | ██▌░░░░░░░   25%  |     /      |
+   +----------------+------+------+-------+-------------------+------------+
+   |   /dev/sdb1    | 1.8T | 1.7T |   43G | █████████▌   95%! |   /data    |
+   +----------------+------+------+-------+-------------------+------------+
+   | /dev/nvme0n1p1 | 512M |  62M |  450M | █▏░░░░░░░░   12%  | /boot/efi  |
+   +----------------+------+------+-------+-------------------+------------+
+   |     tmpfs      |  16G | 2.1M |   16G | ░░░░░░░░░░    1%  |    /run    |
+   +----------------+------+------+-------+-------------------+------------+
 
- 4 filesystems · 2.3T total · 1.8T used (80%)
+    4 filesystems · 2.3T total · 1.8T used (80%)
 ```
 
 On a healthy machine it says so in one line and shows nothing else:
@@ -172,16 +176,19 @@ $ df -h | barem
 ```
 
 ```text
-┌────────────────┬──────┬──────┬───────┬───────────────────┬────────────┐
-│   FILESYSTEM   │ SIZE │ USED │ AVAIL │             USE%  │ MOUNTED ON │
-├────────────────┼──────┼──────┼───────┼───────────────────┼────────────┤
-│ /dev/nvme0n1p2 │ 468G │ 112G │  332G │ ██▌░░░░░░░   25%  │     /      │
-│   /dev/sdb1    │ 1.8T │ 1.7T │   43G │ █████████▌   95%! │   /data    │
-│ /dev/nvme0n1p1 │ 512M │  62M │  450M │ █▏░░░░░░░░   12%  │ /boot/efi  │
-│     tmpfs      │  16G │ 2.1M │   16G │ ░░░░░░░░░░    1%  │    /run    │
-└────────────────┴──────┴──────┴───────┴───────────────────┴────────────┘
+   +----------------+------+------+-------+-------------------+------------+
+   |   FILESYSTEM   | SIZE | USED | AVAIL |             USE%  | MOUNTED ON |
+   +----------------+------+------+-------+-------------------+------------+
+   | /dev/nvme0n1p2 | 468G | 112G |  332G | ██▌░░░░░░░   25%  |     /      |
+   +----------------+------+------+-------+-------------------+------------+
+   |   /dev/sdb1    | 1.8T | 1.7T |   43G | █████████▌   95%! |   /data    |
+   +----------------+------+------+-------+-------------------+------------+
+   | /dev/nvme0n1p1 | 512M |  62M |  450M | █▏░░░░░░░░   12%  | /boot/efi  |
+   +----------------+------+------+-------+-------------------+------------+
+   |     tmpfs      |  16G | 2.1M |   16G | ░░░░░░░░░░    1%  |    /run    |
+   +----------------+------+------+-------+-------------------+------------+
 
- 4 filesystems · 2.3T total · 1.8T used (80%)
+    4 filesystems · 2.3T total · 1.8T used (80%)
 ```
 
 It works out which command produced the text, splits it into columns, decides what each
@@ -232,12 +239,12 @@ border styles:
 
 | `--style` | What it draws |
 | --- | --- |
-| `box` | square corners, a line under the header — **the default** |
+| `box` | square corners, a line under the header |
 | `rounded` | as box, with rounded corners |
 | `double` | double lines, the heaviest look |
 | `grid` | a line between every row, for tables you read across |
 | `dashes` | plain `+---+` and `\|`, works on any terminal |
-| `dashes-grid` | as dashes, with a line between every row |
+| `dashes-grid` | as dashes, with a line between every row — **the default** |
 | `simple` | column lines and a header rule, no frame |
 | `clean` | no lines but a rule under the header |
 | `minimal` | nothing but aligned columns |
@@ -254,7 +261,8 @@ And seven ways to draw a percentage:
 --pct number   25%                     the number on its own, no bar
 ```
 
-`--bar-width N` sets the bar length, and `--pad N` the spacing inside every cell.
+`--bar-width N` sets the bar length, `--pad N` the spacing inside every cell, `--row-gap N`
+blank lines between rows, and `--left` turns off the centring.
 
 ### How it adapts
 
@@ -281,8 +289,12 @@ wrapped or cut either.
 
 ### Reading the output
 
-- **Borders by default**, because they make the columns unmissable. `--style` picks another look,
-  `--styles` shows them all side by side, and `--pad N` changes the spacing inside cells.
+- **Borders by default**, because they make the columns unmissable: a `+---+` frame with a rule
+  between every row, padded so the rows have room to breathe, and the whole table sits in the
+  middle of the window. `--style` picks another of the nine looks, `--styles` shows them all,
+  `--pad N` and `--row-gap N` change the spacing, and `--left` puts the table back on the margin.
+- **Column names are bold and bright** while the frame stays dim, so the names and the numbers
+  are what your eye lands on rather than the grid around them.
 - **Nothing is cropped.** A value too wide for its column is wrapped onto as many lines as it
   needs, breaking at spaces first and then after `/ , ; : =` so a path still reads as a path.
   `--no-wrap` goes back to cutting with an `…`.

@@ -6,6 +6,34 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-05
+
+### Changed
+
+- **The default look is `dashes-grid`**: a `+---+` frame with a rule between
+  every row, so each row is a block you read across rather than a line in a
+  wall of text. `--style box` restores the box-drawing frame, and the other
+  seven styles are unchanged.
+- **The table sits in the middle of the window.** `--left` puts it back
+  against the margin, and card mode is always left-aligned because a centred
+  list reads badly.
+- **Column names are bold and bright, and the frame is dim.** They were both
+  dim before, which made the names the palest thing on screen — the opposite
+  of what a header is for. The row's own name stays bold too.
+- **`--pad` defaults to 2**, for rows with room to breathe, and the padding is
+  now the first thing the layout gives up: if two spaces a side would cost a
+  column or the usage bars, the padding drops to one and the data stays. So a
+  wide window gets the airy look and an 80-column one still shows everything.
+- **A percentage in card mode is right-aligned**, so `1%`, `25%` and `95%!`
+  line up down the card the way they do in a table column.
+
+### Added
+
+- **`--row-gap N`** puts N blank lines between rows, drawn so the frame is not
+  broken by them, for a table you read across rather than down.
+- **`--left`** turns the centring off.
+- `barem --styles` now marks which border and percentage style is the default.
+
 ## [0.8.0] - 2026-10-05
 
 ### Added
@@ -290,7 +318,8 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Packaging with hatchling: the example files ship inside the wheel and are
   found with `importlib.resources`, wherever the package is installed.
 
-[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/Merab25/Gamaxsene/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/Merab25/Gamaxsene/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Merab25/Gamaxsene/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/Merab25/Gamaxsene/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/Merab25/Gamaxsene/compare/v0.6.0...v0.6.1

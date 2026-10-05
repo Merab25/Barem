@@ -242,6 +242,8 @@ PUBLIC_OPTIONS = sorted(
         "--styles",
         "--pct",
         "--pad",
+        "--row-gap",
+        "--left",
         "--no-wrap",
         # barem help
         "--all",

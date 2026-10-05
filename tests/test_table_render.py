@@ -29,7 +29,13 @@ def fixture(name: str) -> str:
 
 
 def plain(text: str, **kwargs) -> str:
-    """Render with colour off, which is how the tests compare output."""
+    """Render with colour off, and against the left margin.
+
+    Centring is the default on a real terminal, but an assertion about what
+    a table starts with is about its structure, not where it sits, so these
+    tests opt out of it. `test_the_table_is_centered` covers the placement.
+    """
+    kwargs.setdefault("center", False)
     options = Options(color=False, **kwargs)
     return format_text(text, options)
 
@@ -128,9 +134,28 @@ def test_clean_style_has_no_vertical_rules():
     assert "─" in out  # but it does have the rule under the header
 
 
-def test_box_is_the_default_style():
-    """Borders without asking; --clean is the way out of them."""
-    assert plain(fixture("df-h"), width=80).startswith("┌")
+def test_dashed_borders_are_the_default_style():
+    """Borders without asking, in plain characters; --clean is the way out."""
+    out = plain(fixture("df-h"), width=80)
+    assert out.startswith("+--")
+    assert "|" in out
+    # dashes-grid: a rule between every pair of rows, not only under the header
+    assert out.count("+------") > 2
+
+
+def test_the_table_is_centered():
+    """The default sits the table in the middle of the window."""
+    out = format_text(fixture("df-h"), Options(color=False, width=120))
+    first = out.split(chr(10))[0]
+    assert first.startswith(" "), "expected a left indent"
+    body = first.strip()
+    gap = len(first) - len(first.rstrip())
+    assert abs(len(first) - gap - len(body) - (120 - len(body)) // 2) <= 1
+
+
+def test_left_turns_centering_off():
+    out = format_text(fixture("df-h"), Options(color=False, width=120, center=False))
+    assert out.startswith("+--")
 
 
 def test_box_style_draws_a_frame():

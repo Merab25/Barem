@@ -146,6 +146,10 @@ _CODES = {
     "yellow": "\033[33m",
     "red": "\033[31m",
     "cyan": "\033[36m",
+    # Column names: bold and bright, because they are what the eye uses
+    # to find its way around the table. The frame stays dim, so the
+    # names and the data are what stand out.
+    "head": "\033[1;96m",
     "magenta": "\033[35m",
     "bold_red": "\033[1;31m",
 }
@@ -209,6 +213,10 @@ class Theme:
     bar_style: styles.Bar = field(default_factory=lambda: styles.BLOCKS)
     #: spaces inside each cell, either side of its value
     pad: int = 1
+    #: blank lines between two data rows, for a table you read across
+    row_gap: int = 0
+    #: centre the whole table in the terminal rather than hugging the left
+    center: bool = True
     #: the row-identifying column is emphasised so it stands out
     emphasise_identity: bool = True
     #: True when the user named thresholds on the command line, which then
@@ -230,6 +238,11 @@ class Theme:
         return f"{_CODES[style]}{text}{_CODES['reset']}"
 
     def header(self, text: str) -> str:
+        """A column name: bold and bright, so it is unmissable."""
+        return self.paint(text, "head")
+
+    def frame(self, text: str) -> str:
+        """A border, a rule or the footer: quiet, so the data stands out."""
         return self.paint(text, "dim")
 
     def rule_char(self) -> str:

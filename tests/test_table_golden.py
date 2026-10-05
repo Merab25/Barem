@@ -25,7 +25,7 @@ WIDTHS = (40, 60, 80, 120)
 #: case each, which is enough to catch a renderer regression.
 CASES = [
     *[
-        (name, width, "box")
+        (name, width, "dashes-grid")
         for name in sorted(p.stem for p in FIXTURES.glob("*.txt"))
         for width in WIDTHS
     ],
@@ -35,7 +35,7 @@ CASES = [
     # one sample of every other border style, so a renderer change shows up
     *[
         (("df-h"), 80, name)
-        for name in ("rounded", "double", "grid", "dashes", "dashes-grid", "simple", "minimal")
+        for name in ("box", "rounded", "double", "grid", "dashes", "simple", "minimal")
     ],
     ("df-h", 80, "md"),
     ("df-h", 80, "csv"),

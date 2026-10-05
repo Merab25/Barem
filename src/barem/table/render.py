@@ -122,7 +122,7 @@ def render_bordered(table: Table, plan: Plan, theme: Theme) -> str:
         if border.columns or border.outer:
             return left + mid.join(span) + right
         total = sum(widths[c.key] for c in columns) + plan.gap * (len(columns) - 1)
-        return " " + theme.header(border.h * min(total, plan.width - 1))
+        return " " + theme.frame(border.h * min(total, plan.width - 1))
 
     def body(cells: list[str]) -> str:
         if border.columns or border.outer:
@@ -144,27 +144,32 @@ def render_bordered(table: Table, plan: Plan, theme: Theme) -> str:
 
     lines: list[str] = []
     if border.outer:
-        lines.append(theme.header(rule(border.tl, border.tt, border.tr)))
+        lines.append(theme.frame(rule(border.tl, border.tt, border.tr)))
 
     if show_header:
         lines.extend(block(_header_lines(plan, theme)))
         if border.header_rule:
             lines.append(
-                theme.header(rule(border.lt, border.x, border.rt))
+                theme.frame(rule(border.lt, border.x, border.rt))
                 if (border.columns or border.outer)
                 else rule("", "", "")
             )
 
+    blank = [" " * widths[c.key] for c in columns]
     for position, row in enumerate(plan.cells):
-        if border.row_rules and position:
-            lines.append(theme.header(rule(border.lt, border.x, border.rt)))
+        if position:
+            if border.row_rules:
+                lines.append(theme.frame(rule(border.lt, border.x, border.rt)))
+            # A gap between rows, drawn so the frame is not broken by it.
+            for _ in range(theme.row_gap):
+                lines.append(body(blank))
         stack = [
             cell_lines(row.get(c.key, Cell("")), c, plan, theme, widths[c.key]) for c in columns
         ]
         lines.extend(block(stack))
 
     if border.outer:
-        lines.append(theme.header(rule(border.bl, border.bt, border.br)))
+        lines.append(theme.frame(rule(border.bl, border.bt, border.br)))
     return "\n".join(lines)
 
 
@@ -192,6 +197,11 @@ def render_cards(table: Table, plan: Plan, theme: Theme) -> str:
                 label_width,
             )
             value = cell.text + cell.marker
+            if column.kind is Kind.PERCENT:
+                # Right-align the number so 1%, 25% and 95%! line up down the
+                # card the way they do in a table column.
+                num_width, mark_width = plan.num_widths.get(column.key, (PCT_NUMBER_WIDTH, 0))
+                value = pad(cell.text, num_width, "right") + pad(cell.marker, mark_width)
             room = plan.width - indent - label_width - 2
             bar = ""
             # The bar is the first thing to go when the card is narrow.
@@ -203,12 +213,15 @@ def render_cards(table: Table, plan: Plan, theme: Theme) -> str:
             ):
                 bar = cell.bar
             value_room = max(1, room - (2 + display_width(bar) if bar else 0))
-            pieces = (
-                wrap(value, value_room)
-                if plan.wrap
-                else [fit_text(column, value, value_room, theme)]
-            )
-            first = theme.paint(pieces[0], cell.style)
+            if column.numeric:
+                # A number is never wrapped, and its alignment padding would
+                # not survive a wrap anyway.
+                pieces = [value]
+            elif plan.wrap:
+                pieces = wrap(value, value_room)
+            else:
+                pieces = [fit_text(column, value, value_room, theme)]
+            first = _paint_padded(pieces[0], display_width(pieces[0]), "left", cell.style, theme)
             if bar:
                 first = f"{first}  {theme.paint(bar, cell.bar_style)}"
             lines.append(" " * indent + theme.header(label) + "  " + first)
@@ -258,6 +271,18 @@ def render_json(table: Table, plan: Plan) -> str:
     return json.dumps(records, indent=2, ensure_ascii=False)
 
 
+def _centered(text: str, width: int) -> str:
+    """Sit the whole block in the middle of the terminal.
+
+    Measured on the widest line so the table keeps its shape: the indent is
+    the same on every line, footer included, and is never negative.
+    """
+    lines = text.split("\n")
+    widest = max((display_width(line) for line in lines), default=0)
+    indent = " " * max(0, (width - widest) // 2)
+    return "\n".join(indent + line if line.strip() else line for line in lines)
+
+
 def render(table: Table, plan: Plan, theme: Theme, style: str = "box", summary: bool = True) -> str:
     """Render in the requested style, with the optional summary line."""
     if style == "md":
@@ -286,5 +311,9 @@ def render(table: Table, plan: Plan, theme: Theme, style: str = "box", summary: 
                 extra = extra.replace("·", "-")
             # The footer obeys the width budget too, wrapped rather than cut.
             for piece in wrap(extra, plan.width - 1):
-                parts.append(" " + theme.header(piece))
-    return "\n".join(parts)
+                parts.append(" " + theme.frame(piece))
+    out = "\n".join(parts)
+    # Cards are already a left-hand list; centring them would read as a mess.
+    if theme.center and not plan.cards:
+        out = _centered(out, plan.width)
+    return out
