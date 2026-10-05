@@ -1,6 +1,7 @@
 # barem
 
 [![CI](https://github.com/Merab25/Barem/actions/workflows/ci.yml/badge.svg)](https://github.com/Merab25/Barem/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/barem)](https://pypi.org/project/barem/)
 ![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 ![Dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen)
@@ -43,25 +44,43 @@ It currently ships **157 commands** and **5,314 examples** — about 30 per comm
 
 ## Installation
 
-You need Python 3.9+, [pipx](https://pipx.pypa.io) and git. On Ubuntu/Debian:
+You need Python 3.9+ and [pipx](https://pipx.pypa.io). On Ubuntu/Debian:
 
 ```bash
-sudo apt install pipx git
+sudo apt install pipx
 pipx ensurepath        # then open a new terminal
 ```
 
-Install straight from GitHub:
+Then:
+
+```bash
+pipx install barem
+```
+
+pipx creates an isolated virtual environment for the tool and puts the `barem` command on your
+`PATH`, so it cannot collide with anything else you have installed.
+
+```bash
+pipx upgrade barem             # update
+pipx install barem==1.0.0     # a specific version
+pipx uninstall barem           # remove
+```
+
+`pip install barem` works too, inside a virtual environment.
+
+### From the repository
+
+To run the unreleased `main`, or to try a change of your own:
 
 ```bash
 pipx install git+https://github.com/Merab25/Barem.git
 ```
 
-pipx creates an isolated virtual environment for the tool and puts the `barem` command on your `PATH`.
+Note that `pipx upgrade` does not re-fetch a git install, so to move such an install forward
+you reinstall it:
 
 ```bash
-pipx install git+https://github.com/Merab25/Barem.git@v0.11.1   # a specific release
-pipx upgrade barem                                             # update
-pipx uninstall barem                                           # remove
+pipx uninstall barem && pipx install git+https://github.com/Merab25/Barem.git
 ```
 
 ## Usage

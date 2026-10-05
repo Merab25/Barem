@@ -67,9 +67,16 @@ def test_headline_totals_match(readme, sheets):
 
 
 def test_readme_installs_the_current_version(readme):
-    """The `pipx install ...@vX.Y.Z` line has to name a tag that will exist."""
-    tags = set(re.findall(r"\.git@(v[\d.]+)", readme))
-    assert tags == {f"v{__version__}"}
+    """Every pinned install line has to name a version that will exist.
+
+    Written two ways: `pipx install barem==X.Y.Z` from PyPI and
+    `pipx install git+...@vX.Y.Z` from the repository. Either is fine, but a
+    stale one sends people to a version that was never released.
+    """
+    pinned = {v.lstrip("v") for v in re.findall(r"\.git@(v[\d.]+)", readme)}
+    pinned |= set(re.findall(r"barem==([\d.]+)", readme))
+    assert pinned, "no pinned install line in the README"
+    assert pinned == {__version__}
 
 
 @pytest.mark.skipif(not CHANGELOG.is_file(), reason="no CHANGELOG.md")

@@ -49,6 +49,11 @@ path = "src/barem/__init__.py"
 [tool.hatch.build.targets.wheel]
 packages = ["src/barem"]
 
+[tool.hatch.build.targets.sdist]
+# The source archive is for building and for reading the tests; local editor
+# settings are neither, and they carry absolute paths from one machine.
+exclude = [".claude"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 

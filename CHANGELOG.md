@@ -6,6 +6,31 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-05
+
+The first release on PyPI, which is all this version number means: the tool
+has been usable for a while, and `pipx install barem` is simply how you get
+it now.
+
+### Added
+
+- **barem is on PyPI**: `pipx install barem`, and `pipx upgrade barem` keeps
+  it current — which the git install never managed, because pipx does not
+  re-fetch a repository on upgrade.
+- **A publish workflow**, run by a GitHub Release. It builds the wheel and
+  the sdist, refuses a tag whose version disagrees with the package, checks
+  the metadata PyPI will render, installs the built wheel and runs the whole
+  test suite against it, and only then uploads. The upload uses PyPI's
+  trusted publishing, so there is no API token in this repository or in its
+  secrets. `workflow_dispatch` can rehearse the whole thing against TestPyPI.
+
+### Changed
+
+- The README leads with the PyPI install, and keeps the git install for
+  running unreleased `main`.
+- The source archive no longer carries `.claude`, which is local editor
+  settings full of one machine's absolute paths.
+
 ## [0.11.1] - 2026-10-05
 
 ### Fixed
@@ -374,7 +399,8 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Packaging with hatchling: the example files ship inside the wheel and are
   found with `importlib.resources`, wherever the package is installed.
 
-[Unreleased]: https://github.com/Merab25/Barem/compare/v0.11.1...HEAD
+[Unreleased]: https://github.com/Merab25/Barem/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/Merab25/Barem/compare/v0.11.1...v1.0.0
 [0.11.1]: https://github.com/Merab25/Barem/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/Merab25/Barem/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/Merab25/Barem/compare/v0.9.0...v0.10.0

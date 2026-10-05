@@ -1,0 +1,105 @@
+# Publishing to PyPI, driven by a GitHub Release.
+#
+# There is no API token anywhere in this repository or in its secrets:
+# publishing uses PyPI's trusted publishing, where PyPI is told to trust this
+# workflow in this repository and GitHub hands it a short-lived identity token
+# for the one upload. Nothing to rotate, nothing to leak.
+#
+# The gate is deliberate: the release only happens after the same tests CI
+# runs have passed here, against the very files that are about to be
+# uploaded, and the version in the tag has to match the version in the
+# package.
+name: Publish
+
+on:
+  release:
+    types: [published]
+  # Lets a release be rehearsed against TestPyPI without tagging anything.
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Where to upload
+        required: true
+        default: testpypi
+        type: choice
+        options: [testpypi, pypi]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and check the artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Build the wheel and the sdist
+        run: |
+          python -m pip install --upgrade pip build twine
+          python -m build
+
+      # A tag that disagrees with the package version would publish something
+      # nobody can install by the name they just read in the release notes.
+      - name: The tag and the package version must agree
+        if: github.event_name == 'release'
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          built=$(ls dist/*.tar.gz | sed -E 's/.*barem-(.*)\.tar\.gz/\1/')
+          echo "tag=$tag built=$built"
+          test "$tag" = "$built"
+
+      - name: Check the metadata PyPI will render
+        run: twine check --strict dist/*
+
+      - name: The package must work from the built wheel
+        run: |
+          python -m pip install --upgrade pytest
+          python -m pip install dist/*.whl
+          pytest -q
+          barem --version
+          barem find size
+          df -h | barem
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+
+  testpypi:
+    name: Upload to TestPyPI
+    if: github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      id-token: write    # the only permission trusted publishing needs
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  pypi:
+    name: Upload to PyPI
+    if: github.event_name == 'release' || inputs.target == 'pypi'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
