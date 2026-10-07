@@ -1,7 +1,7 @@
 # barem
 
 [![CI](https://github.com/Merab25/Barem/actions/workflows/ci.yml/badge.svg)](https://github.com/Merab25/Barem/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/barem)](https://pypi.org/project/barem/)
+[![PyPI](https://img.shields.io/pypi/v/barem?label=pypi&color=3775a9)](https://pypi.org/project/barem/)
 ![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 ![Dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen)
