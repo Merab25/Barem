@@ -1,5 +1,6 @@
 """Tests for barem. Run with: pytest"""
 
+import json
 import shutil
 import subprocess
 
@@ -247,6 +248,8 @@ PUBLIC_OPTIONS = sorted(
         "--no-wrap",
         # barem help
         "--all",
+        "--area",
+        "--explain",
     ]
 )
 
@@ -292,3 +295,118 @@ def test_completion_script_is_valid_shell_syntax(capsys, shell):
     script = capsys.readouterr().out
     result = subprocess.run([shell, "-n"], input=script.encode(), capture_output=True, check=False)
     assert result.returncode == 0, result.stderr.decode(errors="replace")
+
+
+# --- barem help, end to end -------------------------------------------------
+#
+# These drive the real command with the checks replaced, so the wiring between
+# the CLI, the diagnostics and the renderer is covered without depending on
+# the machine the tests run on.
+
+
+def _fixed(monkeypatch, **statuses):
+    """Make every check return a known status without touching the machine."""
+    from barem import diagnose
+
+    def fake_run_checks(checks=None, collect=None):
+        return [
+            diagnose.Result(
+                c.key,
+                c.title,
+                statuses.get(c.key, diagnose.OK),
+                "detail",
+                c.follow_up,
+                area=c.area,
+                about=c.about,
+            )
+            for c in diagnose.CHECKS
+        ]
+
+    monkeypatch.setattr(diagnose, "run_checks", fake_run_checks)
+    return diagnose
+
+
+def test_help_on_a_healthy_machine_says_so_in_one_line(monkeypatch, capsys):
+    _fixed(monkeypatch)
+    code, out, _ = run(capsys, "help")
+    assert code == 0
+    assert "nothing wrong found" in out
+    # One line, not an empty table.
+    assert out.count("\n") == 1
+
+
+def test_help_reports_the_failures_and_the_analysis(monkeypatch, capsys):
+    diagnose = _fixed(monkeypatch, memory=diagnose_bad(), oom=diagnose_bad())
+    code, out, _ = run(capsys, "help")
+    assert code == 2
+    assert "memory" in out
+    assert "likely: the machine is running out of memory" in out
+    assert diagnose.verdict  # the module is the one we patched
+
+
+def test_help_can_be_narrowed_to_an_area(monkeypatch, capsys):
+    _fixed(monkeypatch, memory=diagnose_bad(), route=diagnose_bad())
+    code, out, _ = run(capsys, "help", "--area", "memory", "--all")
+    assert code == 2
+    assert "memory" in out
+    assert "default route" not in out
+
+
+def test_an_unknown_area_is_refused_with_the_list(monkeypatch, capsys):
+    _fixed(monkeypatch)
+    code, _, err = run(capsys, "help", "--area", "nonsense")
+    assert code == 1
+    assert "unknown area" in err
+    assert "memory" in err
+
+
+def test_explain_runs_nothing_and_describes_everything(monkeypatch, capsys):
+    from barem import diagnose
+
+    def explode(*_args, **_kwargs):  # pragma: no cover - must never be called
+        raise AssertionError("--explain must not run any checks")
+
+    monkeypatch.setattr(diagnose, "run_checks", explode)
+    code, out, _ = run(capsys, "help", "--explain")
+    assert code == 0
+    assert "MEMORY" in out and "STORAGE" in out
+    assert "90% is critical" in out
+
+
+def test_json_carries_the_whole_diagnosis(monkeypatch, capsys):
+    _fixed(monkeypatch, memory=diagnose_bad(), oom=diagnose_bad())
+    code, out, _ = run(capsys, "help", "--format", "json")
+    assert code == 2
+    payload = json.loads(out)
+    assert payload["verdict"] == "critical"
+    assert payload["insights"][0]["headline"]
+    assert len(payload["checks"]) == len(_checks())
+
+
+def test_the_area_narrows_the_json_too(monkeypatch, capsys):
+    _fixed(monkeypatch, memory=diagnose_bad())
+    _code, out, _ = run(capsys, "help", "--area", "memory", "--format", "json")
+    payload = json.loads(out)
+    assert {c["area"] for c in payload["checks"]} == {"memory"}
+    # The analysis still reads every result, not just the narrowed ones.
+    assert payload["insights"] == [] or payload["insights"][0]["headline"]
+
+
+def test_check_and_doctor_are_the_same_command(monkeypatch, capsys):
+    _fixed(monkeypatch)
+    for word in ("help", "check", "doctor"):
+        code, out, _ = run(capsys, word)
+        assert code == 0, word
+        assert "nothing wrong found" in out, word
+
+
+def diagnose_bad():
+    from barem.diagnose import BAD
+
+    return BAD
+
+
+def _checks():
+    from barem.diagnose import CHECKS
+
+    return CHECKS

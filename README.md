@@ -43,7 +43,7 @@ It currently ships **157 commands** and **5,314 examples** — about 30 per comm
 - **Search everything**: `barem -s port` searches the examples of every command at once.
 - **Tab completion**: bash and zsh completion for command names, keywords and options, built from the example files that are installed.
 - **Table mode**: pipe a command *into* `barem` and it formats the output — bordered, aligned columns, usage bars, and a layout that adapts to your terminal width. `df -h | barem`
-- **One-command triage**: `barem help` runs the diagnostics you reach for first when something is off, and reports only what is actually wrong.
+- **One-command triage**: `barem help` runs 35 read-only checks across storage, memory, cpu, network, system and security, reports only what is actually wrong, and names what the failures add up to rather than leaving you a list.
 - **Grep-friendly**: `--oneline` prints `command  # description` on one line, and colors switch off automatically when output goes to a pipe or file.
 - **Zero dependencies**: standard library only, Python 3.9+.
 - **Easy to extend**: adding a command means adding one plain text file.
@@ -68,7 +68,7 @@ pipx creates an isolated virtual environment for the tool and puts the `barem` c
 
 ```bash
 pipx upgrade barem             # update
-pipx install barem==1.0.0     # a specific version
+pipx install barem==1.1.0     # a specific version
 pipx uninstall barem           # remove
 ```
 
@@ -108,6 +108,8 @@ pipx uninstall barem && pipx install git+https://github.com/Merab25/Barem.git
 | `barem --styles` | Show every border and percentage style with a sample |
 | `barem run df -h` | Run the command, then format it |
 | `barem help` | Run the diagnostics and report what is off (see [barem help](#barem-help)) |
+| `barem help --area memory` | Only one area: storage, memory, cpu, network, system, security |
+| `barem help --explain` | What each check measures and where its threshold is |
 
 Keywords are case-insensitive and match the **start of a word**: `port` finds "port", "ports" and `--port`, but not "export" or "report".
 
@@ -129,33 +131,54 @@ Exit codes make it usable in scripts: `0` when examples were printed, `1` for an
 
 When something is off on a machine, the first few minutes are always the same handful of
 commands: is the disk full, has memory gone, did a unit fail, is there a default route,
-does DNS answer. `barem help` runs that list and reports **only what is actually wrong**.
+does DNS answer. `barem help` runs **35 checks** across six areas, reports only what is
+actually wrong, and then says what the failures add up to.
 
 ```console
 $ barem help
 ```
 
 ```text
-+----------------+------+------+-------+-------------------------+------------+
-|   FILESYSTEM   | SIZE | USED | AVAIL |                   USE%  | MOUNTED ON |
-+----------------+------+------+-------+-------------------------+------------+
-| /dev/nvme0n1p2 | 468G | 112G |  332G | ||||               25%  |     /      |
-+----------------+------+------+-------+-------------------------+------------+
-|   /dev/sdb1    | 1.8T | 1.7T |   43G | |||||||||||||||    95%! |   /data    |
-+----------------+------+------+-------+-------------------------+------------+
-| /dev/nvme0n1p1 | 512M |  62M |  450M | ||                 12%  | /boot/efi  |
-+----------------+------+------+-------+-------------------------+------------+
-|     tmpfs      |  16G | 2.1M |   16G | |                   1%  |    /run    |
-+----------------+------+------+-------+-------------------------+------------+
++--------------------+-----------+----------+----------------------------------------------+
+|       CHECK        |   AREA    |  STATUS  |                    DETAIL                    |
++--------------------+-----------+----------+----------------------------------------------+
+|  hypervisor steal  |    cpu    |   bad    |  12.4% of cpu time taken by the hypervisor   |
+|                    |           |          |                  since boot                  |
++--------------------+-----------+----------+----------------------------------------------+
+|       memory       |  memory   |   bad    |          1.2G of 32G available (4%)          |
++--------------------+-----------+----------+----------------------------------------------+
+|  memory pressure   |  memory   |   bad    |  38% of the last minute waiting on memory,   |
+|                    |           |          |                    rising                    |
++--------------------+-----------+----------+----------------------------------------------+
+|   out of memory    |  memory   |   bad    |      OOM killer hit: postgres, python3       |
++--------------------+-----------+----------+----------------------------------------------+
+|     disk space     |  storage  |   bad    |                   /var 94%                   |
++--------------------+-----------+----------+----------------------------------------------+
+|    failed units    |  system   |   bad    |             myapp-worker.service             |
++--------------------+-----------+----------+----------------------------------------------+
+|        swap        |  memory   |   warn   |           7.9G of 8.0G used (99%)            |
++--------------------+-----------+----------+----------------------------------------------+
 
- 4 filesystems · 2.3T total · 1.8T used (80%)
+ 6 critical · 1 to watch · 28 passed · barem help --all shows every check
+ likely: the machine is running out of memory (memory, oom, psi_memory, swap)
+ -> find the process: ps aux | barem --sort -%mem --top 10
+ likely: memory has spilled into swap and the machine is thrashing (swap, psi_memory)
+ -> this is slower than being out of memory outright; free some
+ next: vmstat 2 5
+ next: journalctl -k -b --grep='out of memory'
+ next: df -h | barem --sort -use%
+ ...and 2 more to look at
 ```
+
+The table is the evidence. The `likely:` lines under it are the point: six red rows there
+are not six problems, they are one machine running out of memory, and saying so is the
+difference between a list and a diagnosis.
 
 On a healthy machine it says so in one line and shows nothing else:
 
 ```console
 $ barem help
- nothing wrong found · 15 passed · barem help --all shows every check
+ nothing wrong found · 35 passed · barem help --all shows every check
 ```
 
 `barem check` and `barem doctor` do the same thing. Note that **`barem --help` still prints
@@ -163,12 +186,47 @@ the usage text** — the diagnosis is the bare word, the usage is the flag.
 
 ### What it checks
 
-Disk space and inodes, memory and swap, load against the core count, failed systemd units,
-read-only filesystems, OOM kills, kernel I/O errors, the default route, DNS, clock
-synchronisation, a pending reboot, zombie processes and open file descriptors.
+| Area | Checks |
+| --- | --- |
+| **storage** | disk space, inodes, read-only mounts, disk pressure, io wait, processes stuck in uninterruptible sleep, journal size |
+| **memory** | available memory, swap, memory pressure, OOM kills, unwritten pages |
+| **cpu** | load against the core count, cpu pressure, hypervisor steal |
+| **network** | default route, DNS, the machine's own hostname, connection tracking, interface errors, listen-queue overflows, sockets |
+| **system** | systemd's own verdict, failed units, kernel errors, recent crashes, clock sync, uptime, zombies, file descriptors, pending reboot, kernel version, pending updates |
+| **security** | failed logins, data stores listening on every interface |
 
-Each one also carries the command worth running next, and the worst three are printed under
-the table.
+Three of those deserve a word, because they are the ones people do not think to run:
+
+- **Pressure** (`/proc/pressure/*`) is the kernel saying how much time tasks spent *waiting*
+  for cpu, memory or disk. It answers "is this machine slow" far better than a utilisation
+  figure does — a disk can be 100% busy and fine, or 20% busy with everything stuck behind
+  it. barem also compares the 10-second and 5-minute windows, so it can tell you whether a
+  problem is **rising** or **easing**.
+- **Hypervisor steal** separates "my application is slow" from "the host is oversubscribed
+  and there is nothing in this machine to fix". When steal is high, barem deliberately does
+  *not* tell you the machine is busy, because it isn't — somebody else is.
+- **Listen-queue overflows** are connections your server refused while looking perfectly
+  healthy from the outside. Nothing else on the machine shows it.
+
+To see every check with its thresholds and the command behind it:
+
+```bash
+barem help --explain                 # all of them
+barem help --explain --area memory   # just one area
+```
+
+### Reading it
+
+```bash
+barem help                      # only what is wrong
+barem help --all                # every check, including the ones that passed
+barem help --area storage       # one area at a time
+barem help --explain            # what each check measures and where the line is
+```
+
+The analysis always reads **every** result, even when the report is narrowed — memory
+exhaustion is told by the disk and the journal too, so `--area memory` still gets the
+whole picture.
 
 ### Using it in a script
 
@@ -182,7 +240,28 @@ The exit code says what was found, so it drops into a cron job or a CI step:
 
 ```bash
 barem help || echo "check the machine"
-barem help --all --format json          # every result, machine-readable
+barem help --format json        # the whole diagnosis, machine-readable
+```
+
+The JSON carries more than the table does — every check with its area and status, the
+analysis, and a one-word `verdict` of `healthy`, `degraded` or `critical`:
+
+```json
+{
+  "verdict": "critical",
+  "exit_code": 2,
+  "counts": { "bad": 6, "warn": 1, "ok": 28, "skipped": 0 },
+  "checks": [
+    { "key": "memory", "area": "memory", "status": "bad",
+      "detail": "1.2G of 32G available (4%)" }
+  ],
+  "insights": [
+    { "headline": "the machine is running out of memory",
+      "severity": "bad",
+      "evidence": ["memory", "oom", "psi_memory", "swap"],
+      "advice": "find the process: ps aux | barem --sort -%mem --top 10" }
+  ]
+}
 ```
 
 ### What it will not do
@@ -191,6 +270,11 @@ Every check is read-only, needs no root, and is given a four-second timeout, so 
 can never make a bad situation worse — a hung NFS mount cannot hang the diagnosis. A check
 whose command is missing reports `skipped` rather than failing, which is what you get on a
 container without `systemctl` or a system without `journalctl`.
+
+The analysis never invents a finding: a pattern can only fire on checks that already failed
+on their own, and an empty analysis means the failures do not form a shape anybody has
+named — which is not the same as the machine being healthy, and is why it never replaces
+the table.
 
 ## Table mode
 

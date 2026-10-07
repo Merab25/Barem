@@ -6,6 +6,76 @@ numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-07
+
+`barem help` went from fifteen checks that each answered for themselves to
+thirty-five that are read together.
+
+### Added
+
+- **Twenty more checks**, in the places people do not think to look:
+
+  - **Pressure stall information** for cpu, memory and disk
+    (`/proc/pressure/*`) -- how much time tasks spent *waiting* for a
+    resource, which answers "is this machine slow" far better than any
+    utilisation figure. The three windows are compared, so a problem is
+    reported as **rising** or **easing** rather than as one number.
+  - **Hypervisor steal time**, which separates "my application is slow" from
+    "the host is oversubscribed and nothing in this machine will fix it".
+  - **Listen-queue overflows**, connections a server refused while looking
+    perfectly healthy from outside, and TCP retransmission rates.
+  - **Connection tracking** table usage, which drops packets silently when
+    full and is the hardest network outage to see from inside the machine.
+  - **Processes stuck in uninterruptible sleep**, the signature of a disk or
+    an NFS mount that stopped answering.
+  - Interface errors and drops judged **as a share of packets carried**,
+    because a raw counter means nothing on a machine up for a year.
+  - Also: io wait, unwritten pages, socket and time-wait counts, the
+    machine's own hostname resolving, systemd's own verdict on the system,
+    recent core dumps, journal disk usage, uptime, a kernel newer than the
+    running one, pending security updates, failed ssh logins, and data stores
+    listening on every interface instead of on loopback.
+
+- **Analysis.** A list of failing checks is not a diagnosis: fifteen red rows
+  on a machine that ran out of memory are one event seen fifteen ways. Eleven
+  named patterns read the results together and say what they add up to, with
+  the evidence and what to do:
+
+      likely: the machine is running out of memory (memory, oom, psi_memory, swap)
+      -> find the process: ps aux | barem --sort -%mem --top 10
+
+  The patterns also know what *not* to say. High load with high steal time is
+  reported as the hypervisor's doing, and the "this machine is busy" line is
+  suppressed, because it isn't. Full inodes with free disk space get their own
+  line, because that is the one that looks impossible. Nothing is invented: a
+  pattern can only fire on checks that already failed on their own.
+
+- **Areas.** Every check belongs to one of storage, memory, cpu, network,
+  system or security, shown as a column and selectable with `--area`. The
+  analysis still reads every result when the report is narrowed, because
+  memory exhaustion is told by the disk and the journal too.
+
+- **`barem help --explain`** prints what every check measures, where its
+  threshold is and the command behind it, and runs nothing at all. A number
+  nobody can interpret is not a diagnosis, so the thresholds are part of the
+  tool rather than buried in its source.
+
+- **`barem help --format json`** now carries the whole diagnosis -- every
+  check with its area, the analysis, the counts and a one-word `verdict` of
+  healthy, degraded or critical. The table export would have given three
+  rendered columns and lost the rest.
+
+- Checks can read **several files at once** (a count and its maximum) or
+  **every file matching a pattern** (the kernels in /boot), as well as running
+  a command or reading one file.
+
+### Changed
+
+- A command is suggested once, however many checks point at it, and never
+  when the analysis has already given it.
+- The README's `barem help` example showed a `df` table, which is not what
+  the command prints.
+
 ## [1.0.0] - 2026-10-05
 
 The first release on PyPI, which is all this version number means: the tool
@@ -399,7 +469,8 @@ it now.
 - Packaging with hatchling: the example files ship inside the wheel and are
   found with `importlib.resources`, wherever the package is installed.
 
-[Unreleased]: https://github.com/Merab25/Barem/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/Merab25/Barem/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/Merab25/Barem/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Merab25/Barem/compare/v0.11.1...v1.0.0
 [0.11.1]: https://github.com/Merab25/Barem/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/Merab25/Barem/compare/v0.10.0...v0.11.0

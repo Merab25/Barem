@@ -297,6 +297,17 @@ def completion_candidates(words: list[str]) -> list[str]:
     return sorted(word for word in pool - set(earlier) if word.startswith(partial))
 
 
+def _areas() -> tuple[str, ...]:
+    """The diagnostic areas, for the --area help text.
+
+    Imported lazily and kept in the diagnostics module, so the two cannot
+    drift apart and a plain lookup does not import it at all.
+    """
+    from .diagnose import AREAS
+
+    return AREAS
+
+
 def build_parser() -> argparse.ArgumentParser:
     commands = textwrap.fill(
         " ".join(available()), width=72, initial_indent="  ", subsequent_indent="  "
@@ -464,6 +475,16 @@ def _add_table_arguments(parser: argparse.ArgumentParser) -> None:
         help="with `barem help`, list the checks that passed as well",
     )
     group.add_argument(
+        "--area",
+        metavar="NAME",
+        help="with `barem help`, only one area: " + ", ".join(_areas()),
+    )
+    group.add_argument(
+        "--explain",
+        action="store_true",
+        help="with `barem help`, describe every check and its thresholds",
+    )
+    group.add_argument(
         "--watch", type=float, metavar="SECONDS", help="with 'run', re-run and redraw every SECONDS"
     )
 
@@ -618,8 +639,34 @@ def run_diagnose(argv: list[str]) -> int:
 
     parser = build_parser()
     args = parser.parse_args(join_dash_values(argv))
+
+    area = (args.area or "").strip().lower()
+    if area and area not in diagnose.AREAS:
+        print(
+            f"barem: unknown area {args.area!r}; try " + ", ".join(diagnose.AREAS),
+            file=sys.stderr,
+        )
+        return 1
+
+    # --explain reads the catalogue and runs nothing at all.
+    if args.explain:
+        emit(diagnose.explain(area=area))
+        return 0
+
     results = diagnose.run_checks()
-    table = diagnose.build_table(results, show_all=args.all_checks)
+    # The analysis reads every result, even when the report is narrowed:
+    # memory exhaustion is told by the disk and the journal too.
+    insights = diagnose.analyse(results)
+    shown = diagnose.select(results, area)
+
+    if args.export == "json":
+        # The table export would carry the three rendered columns and lose
+        # the areas, the analysis and the verdict, which is most of what a
+        # monitoring agent came for.
+        emit(diagnose.as_json(shown, insights))
+        return diagnose.exit_code(shown)
+
+    table = diagnose.build_table(shown, show_all=args.all_checks, insights=insights)
 
     options = table_options(args)
     if not table.rows and not args.all_checks:
@@ -627,10 +674,10 @@ def run_diagnose(argv: list[str]) -> int:
         # empty table. The summary already opens with the verdict.
         style = Style(colors_enabled(args.no_color))
         emit(" " + style.title(table.summary))
-        return diagnose.exit_code(results)
+        return diagnose.exit_code(shown)
 
     emit(table_mod.render_table(table, options))
-    return diagnose.exit_code(results)
+    return diagnose.exit_code(shown)
 
 
 def run_wrapper(argv: list[str]) -> int:
